@@ -1,0 +1,48 @@
+# Flutter generated files
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# iOS build artifacts
+/ios/.symlinks/
+/ios/Flutter/App.framework
+/ios/Flutter/Flutter.framework
+/ios/Flutter/Flutter.podspec
+/ios/Runner.xcworkspace
+/ios/Runner/GeneratedPluginRegistrant.*
+
+# Android build artifacts
+/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+/android/key.properties
+/android/local.properties
+/android/.gradle/
+/android/gradle/wrapper/gradle-wrapper.jar
+
+# IDE specific files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# Python virtual environment
+/venv/
+*.pyc
+__pycache__/
+.env
+
+# Logs and Databases
+*.log
+*.sqlite
+*.db
+
+# Generated localization files (relative to lib/l10n or generated location)
+app_localizations.dart
+.dart_tool/flutter_gen/gen_l10n/
+
+# Other
+*.DS_Store
