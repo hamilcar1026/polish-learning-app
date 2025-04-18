@@ -21,8 +21,8 @@ class ApiService {
   // --- Updated Base URL Logic ---
   static String getBaseUrl() {
     if (kIsWeb) {
-      // Use localhost for web
-      return 'http://localhost:8080'; 
+      // Use the deployed Cloud Run URL for web
+      return 'https://polish-learning-backend-service-529152975346.asia-northeast3.run.app'; 
     } else if (Platform.isAndroid) {
       // Use 10.0.2.2 for Android emulators
       return 'http://10.0.2.2:8080';
