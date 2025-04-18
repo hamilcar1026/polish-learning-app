@@ -1,0 +1,37 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Python Virtual Environment
+venv
+.venv
+env
+ENV
+env.bak
+venv.bak
+
+# Python bytecode and cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.coverage
+
+# IDE / Editor directories
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Add other files or directories to ignore if needed
+# Example: local instance folders, large data files not needed in runtime
+# instance/
+# data/ 
