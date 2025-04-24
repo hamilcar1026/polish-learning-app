@@ -173,150 +173,86 @@ def get_dictionary_info_lingvanex(text, target_language):
 @app.route('/analyze/<word>', methods=['GET'])
 def analyze_word(word):
     # --- 로깅 모듈 사용으로 변경 ---
-    logging.warning(f"[analyze_word] Function called! Received word: {word}") # print 대신 logging 사용
+    logging.warning(f"[analyze_word] SIMPLIFIED Function called! Received word: {word}") # 수정된 로그 메시지
     # -----------------------------
 
-    if morf is None:
-        logging.error("Morfeusz2 analyzer not available.") # 오류도 logging 사용 권장
-        return jsonify({"status": "error", "message": "Morfeusz2 analyzer not available."}), 500
+    # --- 임시로 함수 로직 대부분 주석 처리 ---
+    # if morf is None:
+    #     logging.error("Morfeusz2 analyzer not available.") # 오류도 logging 사용 권장
+    #     return jsonify({"status": "error", "message": "Morfeusz2 analyzer not available."}), 500
+    # 
+    # target_lang = request.args.get('target_lang', default='en', type=str)
+    # # logging.info(f"[analyze_word] Target language requested: {target_lang} for word: {word}") # 필요시 INFO 레벨 사용
+    # 
+    # try:
+    #     original_word_lower = word.lower()
+    # 
+    #     # --- Attempt 1: Analyze the original word --- 
+    #     # logging.info(f"[analyze_word] Attempt 1: Analyzing original word '{original_word_lower}'")
+    #     analysis_result = morf.analyse(original_word_lower)
+    # 
+    #     # --- Improved Check: Ensure analysis has valid (non-'ign') results --- 
+    #     # Check if analysis_result is not empty AND if any tuple's tag is NOT 'ign'
+    #     is_analysis_valid = analysis_result and any(
+    #         len(r) >= 3 and isinstance(r[2], tuple) and len(r[2]) >= 3 and r[2][2].split(':', 1)[0] != 'ign'
+    #         for r in analysis_result
+    #     )
+    # 
+    #     if is_analysis_valid:
+    #         logging.warning(f"[analyze_word] Attempt 1 SUCCESS: Found valid analysis for '{original_word_lower}'")
+    #         # --- Format results and get translation --- 
+    #         formatted_results = _format_analysis_results(analysis_result)
+    #         if not formatted_results: # Should not happen if analysis_result was non-empty, but check anyway
+    #              # Should ideally log an error here
+    #              return jsonify({"status": "success", "word": original_word_lower, "data": [], "message": f"Analysis found but formatting failed for '{original_word_lower}'."}), 200
+    #         
+    #         primary_lemma = formatted_results[0].get("lemma")
+    #         cleaned_lemma = _clean_lemma(primary_lemma)
+    #         translation_result = None
+    #         if cleaned_lemma:
+    #             # --- 임시 디버깅 코드 (logging 사용) ---
+    #             temp_api_key = os.environ.get("LINGVANEX_API_KEY")
+    #             logging.warning(f"[analyze_word] DEBUG: LINGVANEX_API_KEY value before calling translate: {'SET' if temp_api_key else 'NOT SET'}")
+    #             # -----------------------------------
+    # 
+    #             # --- Use Lingvanex for Translation --- 
+    #             # logging.info(f"[analyze_word] DEBUG: Calling translate_text_lingvanex with target_lang = {target_lang}")
+    #             translation_result = translate_text_lingvanex(cleaned_lemma, target_lang)
+    #             # -------------------------------------
+    #         
+    #         response_data = {
+    #             "status": "success",
+    #             "word": original_word_lower,
+    #             "data": formatted_results,
+    #             "translation_en": translation_result # Renamed for clarity
+    #         }
+    #         # logging.info(f"[analyze_word] Returning JSON (translation is for {target_lang}): {response_data}")
+    #         return jsonify(response_data)
+    #     else:
+    #         # --- Handle cases where original analysis failed or only returned 'ign' --- 
+    #         if analysis_result: # If analysis_result exists but only contains 'ign'
+    #              logging.warning(f"[analyze_word] Attempt 1 FAILED: Only 'ign' analysis found for '{original_word_lower}'")
+    #         else: # If analysis_result is completely empty
+    #              logging.warning(f"[analyze_word] Attempt 1 FAILED: No analysis found for '{original_word_lower}'")
+    # 
+    #     # --- Attempt 2: Try finding suggestions by correcting potential diacritic errors --- 
+    #     # ... (Attempt 2 logic commented out) ...
+    # 
+    #     # --- All attempts failed --- 
+    #     logging.warning(f"[analyze_word] All attempts failed for '{original_word}'")
+    #     
+    #     # --- Attempt to translate the original word even if analysis failed --- 
+    #     # ... (Fallback translation logic commented out) ...
+    #
+    # except Exception as e:
+    #     logging.error(f"Error during analysis for '{word}': {e}")
+    #     # TODO: Localize message
+    #     return jsonify({"status": "error", "message": f"An error occurred during analysis: {e}"}), 500
+    # ---------------------------------------
 
-    target_lang = request.args.get('target_lang', default='en', type=str)
-    # logging.info(f"[analyze_word] Target language requested: {target_lang} for word: {word}") # 필요시 INFO 레벨 사용
-
-    try:
-        original_word_lower = word.lower()
-
-        # --- Attempt 1: Analyze the original word --- 
-        # logging.info(f"[analyze_word] Attempt 1: Analyzing original word '{original_word_lower}'")
-        analysis_result = morf.analyse(original_word_lower)
-
-        # --- Improved Check: Ensure analysis has valid (non-'ign') results --- 
-        # Check if analysis_result is not empty AND if any tuple's tag is NOT 'ign'
-        is_analysis_valid = analysis_result and any(
-            len(r) >= 3 and isinstance(r[2], tuple) and len(r[2]) >= 3 and r[2][2].split(':', 1)[0] != 'ign'
-            for r in analysis_result
-        )
-
-        if is_analysis_valid:
-            logging.warning(f"[analyze_word] Attempt 1 SUCCESS: Found valid analysis for '{original_word_lower}'")
-            # --- Format results and get translation --- 
-            formatted_results = _format_analysis_results(analysis_result)
-            if not formatted_results: # Should not happen if analysis_result was non-empty, but check anyway
-                 return jsonify({"status": "success", "word": original_word_lower, "data": [], "message": f"Analysis found but formatting failed for '{original_word_lower}'."}), 200
-            
-            primary_lemma = formatted_results[0].get("lemma")
-            cleaned_lemma = _clean_lemma(primary_lemma)
-            translation_result = None
-            if cleaned_lemma:
-                # --- 임시 디버깅 코드 (logging 사용) ---
-                temp_api_key = os.environ.get("LINGVANEX_API_KEY")
-                logging.warning(f"[analyze_word] DEBUG: LINGVANEX_API_KEY value before calling translate: {'SET' if temp_api_key else 'NOT SET'}")
-                # -----------------------------------
-
-                # --- Use Lingvanex for Translation --- 
-                # logging.info(f"[analyze_word] DEBUG: Calling translate_text_lingvanex with target_lang = {target_lang}")
-                translation_result = translate_text_lingvanex(cleaned_lemma, target_lang)
-                # -------------------------------------
-            
-            response_data = {
-                "status": "success",
-                "word": original_word_lower,
-                "data": formatted_results,
-                "translation_en": translation_result # Renamed for clarity
-            }
-            # logging.info(f"[analyze_word] Returning JSON (translation is for {target_lang}): {response_data}")
-            return jsonify(response_data)
-        else:
-            # --- Handle cases where original analysis failed or only returned 'ign' --- 
-            if analysis_result: # If analysis_result exists but only contains 'ign'
-                 logging.warning(f"[analyze_word] Attempt 1 FAILED: Only 'ign' analysis found for '{original_word_lower}'")
-            else: # If analysis_result is completely empty
-                 logging.warning(f"[analyze_word] Attempt 1 FAILED: No analysis found for '{original_word_lower}'")
-
-        # --- Attempt 2: Try finding suggestions by correcting potential diacritic errors --- 
-        suggestion_found = False
-        suggested_word = None
-        original_word = original_word_lower # Keep original for the response
-
-        # Map of common non-diacritic chars to potential Polish diacritic chars
-        diacritic_map = {
-            'a': ['ą'], 'e': ['ę'], 'c': ['ć'], 'l': ['ł'],
-            'n': ['ń'], 'o': ['ó'], 's': ['ś'], 'z': ['ź', 'ż']
-        }
-
-        logging.warning(f"[analyze_word] Attempt 2: Trying diacritic suggestions for '{original_word}'")
-        for i, char in enumerate(original_word):
-            if char in diacritic_map:
-                for replacement in diacritic_map[char]:
-                    potential_suggestion = list(original_word)
-                    potential_suggestion[i] = replacement
-                    potential_suggestion = "".join(potential_suggestion)
-                    
-                    logging.warning(f"  -> Trying suggestion: '{potential_suggestion}'")
-                    suggestion_analysis = morf.analyse(potential_suggestion)
-                    # --- Add this line for debugging --- 
-                    logging.warning(f"  -> Raw analysis for '{potential_suggestion}': {suggestion_analysis}") 
-                    # -------------------------------------
-                    
-                    # Check if the analysis for the suggestion is valid (non-'ign')
-                    is_suggestion_valid = suggestion_analysis and any(
-                        len(r) >= 3 and isinstance(r[2], tuple) and len(r[2]) >= 3 and r[2][2].split(':', 1)[0] != 'ign'
-                        for r in suggestion_analysis
-                    )
-
-                    if is_suggestion_valid:
-                        logging.warning(f"[analyze_word] Attempt 2 SUCCESS: Found valid analysis for suggested word '{potential_suggestion}'")
-                        suggested_word = potential_suggestion
-                        suggestion_found = True
-                        break # Stop after finding the first valid suggestion for this character
-                if suggestion_found:
-                    break # Stop iterating through characters if a suggestion was found
-        
-        # If a valid suggestion was found through diacritic correction
-        if suggestion_found and suggested_word:
-             # TODO: Localize the message string (use a key like 'suggestion_did_you_mean')
-             suggestion_message = f"Did you mean '{suggested_word}'?" # Placeholder message
-             response_data = {
-                 "status": "suggestion",
-                 "message": suggestion_message,
-                 "suggested_word": suggested_word,
-                 "original_word": original_word # Return the original word user typed
-             }
-             logging.warning(f"[analyze_word] Returning suggestion JSON: {response_data}")
-             return jsonify(response_data)
-        else:
-             logging.warning(f"[analyze_word] Attempt 2 FAILED: No valid diacritic suggestion found for '{original_word}'")
-
-        # --- All attempts failed --- 
-        logging.warning(f"[analyze_word] All attempts failed for '{original_word}'")
-        
-        # --- Attempt to translate the original word even if analysis failed --- 
-        failed_translation_result = None
-        logging.warning(f"[analyze_word] Trying to translate original word '{original_word}' as fallback.")
-        # Ensure target_lang is defined in this scope (it should be from request args)
-        if original_word:
-            failed_translation_result = translate_text_lingvanex(original_word, target_lang)
-        # ---------------------------------------------------------------------
-
-        # TODO: Localize message
-        # Return status success but with empty data and the failure message
-        # Include translation if found
-        final_response = {
-             "status": "success", 
-             "word": original_word, 
-             "data": [], 
-             "message": f"No analysis found for '{original_word}'."
-        }
-        if failed_translation_result:
-             final_response["translation_en"] = failed_translation_result
-             logging.warning(f"[analyze_word] Added fallback translation for '{original_word}': {failed_translation_result}")
-
-        return jsonify(final_response), 200
-
-    except Exception as e:
-        logging.error(f"Error during analysis for '{word}': {e}")
-        # TODO: Localize message
-        return jsonify({"status": "error", "message": f"An error occurred during analysis: {e}"}), 500
+    # --- 즉시 간단한 응답 반환 ---
+    return jsonify({"status": "simplified_test", "message": f"analyze_word called for {word}"})
+    # -----------------------------
 
 # --- Helper function to format analysis results (extracted logic) --- 
 def _format_analysis_results(analysis_result):
