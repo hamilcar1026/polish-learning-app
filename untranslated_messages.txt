@@ -3,19 +3,23 @@
     "conjugationCategoryImpersonal",
     "conjugationCategoryVerbalNoun",
     "conjugationCategoryConditional",
-    "conjugationCategoryPresentImpersonal",
-    "conjugationCategoryPastImpersonal",
     "suggestionDidYouMean",
-    "suggestionErrorFallback"
+    "suggestionErrorFallback",
+    "impersonalPresentForm",
+    "impersonalPastForm",
+    "impersonalFutureForm",
+    "impersonalConditionalForm"
   ],
 
   "ru": [
     "conjugationCategoryImpersonal",
     "conjugationCategoryVerbalNoun",
     "conjugationCategoryConditional",
-    "conjugationCategoryPresentImpersonal",
-    "conjugationCategoryPastImpersonal",
     "suggestionDidYouMean",
-    "suggestionErrorFallback"
+    "suggestionErrorFallback",
+    "impersonalPresentForm",
+    "impersonalPastForm",
+    "impersonalFutureForm",
+    "impersonalConditionalForm"
   ]
 }

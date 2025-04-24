@@ -139,6 +139,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tag_adjp => '형용사적 분사 (수동)';
 
   @override
+  String get tag_cond => '조건법';
+
+  @override
   String get qualifier_sg => '단수';
 
   @override
@@ -292,6 +295,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get conjugationCategoryConditionalImpersonal => '조건법 비인칭';
 
   @override
+  String get conjugationCategoryImperativeImpersonal => '명령형 비인칭';
+
+  @override
   String get drawerRecentSearches => '최근 검색어';
 
   @override
@@ -404,4 +410,19 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get suggestionErrorFallback => '제안을 표시하는 중 오류가 발생했습니다.';
+
+  @override
+  String get impersonalAccuracyWarning => '정확하지 않을 수 있음';
+
+  @override
+  String get impersonalPresentForm => '비인칭 현재형 (미완료)';
+
+  @override
+  String get impersonalPastForm => '비인칭 과거형 (완료)';
+
+  @override
+  String get impersonalFutureForm => '비인칭 미래형';
+
+  @override
+  String get impersonalConditionalForm => '비인칭 조건법';
 }

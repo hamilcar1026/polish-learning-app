@@ -1071,63 +1071,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
-  String _getConjugationCategoryKey(Map<String, String> tagMap) {
-    final String base = tagMap['base'] ?? '';
-
-    switch (base) {
-      case 'fin':
-        final String tenseAspect = tagMap['tense_aspect'] ?? '';
-        if (tenseAspect.contains('imperf')) return 'conjugationCategoryPresentIndicative';
-        if (tenseAspect.contains('perf')) return 'conjugationCategoryFuturePerfectiveIndicative';
-        return 'conjugationCategoryFiniteVerb'; // Fallback
-        
-      case 'bedzie': 
-        return 'conjugationCategoryFutureImperfectiveIndicative';
-        
-      case 'praet': 
-        return 'conjugationCategoryPastTense';
-        
-      case 'impt': 
-      case 'impt_periph': 
-        return 'conjugationCategoryImperative';
-        
-      case 'inf': 
-        return 'conjugationCategoryInfinitive';
-        
-      case 'pcon': 
-        return 'conjugationCategoryPresentAdverbialParticiple';
-        
-      case 'pant': 
-        return 'conjugationCategoryAnteriorAdverbialParticiple';
-        
-      case 'pact': 
-        return 'conjugationCategoryPresentActiveParticiple';
-        
-      case 'ppas': 
-        return 'conjugationCategoryPastPassiveParticiple';
-        
-      case 'ger': 
-        return 'conjugationCategoryVerbalNoun';
-        
-      case 'imps': {
-        final String aspect = tagMap['aspect'] ?? '';
-        if (aspect == 'perf' || aspect.contains('perf')) {
-          return 'conjugationCategoryPastImpersonal';
-        } 
-        return 'conjugationCategoryPresentImpersonal';
-      }
-        
-      case 'cond': 
-        return 'conjugationCategoryConditional';
-        
-      case 'conjugationCategoryImperativeImpersonal': 
-        return 'conjugationCategoryImperativeImpersonal';
-        
-      default: 
-        return 'conjugationCategoryOtherForms';
-    }
-  }
-
   // --- Helper function to build Participle Declension Table ---
   // (Similar structure to _buildDeclensionResults, but parses pact/ppas tags)
   Widget _buildParticipleDeclensionTable(List<ConjugationForm> forms, AppLocalizations l10n, bool isActive) {

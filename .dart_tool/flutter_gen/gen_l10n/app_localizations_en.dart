@@ -139,6 +139,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tag_adjp => 'adj participle (pass)';
 
   @override
+  String get tag_cond => 'conditional';
+
+  @override
   String get qualifier_sg => 'sg';
 
   @override
@@ -292,6 +295,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get conjugationCategoryConditionalImpersonal => 'Conditional Impersonal';
 
   @override
+  String get conjugationCategoryImperativeImpersonal => 'Impersonal Imperative';
+
+  @override
   String get drawerRecentSearches => 'Recent Searches';
 
   @override
@@ -404,4 +410,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get suggestionErrorFallback => 'Error displaying suggestion.';
+
+  @override
+  String get impersonalAccuracyWarning => 'May not be accurate';
+
+  @override
+  String get impersonalPresentForm => 'Impersonal present form (imperf)';
+
+  @override
+  String get impersonalPastForm => 'Impersonal past form (perf)';
+
+  @override
+  String get impersonalFutureForm => 'Impersonal future form';
+
+  @override
+  String get impersonalConditionalForm => 'Impersonal conditional form';
 }

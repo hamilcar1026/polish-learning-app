@@ -351,6 +351,12 @@ abstract class AppLocalizations {
   /// **'adj participle (pass)'**
   String get tag_adjp;
 
+  /// No description provided for @tag_cond.
+  ///
+  /// In en, this message translates to:
+  /// **'conditional'**
+  String get tag_cond;
+
   /// No description provided for @qualifier_sg.
   ///
   /// In en, this message translates to:
@@ -657,6 +663,12 @@ abstract class AppLocalizations {
   /// **'Conditional Impersonal'**
   String get conjugationCategoryConditionalImpersonal;
 
+  /// No description provided for @conjugationCategoryImperativeImpersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Impersonal Imperative'**
+  String get conjugationCategoryImperativeImpersonal;
+
   /// No description provided for @drawerRecentSearches.
   ///
   /// In en, this message translates to:
@@ -872,6 +884,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error displaying suggestion.'**
   String get suggestionErrorFallback;
+
+  /// No description provided for @impersonalAccuracyWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'May not be accurate'**
+  String get impersonalAccuracyWarning;
+
+  /// Description for the impersonal present form
+  ///
+  /// In en, this message translates to:
+  /// **'Impersonal present form (imperf)'**
+  String get impersonalPresentForm;
+
+  /// Description for the impersonal past form
+  ///
+  /// In en, this message translates to:
+  /// **'Impersonal past form (perf)'**
+  String get impersonalPastForm;
+
+  /// Description for the impersonal future form
+  ///
+  /// In en, this message translates to:
+  /// **'Impersonal future form'**
+  String get impersonalFutureForm;
+
+  /// Description for the impersonal conditional form
+  ///
+  /// In en, this message translates to:
+  /// **'Impersonal conditional form'**
+  String get impersonalConditionalForm;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

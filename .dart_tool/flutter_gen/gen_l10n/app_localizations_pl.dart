@@ -139,6 +139,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get tag_adjp => 'przym. bierny';
 
   @override
+  String get tag_cond => 'tryb warunkowy';
+
+  @override
   String get qualifier_sg => 'lp';
 
   @override
@@ -280,16 +283,19 @@ class AppLocalizationsPl extends AppLocalizations {
   String get conjugationCategoryConditional => 'Conditional';
 
   @override
-  String get conjugationCategoryPresentImpersonal => 'Present Impersonal';
+  String get conjugationCategoryPresentImpersonal => 'Bezosobowa teraźniejsza';
 
   @override
-  String get conjugationCategoryPastImpersonal => 'Past Impersonal';
+  String get conjugationCategoryPastImpersonal => 'Bezosobowa przeszła';
 
   @override
-  String get conjugationCategoryFutureImpersonal => 'Przyszły bezosobowy';
+  String get conjugationCategoryFutureImpersonal => 'Bezosobowa przyszła';
 
   @override
-  String get conjugationCategoryConditionalImpersonal => 'Tryb przypuszczający bezosobowy';
+  String get conjugationCategoryConditionalImpersonal => 'Bezosobowa trybu warunkowego';
+
+  @override
+  String get conjugationCategoryImperativeImpersonal => 'Tryb rozkazujący nieosobowy';
 
   @override
   String get drawerRecentSearches => 'Ostatnie wyszukiwania';
@@ -404,4 +410,19 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get suggestionErrorFallback => 'Error displaying suggestion.';
+
+  @override
+  String get impersonalAccuracyWarning => 'Może nie być dokładne';
+
+  @override
+  String get impersonalPresentForm => 'Impersonal present form (imperf)';
+
+  @override
+  String get impersonalPastForm => 'Impersonal past form (perf)';
+
+  @override
+  String get impersonalFutureForm => 'Impersonal future form';
+
+  @override
+  String get impersonalConditionalForm => 'Impersonal conditional form';
 }
