@@ -286,6 +286,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get conjugationCategoryPastImpersonal => 'Past Impersonal';
 
   @override
+  String get conjugationCategoryFutureImpersonal => 'Przyszły bezosobowy';
+
+  @override
+  String get conjugationCategoryConditionalImpersonal => 'Tryb przypuszczający bezosobowy';
+
+  @override
   String get drawerRecentSearches => 'Ostatnie wyszukiwania';
 
   @override

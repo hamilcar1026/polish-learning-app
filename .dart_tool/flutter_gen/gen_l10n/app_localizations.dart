@@ -645,6 +645,18 @@ abstract class AppLocalizations {
   /// **'Past Impersonal'**
   String get conjugationCategoryPastImpersonal;
 
+  /// Title for the Future Impersonal verb form category
+  ///
+  /// In en, this message translates to:
+  /// **'Future Impersonal'**
+  String get conjugationCategoryFutureImpersonal;
+
+  /// Title for the Conditional Impersonal verb form category
+  ///
+  /// In en, this message translates to:
+  /// **'Conditional Impersonal'**
+  String get conjugationCategoryConditionalImpersonal;
+
   /// No description provided for @drawerRecentSearches.
   ///
   /// In en, this message translates to:
