@@ -2063,41 +2063,61 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   // Returns the localization KEY for the conjugation category
   String _getConjugationCategoryKey(Map<String, String> tagMap) {
-    String base = tagMap['base'] ?? '';
-    // Try to get aspect from various possible fields in the tagMap
-    String tagAspect = tagMap['aspect'] ?? tagMap['tense_aspect'] ?? tagMap['aspect_voice'] ?? tagMap['mood_gender2'] ?? '';
-    String tenseAspect = tagMap['tense_aspect'] ?? tagMap['aspect'] ?? tagMap['gender_tense_aspect'] ?? '';
-    String mood = tagMap['mood'] ?? '';
+    final String base = tagMap['base'] ?? '';
 
     switch (base) {
       case 'fin':
+        final String tenseAspect = tagMap['tense_aspect'] ?? '';
         if (tenseAspect.contains('imperf')) return 'conjugationCategoryPresentIndicative';
         if (tenseAspect.contains('perf')) return 'conjugationCategoryFuturePerfectiveIndicative';
         return 'conjugationCategoryFiniteVerb'; // Fallback for other finite forms
-      case 'bedzie': return 'conjugationCategoryFutureImperfectiveIndicative';
-      case 'praet': return 'conjugationCategoryPastTense';
-      case 'impt': return 'conjugationCategoryImperative';
-      case 'impt_periph': return 'conjugationCategoryImperative';
-      case 'inf': return 'conjugationCategoryInfinitive';
-      case 'pcon': return 'conjugationCategoryPresentAdverbialParticiple';
-      case 'pant': return 'conjugationCategoryAnteriorAdverbialParticiple';
-      case 'pact': return 'conjugationCategoryPresentActiveParticiple';
-      case 'ppas': return 'conjugationCategoryPastPassiveParticiple';
-      case 'ger': return 'conjugationCategoryVerbalNoun';
-      // --- MODIFICATION START: Differentiate Impersonal based on aspect --- 
+        
+      case 'bedzie': 
+        return 'conjugationCategoryFutureImperfectiveIndicative';
+        
+      case 'praet': 
+        return 'conjugationCategoryPastTense';
+        
+      case 'impt': 
+      case 'impt_periph': 
+        return 'conjugationCategoryImperative';
+        
+      case 'inf': 
+        return 'conjugationCategoryInfinitive';
+        
+      case 'pcon': 
+        return 'conjugationCategoryPresentAdverbialParticiple';
+        
+      case 'pant': 
+        return 'conjugationCategoryAnteriorAdverbialParticiple';
+        
+      case 'pact': 
+        return 'conjugationCategoryPresentActiveParticiple';
+        
+      case 'ppas': 
+        return 'conjugationCategoryPastPassiveParticiple';
+        
+      case 'ger': 
+        return 'conjugationCategoryVerbalNoun';
+        
+      // --- MODIFICATION: Simplify impersonal handling to avoid variable scope issues ---
       case 'imps': {
-        // 확실하게 변수 범위 지정
-        final String aspectValue = tagAspect;
-        if (aspectValue.contains('perf')) {
-          return 'conjugationCategoryPastImpersonal'; // Assume perf = past impersonal
-        } else { 
-          return 'conjugationCategoryPresentImpersonal'; // Assume imperf or no aspect = present impersonal
-        }
+        // Check for perfective aspect directly from tagMap
+        final String aspect = tagMap['aspect'] ?? '';
+        if (aspect == 'perf' || aspect.contains('perf')) {
+          return 'conjugationCategoryPastImpersonal';
+        } 
+        return 'conjugationCategoryPresentImpersonal';
       }
-      // --- MODIFICATION END ---
-      case 'cond': return 'conjugationCategoryConditional'; // 조건법
-      case 'conjugationCategoryImperativeImpersonal': return 'conjugationCategoryImperativeImpersonal'; // Added for impersonal imperative
-      default: return 'conjugationCategoryOtherForms'; // Group others
+        
+      case 'cond': 
+        return 'conjugationCategoryConditional';
+        
+      case 'conjugationCategoryImperativeImpersonal': 
+        return 'conjugationCategoryImperativeImpersonal';
+        
+      default: 
+        return 'conjugationCategoryOtherForms';
     }
   }
 
