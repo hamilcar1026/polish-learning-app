@@ -51,7 +51,18 @@ BY_CONDITIONAL_PARTICLES = {
 }
 
 # Allowed tags (Ensure all needed tags are included)
-ALLOWED_TAGS = {'fin', 'impt', 'imps', 'inf', 'pact', 'pant', 'pcon', 'ppas', 'praet', 'bedzie', 'ger', 'cond', 'impt_periph', 'fut_imps', 'cond_imps'} # Add cond
+ALLOWED_TAGS = {'fin', 'impt', 'imps', 'inf', 'pact', 'pant', 'pcon', 'ppas', 'praet', 'bedzie', 'ger', 'cond', 'impt_periph', 'fut_imps', 'cond_imps', 'impt_imps'} # Add all needed impersonal tags
+
+# --- 향상된 비인칭 처리를 위한 새로운 상수 추가 ---
+# 비인칭 동사의 się 위치 패턴 (동사에 따라 다를 수 있음)
+IMPERSONAL_SIE_PATTERNS = {
+    'before': True,  # się가 동사 앞에 오는 경우 (się + 동사)
+    'after': False,  # się가 동사 뒤에 오는 경우 (동사 + się)
+}
+
+# 명령형 비인칭 접두사
+IMPERSONAL_IMPERATIVE_PREFIX = "niech"
+# ---------------------------
 
 # --- Lingvanex Translation Function ---
 def translate_text_lingvanex(text, target_language):
@@ -391,6 +402,21 @@ def get_form_tag_gender_animacy(form_tag_full):
              return part
      return None
 
+# --- 비인칭 형태 감지 함수 (새로 추가) ---
+def is_impersonal_form(form, tag_full):
+    """비인칭 형태인지 확인하는 함수"""
+    # -no, -to로 끝나는 형태는 과거 비인칭
+    if form.endswith(('no', 'to')) and 'imps' in tag_full:
+        return True
+    # 명시적으로 imps 태그가 있는 경우
+    if tag_full.split(':', 1)[0] == 'imps':
+        return True
+    # się가 포함된 특정 패턴 (일부 reflexive 동사는 예외)
+    if ' się ' in form or form.endswith(' się') or form.startswith('się '):
+        return True
+    return False
+# ---------------------------
+
 # Helper function to generate forms and format them (REFACTORED)
 def generate_and_format_forms(word, check_func):
     if morf is None:
@@ -408,6 +434,7 @@ def generate_and_format_forms(word, check_func):
         primary_tag_full = None
         primary_base_tag = None
         is_primary_imperfective = False # Flag for imperfective aspect
+        has_reflexive_sie = False # Flag to check if verb is inherently reflexive (uses się)
 
         # Heuristic to find the most likely primary verb/declinable lemma
         for r in analysis_result:
@@ -422,6 +449,10 @@ def generate_and_format_forms(word, check_func):
                     primary_base_tag = current_base_tag
                     if 'imperf' in current_tag_full.split(':'):
                         is_primary_imperfective = True
+                    # Check if this verb uses się naturally
+                    if ' się' in current_lemma or current_lemma.endswith('się'):
+                        has_reflexive_sie = True
+                        print(f"[generate_and_format_forms] Identified reflexive verb with się: {current_lemma}")
                     print(f"[generate_and_format_forms] Selected primary analysis: lemma='{primary_lemma}', tag='{primary_tag_full}', is_imperfective={is_primary_imperfective}")
                     break # Found the first matching analysis
 
@@ -438,6 +469,7 @@ def generate_and_format_forms(word, check_func):
         infinitive_form = None
         past_forms = {} # To store praet forms: {'sg:m1': 'robił', 'sg:f': 'robiła', ...}
         past_impersonal_form = None
+        present_impersonal_forms = [] # 다양한 현재 비인칭 형태 저장
         
         # 디버깅: 동명사(Gerund) 추적
         print(f"[디버그-동명사] 형태 생성 시작 - 기본형: '{primary_lemma}'")
@@ -447,6 +479,10 @@ def generate_and_format_forms(word, check_func):
         future_forms_perf = 0
         future_forms_imperf = 0
         print(f"[디버그-미래시제] 미래시제 처리 - 미완료상: {is_primary_imperfective}")
+        
+        # 디버깅: 비인칭 추적
+        impersonal_forms_found = 0
+        print(f"[디버그-비인칭] 비인칭 처리 시작 - 동사: '{primary_lemma}', 본질적 재귀형: {has_reflexive_sie}")
 
         for form_tuple in generated_forms_raw:
             if len(form_tuple) < 3:
@@ -480,6 +516,18 @@ def generate_and_format_forms(word, check_func):
                 number = next((p for p in parts if p in ['sg', 'pl']), 'unknown')
                 person = next((p for p in parts if p in ['pri', 'sec', 'ter']), 'unknown')
                 print(f"[디버그-미래시제] 태그 파싱 결과 - 수: {number}, 인칭: {person}")
+            
+            # --- 비인칭 형태 감지 및 처리 (향상됨) ---
+            is_impersonal = is_impersonal_form(form, form_tag_full)
+            if is_impersonal:
+                impersonal_forms_found += 1
+                print(f"[디버그-비인칭] 비인칭 형태 발견 #{impersonal_forms_found}: '{form}', 태그: '{form_tag_full}'")
+                
+                # 현재 비인칭 형태 저장
+                if base_tag == 'imps' and not (form.endswith('no') or form.endswith('to')):
+                    if form not in present_impersonal_forms:
+                        present_impersonal_forms.append(form)
+                        print(f"[디버그-비인칭] 현재 비인칭 형태 저장: '{form}'")
 
             # --- Store infinitive ---
             if base_tag == 'inf':
@@ -506,6 +554,12 @@ def generate_and_format_forms(word, check_func):
                     print(f"      >> Found past form for {num_gen_key}: {form}")
             # --------------------------------------------------
 
+            # --- 과거 비인칭 형태 저장 (no/to 형태) ---
+            if base_tag == 'imps' and (form.endswith('no') or form.endswith('to')):
+                past_impersonal_form = form
+                print(f"      >> Found past impersonal form: {past_impersonal_form}")
+            # --------------------------------------------------
+
             # --- Infer person for past tense tags (already stored) ---
             person = None
             if base_tag == 'praet':
@@ -522,9 +576,15 @@ def generate_and_format_forms(word, check_func):
 
             category_key = get_conjugation_category_key(base_tag, form_tag_full)
 
-            if category_key == 'conjugationCategoryPastImpersonal' and (form.endswith('no') or form.endswith('to')):
-                past_impersonal_form = form
-                print(f"      >> Found past impersonal form: {past_impersonal_form}")
+            # --- 향상된 비인칭 카테고리 분류 (업데이트됨) ---
+            if is_impersonal:
+                if form.endswith(('no', 'to')):
+                    category_key = 'conjugationCategoryPastImpersonal'
+                elif base_tag == 'imps':
+                    category_key = 'conjugationCategoryPresentImpersonal'
+                elif base_tag == 'impt' or 'impt' in form_tag_full:
+                    category_key = 'conjugationCategoryImperativeImpersonal'
+            # -------------------------------------------------
 
             form_data = {"form": form, "tag": form_tag_full, "qualifiers": qualifiers}
             if category_key not in grouped_forms: grouped_forms[category_key] = []
@@ -539,21 +599,99 @@ def generate_and_format_forms(word, check_func):
                 print(f"[디버그-동명사] #{idx+1}: 형태='{form_data['form']}', 태그='{form_data['tag']}'")
         else:
             print(f"[디버그-동명사] 최종 결과에 포함된 동명사 없음")
+        
+        # 디버깅: 비인칭 결과 요약
+        print(f"[디버그-비인칭] 비인칭 처리 결과: 발견된 형태 {impersonal_forms_found}개")
+        print(f"[디버그-비인칭] 현재 비인칭 형태: {present_impersonal_forms}")
+        print(f"[디버그-비인칭] 과거 비인칭 형태: {past_impersonal_form}")
 
-        # --- Generate Future Impersonal / Conditional Impersonal ---
+        # --- 향상된 비인칭 형태 생성 ---
+        # 1. 과거 비인칭 형태가 있는 경우 미래/조건 비인칭 생성
         if past_impersonal_form:
-            # Future Impersonal
-            future_imps_form = f"będzie się {past_impersonal_form}"
+            # 미래 비인칭 (다양한 변형)
             future_imps_key = 'conjugationCategoryFutureImpersonal'
             if future_imps_key not in grouped_forms: grouped_forms[future_imps_key] = []
-            grouped_forms[future_imps_key].append({"form": future_imps_form, "tag": "fut_imps", "qualifiers": []})
+            
+            # 기본 미래 비인칭 (będzie + 과거 비인칭)
+            future_imps_form1 = f"będzie {past_impersonal_form}"
+            grouped_forms[future_imps_key].append({
+                "form": future_imps_form1, 
+                "tag": "fut_imps:imperf", 
+                "qualifiers": []
+            })
+            print(f"[디버그-비인칭] 미래 비인칭 생성 (기본): {future_imps_form1}")
+            
+            # się가 있는 미래 비인칭 (będzie się + 과거 비인칭)
+            future_imps_form2 = f"będzie się {past_impersonal_form}"
+            grouped_forms[future_imps_key].append({
+                "form": future_imps_form2, 
+                "tag": "fut_imps:imperf:refl", 
+                "qualifiers": []
+            })
+            print(f"[디버그-비인칭] 미래 비인칭 생성 (się): {future_imps_form2}")
 
-            # Conditional Impersonal
-            cond_imps_form = f"by {past_impersonal_form}" # Simple version
+            # 조건 비인칭 (다양한 변형)
             cond_imps_key = 'conjugationCategoryConditionalImpersonal'
             if cond_imps_key not in grouped_forms: grouped_forms[cond_imps_key] = []
-            grouped_forms[cond_imps_key].append({"form": cond_imps_form, "tag": "cond_imps", "qualifiers": []})
-        # --------------------------------------------------------
+            
+            # 기본 조건 비인칭 (standard by + past impersonal)
+            cond_imps_form1 = f"{past_impersonal_form} by"
+            grouped_forms[cond_imps_key].append({
+                "form": cond_imps_form1, 
+                "tag": "cond_imps", 
+                "qualifiers": []
+            })
+            print(f"[디버그-비인칭] 조건 비인칭 생성 (기본): {cond_imps_form1}")
+            
+            # 대체 조건 비인칭 (by + past impersonal)
+            cond_imps_form2 = f"by {past_impersonal_form}"
+            grouped_forms[cond_imps_key].append({
+                "form": cond_imps_form2, 
+                "tag": "cond_imps:alt", 
+                "qualifiers": []
+            })
+            print(f"[디버그-비인칭] 조건 비인칭 생성 (대체): {cond_imps_form2}")
+            
+            # się가 있는 조건 비인칭
+            if not has_reflexive_sie:  # 이미 reflexive 동사가 아닌 경우에만
+                cond_imps_form3 = f"{past_impersonal_form} by się"
+                grouped_forms[cond_imps_key].append({
+                    "form": cond_imps_form3, 
+                    "tag": "cond_imps:refl", 
+                    "qualifiers": []
+                })
+                print(f"[디버그-비인칭] 조건 비인칭 생성 (się): {cond_imps_form3}")
+        
+        # 2. 현재 비인칭 형태가 있는 경우
+        if present_impersonal_forms and len(present_impersonal_forms) > 0:
+            # 명령형 비인칭 생성
+            impt_imps_key = 'conjugationCategoryImperativeImpersonal'
+            if impt_imps_key not in grouped_forms: grouped_forms[impt_imps_key] = []
+            
+            for present_form in present_impersonal_forms:
+                impt_imps_form = f"{IMPERSONAL_IMPERATIVE_PREFIX} {present_form}"
+                grouped_forms[impt_imps_key].append({
+                    "form": impt_imps_form,
+                    "tag": "impt_imps",
+                    "qualifiers": []
+                })
+                print(f"[디버그-비인칭] 명령형 비인칭 생성: {impt_imps_form}")
+        
+        # 3. 부정형 비인칭 추가 (현재 비인칭 기준)
+        if present_impersonal_forms and len(present_impersonal_forms) > 0:
+            present_imps_key = 'conjugationCategoryPresentImpersonal'
+            
+            # 부정형 추가
+            for present_form in present_impersonal_forms:
+                if not present_form.startswith("nie "):  # 이미 부정형이 아닌 경우에만
+                    neg_form = f"nie {present_form}"
+                    grouped_forms[present_imps_key].append({
+                        "form": neg_form,
+                        "tag": "imps:neg",
+                        "qualifiers": []
+                    })
+                    print(f"[디버그-비인칭] 부정 현재 비인칭 추가: {neg_form}")
+        # ----------------------------------------------
 
         # --- Generate Future Imperfective / Conditional ---
         if is_primary_imperfective:
@@ -728,18 +866,17 @@ def get_conjugation_category_key(base_tag, full_tag):
     elif base_tag == 'ppas': return 'conjugationCategoryPastPassiveParticiple'
     elif base_tag == 'ger': return 'conjugationCategoryVerbalNoun'
     elif base_tag == 'imps':
-        # Differentiate impersonal based on aspect (assuming aspect is present)
-        if aspect == 'perf':
-             return 'conjugationCategoryPastImpersonal' # Assume perf = past impersonal (-no, -to)
-        else: # Assume imperf or no aspect = present impersonal
-             return 'conjugationCategoryPresentImpersonal'
+        # 향상된 비인칭 구분 로직
+        if full_tag.startswith('imps:pef') or any(part == 'perf' for part in parts):
+            return 'conjugationCategoryPastImpersonal'
+        else:
+            return 'conjugationCategoryPresentImpersonal'
     elif base_tag == 'cond': return 'conjugationCategoryConditional'
-    # No specific keys for future/conditional impersonal yet, handled manually later
-    elif base_tag == 'fut_imps': return 'conjugationCategoryFutureImpersonal' # Manual tag
-    elif base_tag == 'cond_imps': return 'conjugationCategoryConditionalImpersonal' # Manual tag
-
+    # 추가된 비인칭 태그 처리
+    elif base_tag == 'fut_imps': return 'conjugationCategoryFutureImpersonal'
+    elif base_tag == 'cond_imps': return 'conjugationCategoryConditionalImpersonal'
+    elif base_tag == 'impt_imps': return 'conjugationCategoryImperativeImpersonal'
     else: return 'conjugationCategoryOtherForms' # Group others
-# -------------------------------------------------------------
 
 @app.route('/conjugate/<word>', methods=['GET'])
 def conjugate_word(word):
