@@ -1408,33 +1408,32 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final tagParts = tag.split(':');
     final translatedParts = tagParts.map((part) => _translateGrammarTerm(part, l10n)).toList();
     
-    // 여기서는 편의상 한국어 표시 순서에 맞게 조정 
-    // 예: '명령법 복수 1인칭 미완료' 형태로 변환
+    // 언어 설정과 관계없이 태그를 적절한 순서로 정렬하여 표시
     if (translatedParts.isNotEmpty) {
       // 기본 형태 (품사)
       String result = translatedParts[0];
       
       // 단/복수 추가
       if (tagParts.contains('sg')) {
-        result += ' 단수';
+        result += ' ${l10n.qualifier_sg}';
       } else if (tagParts.contains('pl')) {
-        result += ' 복수';
+        result += ' ${l10n.qualifier_pl}';
       }
       
       // 인칭 추가
       if (tagParts.contains('pri')) {
-        result += ' 1인칭';
+        result += ' ${l10n.qualifier_pri}';
       } else if (tagParts.contains('sec')) {
-        result += ' 2인칭';
+        result += ' ${l10n.qualifier_sec}';
       } else if (tagParts.contains('ter')) {
-        result += ' 3인칭';
+        result += ' ${l10n.qualifier_ter}';
       }
       
       // 상 추가 (미완료/완료)
       if (tagParts.contains('imperf')) {
-        result += ' 미완료';
+        result += ' ${l10n.qualifier_imperf}';
       } else if (tagParts.contains('perf')) {
-        result += ' 완료';
+        result += ' ${l10n.qualifier_perf}';
       }
       
       return result;
