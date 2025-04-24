@@ -1866,6 +1866,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             if (plForms['n'] != null) {
               contentWidgets.add(Text("${plForms['n']} (${l10n.genderLabelN1}/${l10n.genderLabelN2})"));
             }
+            if (plForms['non-m1'] != null && plForms['f'] == null && plForms['n'] == null) {
+              contentWidgets.add(Text("${plForms['non-m1']} (non-${l10n.genderLabelM1})"));
+            }
             
             if (contentWidgets.isEmpty) {
               return Text('-');
