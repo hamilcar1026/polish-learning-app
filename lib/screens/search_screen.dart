@@ -936,7 +936,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       if (groupedForms.containsKey(key)) {
         final forms = groupedForms[key]!;
         if (forms.isNotEmpty) {
-          final title = _getLocalizedConjugationCategoryTitle(key, l10n);
+          final title = _getLocalizedConjugationCategoryTitle(key, l10n); // Use localized title function
           bool isExpanded = _expandedCategories[key] ?? true; // Default to expanded
 
           // Determine which builder to use based on the key
@@ -1040,7 +1040,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     // Add any remaining categories not in displayOrder
     groupedForms.forEach((key, forms) {
        if (!displayOrder.contains(key) && forms.isNotEmpty) {
-          final title = _getLocalizedConjugationCategoryTitle(key, l10n);
+          final title = _getLocalizedConjugationCategoryTitle(key, l10n); // Use localized title function
            sections.add(
              ExpansionTile(
                key: PageStorageKey<String>(key),
