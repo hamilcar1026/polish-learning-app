@@ -741,17 +741,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     // final numberOrder = ['Singular', 'Plural']; // Not needed for Table structure
 
     for (var formInfo in forms) {
-      final tagMap = _parseTag(formInfo.tag);
+      final tagMap = _parseTag(formInfo.tag); 
+      print(">>> _parseTag result: $tagMap"); // <--- 추가 1
       final form = formInfo.form;
-      final person = tagMap['person'];
-      final number = tagMap['number'];
-      final gender = tagMap['gender']; // Needed for past tense
+      final person = tagMap['person']; 
+      final number = tagMap['number']; 
+      final gender = tagMap['gender']; 
       
-      // Pass l10n to helper functions
+      print(">>> Extracted: person=$person, number=$number"); // <--- 추가 2
+
       final String personKey = _getPersonLabel(person, l10n); 
       final String numberKey = (number == 'sg') ? 'Singular' : (number == 'pl') ? 'Plural' : '-';
+      
+      print(">>> Keys: personKey=$personKey, numberKey=$numberKey"); // <--- 추가 3
 
-      if (personKey != '-' && numberKey != '-') {
+      if (personKey != '-' && numberKey != '-') { 
+        print(">>> Condition met, adding to tableData..."); // <--- 추가 4
         if (!tableData.containsKey(personKey)) tableData[personKey] = {};
 
         if (isPastTense && gender != null) {
@@ -767,6 +772,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           // Other tenses: Directly assign form (Handles potential overwrites from impt/impt_periph)
           tableData[personKey]![numberKey] = form;
         }
+      } else {
+        print(">>> Condition NOT met, skipping."); // <--- 추가 5
       }
     }
 
