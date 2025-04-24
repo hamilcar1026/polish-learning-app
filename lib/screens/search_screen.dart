@@ -1086,12 +1086,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case 'conjugationCategoryPastPassiveParticiple': return l10n.conjugationCategoryPastPassiveParticiple;
       case 'conjugationCategoryVerbalNoun': return l10n.conjugationCategoryVerbalNoun;
       // --- MODIFICATION START: Differentiate Impersonal based on aspect --- 
-      case 'imps': 
-        if (tagAspect.contains('perf')) {
-          return 'conjugationCategoryPastImpersonal'; // Assume perf = past impersonal
-        } else { 
-          return 'conjugationCategoryPresentImpersonal'; // Assume imperf or no aspect = present impersonal
-        }
+      case 'imps': {
+        // Check for perfective aspect directly from tagMap
+        final String aspect = tagMap['aspect'] ?? '';
+        if (aspect == 'perf' || aspect.contains('perf')) {
+          return 'conjugationCategoryPastImpersonal';
+        } 
+        return 'conjugationCategoryPresentImpersonal';
+      }
       // --- MODIFICATION END ---
       case 'cond': return 'conjugationCategoryConditional'; // 조건법
       case 'conjugationCategoryImperativeImpersonal': return 'conjugationCategoryImperativeImpersonal'; // Added for impersonal imperative
