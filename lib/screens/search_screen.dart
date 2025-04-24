@@ -865,15 +865,26 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       return groupedFormsByKey;
     }
 
+    print(">>> Starting _prepareGroupedConjugationForms for ${conjugationData.lemma} with ${conjugationData.forms.length} forms."); // 함수 시작 로그
+
     for (var formInfo in conjugationData.forms) {
+      // --- 상세 로그 추가 ---
+      print("  Processing form tag: ${formInfo.tag}"); 
       final tagMap = _parseTag(formInfo.tag);
+      print("    _parseTag result: $tagMap"); 
       String categoryKey = _getConjugationCategoryKey(tagMap); // Get the localization key
+      print("    _getConjugationCategoryKey result: $categoryKey"); 
+      // --------------------
 
       if (!groupedFormsByKey.containsKey(categoryKey)) {
         groupedFormsByKey[categoryKey] = [];
       }
       groupedFormsByKey[categoryKey]!.add(formInfo);
     }
+    // --- 최종 키 확인 로그 (이전 로그 재활용 및 수정) ---
+    // print(">>> _prepareGroupedConjugationForms result keys: ${groupedForms.keys}"); // 이전 로그 주석 처리 또는 제거
+    print(">>> _prepareGroupedConjugationForms FINISHED. Result keys: ${groupedFormsByKey.keys}");
+    // ---------------------------------------
     return groupedFormsByKey;
   }
 
@@ -1223,6 +1234,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case 'pant': return 'conjugationCategoryAnteriorAdverbialParticiple';
       case 'pact': return 'conjugationCategoryPresentActiveParticiple';
       case 'ppas': return 'conjugationCategoryPastPassiveParticiple';
+      case 'ger': return 'conjugationCategoryVerbalNoun'; // 동명사
+      case 'imps': return 'conjugationCategoryImpersonal'; // 비인칭
+      case 'cond': return 'conjugationCategoryConditional'; // 조건법
       default: return 'conjugationCategoryOtherForms'; // Group others
     }
   }
