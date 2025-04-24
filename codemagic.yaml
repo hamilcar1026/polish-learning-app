@@ -6,22 +6,27 @@ workflows:
     max_build_duration: 60 # 최대 빌드 시간 (분)
     environment:
       flutter: stable # 사용할 Flutter 버전 (stable, beta, specific version)
+      # 모든 사용 그룹 정의
+      groups:
+        - google_service_account # 서비스 계정 JSON 키 (Base64 인코딩) 저장용
+        - firebase_credentials # Firebase 프로젝트 ID 저장용
+        - backend_url # 백엔드 URL 저장용
       # vars: # 일반 (비보안) 변수가 필요하다면 여기에 정의
-      #   FIREBASE_PROJECT_ID: YOUR_FIREBASE_PROJECT_ID # 예시: Firebase 프로젝트 ID (UI에서 설정해도 됨)
+      #   SOME_VAR: some_value
     scripts:
       - name: Get Flutter packages
         script: flutter packages pub get
       - name: Build Flutter web app
         script: |
-          # 기본 변수 참조 사용 ($변수이름)
-          flutter build web --release --dart-define=BACKEND_URL=$BACKEND_URL 
-          # $BACKEND_URL 환경 변수는 Codemagic UI에서 주입됩니다.
+          # 그룹 통해 변수 참조
+          flutter build web --release --dart-define=BACKEND_URL=$backend_url.BACKEND_URL 
     artifacts:
       - build/web/** # 빌드 결과물 경로
     publishing:
-      # Firebase Hosting 배포 설정
+      # Firebase Hosting 배포 설정 (서비스 계정 사용)
       firebase:
-        # 기본 변수 참조 사용 ($변수이름)
-        project: $FIREBASE_PROJECT_ID # UI 환경 변수
-        token: $FIREBASE_TOKEN # UI 보안 환경 변수
+        # 그룹 통해 변수 참조
+        project: $firebase_credentials.FIREBASE_PROJECT_ID
+        # 서비스 계정 인증 정보 사용 (그룹 통해 참조)
+        google_credentials: $google_service_account.GOOGLE_CREDENTIALS
         # channel: live # 배포 채널 (선택 사항, 예: 'live', 'beta')
