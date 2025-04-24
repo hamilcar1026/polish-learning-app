@@ -1,0 +1,32 @@
+"""# codemagic.yaml
+workflows:
+  web-release: # Workflow 이름 (원하는 대로 변경 가능)
+    name: Flutter Web Release Build and Deploy
+    instance_type: mac_mini_m1 # 빌드 머신 타입 (필요시 변경)
+    max_build_duration: 60 # 최대 빌드 시간 (분)
+    environment:
+      flutter: stable # 사용할 Flutter 버전 (stable, beta, specific version)
+      # 그룹 이름은 Codemagic UI에서 설정한 것과 일치해야 합니다.
+      # 여기에 변수를 직접 넣지 마세요! UI에서 설정합니다.
+      groups:
+        - firebase_credentials # Firebase Token 저장용 (예시)
+        - backend_url # Backend URL 저장용 (예시)
+      # vars: # 일반 (비보안) 변수가 필요하다면 여기에 정의
+      #   FIREBASE_PROJECT_ID: YOUR_FIREBASE_PROJECT_ID # 예시: Firebase 프로젝트 ID (UI에서 설정해도 됨)
+    scripts:
+      - name: Get Flutter packages
+        script: flutter packages pub get
+      - name: Build Flutter web app
+        script: |
+          flutter build web --release --dart-define=BACKEND_URL=$BACKEND_URL 
+          # $BACKEND_URL 환경 변수는 Codemagic UI에서 주입됩니다.
+    artifacts:
+      - build/web/** # 빌드 결과물 경로
+    publishing:
+      # Firebase Hosting 배포 설정
+      firebase:
+        project: $FIREBASE_PROJECT_ID # Codemagic UI 환경 변수 사용 (또는 직접 ID 입력)
+        token: $FIREBASE_TOKEN # Codemagic UI 보안 환경 변수 사용
+        # channel: live # 배포 채널 (선택 사항, 예: 'live', 'beta')
+
+""
