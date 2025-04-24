@@ -167,6 +167,10 @@ def get_dictionary_info_lingvanex(text, target_language):
 
 @app.route('/analyze/<word>', methods=['GET'])
 def analyze_word(word):
+    # --- 함수 호출 확인용 로그 추가 ---
+    print(f"[analyze_word] Function called! Received word: {word}")
+    # ---------------------------------
+
     if morf is None:
         return jsonify({"status": "error", "message": "Morfeusz2 analyzer not available."}), 500
 
