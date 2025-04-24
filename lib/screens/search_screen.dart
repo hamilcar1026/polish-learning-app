@@ -2266,7 +2266,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           children: forms.map((form) {
             // 태그에서 추출한 정보를 기반으로 형태 설명 생성
             final tagMap = _parseTag(form.tag);
-            final String tagAspect = tagMap['aspect'] ?? '';
+            // Remove the potentially problematic local variable tagAspect
+            // final String tagAspect = tagMap['aspect'] ?? '';
             
             // 비인칭 형태에 대한 현지화된 설명 텍스트 생성
             String description = '';
@@ -2281,10 +2282,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             } else if (form.tag.contains('cond_imps')) {
               description = l10n.impersonalConditionalForm;
             } else {
-              // 태그 기반 추가 처리
-              if (tagAspect == 'imperf') {
+              // 태그 기반 추가 처리 - 직접 tagMap['aspect'] 사용
+              if ((tagMap['aspect'] ?? '') == 'imperf') {
                 description = l10n.qualifier_imperf;
-              } else if (tagAspect == 'perf') {
+              } else if ((tagMap['aspect'] ?? '') == 'perf') {
                 description = l10n.qualifier_perf;
               } else {
                 // 기본 처리: 전체 태그 형식화 시도
