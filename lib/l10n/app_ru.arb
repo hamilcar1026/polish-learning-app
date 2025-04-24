@@ -102,6 +102,14 @@
   "conjugationCategoryPastPassiveParticiple": "Страдательное причастие прошедшего времени",
   "conjugationCategoryFiniteVerb": "Личный глагол",
   "conjugationCategoryOtherForms": "Другие формы",
+  "conjugationCategoryFutureImpersonal": "Будущее безличное",
+  "@conjugationCategoryFutureImpersonal": {
+    "description": "Заголовок категории для безличной формы будущего времени"
+  },
+  "conjugationCategoryConditionalImpersonal": "Условное безличное",
+  "@conjugationCategoryConditionalImpersonal": {
+    "description": "Заголовок категории для безличной формы условного наклонения"
+  },
   "drawerRecentSearches": "Недавние поиски",
   "drawerClearRecentSearchesTooltip": "Очистить недавние поиски",
   "drawerClearRecentSearchesDialogTitle": "Очистить недавние поиски?",

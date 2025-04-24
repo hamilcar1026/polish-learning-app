@@ -86,6 +86,14 @@
   "conjugationCategoryPastPassiveParticiple": "Imiesłów przymiotnikowy bierny",
   "conjugationCategoryFiniteVerb": "Forma osobowa",
   "conjugationCategoryOtherForms": "Inne formy",
+  "conjugationCategoryFutureImpersonal": "Przyszły bezosobowy",
+  "@conjugationCategoryFutureImpersonal": {
+    "description": "Tytuł kategorii dla formy bezosobowej czasu przyszłego"
+  },
+  "conjugationCategoryConditionalImpersonal": "Tryb przypuszczający bezosobowy",
+  "@conjugationCategoryConditionalImpersonal": {
+    "description": "Tytuł kategorii dla formy bezosobowej trybu przypuszczającego"
+  },
   "drawerRecentSearches": "Ostatnie wyszukiwania",
   "drawerClearRecentSearchesTooltip": "Wyczyść ostatnie wyszukiwania",
   "drawerClearRecentSearchesDialogTitle": "Wyczyścić ostatnie wyszukiwania?",

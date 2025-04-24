@@ -107,7 +107,14 @@
    "conjugationCategoryConditional": "Conditional",
    "conjugationCategoryPresentImpersonal": "Present Impersonal",
    "conjugationCategoryPastImpersonal": "Past Impersonal",
-   
+   "conjugationCategoryFutureImpersonal": "Future Impersonal",
+   "@conjugationCategoryFutureImpersonal": {
+     "description": "Title for the Future Impersonal verb form category"
+   },
+   "conjugationCategoryConditionalImpersonal": "Conditional Impersonal",
+   "@conjugationCategoryConditionalImpersonal": {
+     "description": "Title for the Conditional Impersonal verb form category"
+   },
    "drawerRecentSearches": "Recent Searches",
    "drawerClearRecentSearchesTooltip": "Clear Recent Searches",
    "drawerClearRecentSearchesDialogTitle": "Clear Recent Searches?",

@@ -748,41 +748,24 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     for (var formInfo in forms) {
       final tagMap = _parseTag(formInfo.tag); 
-      // print(">>> _parseTag result: $tagMap"); // <--- 제거
       final form = formInfo.form;
       final person = tagMap['person']; 
       final number = tagMap['number']; 
-      final gender = tagMap['gender']; 
+      // final gender = tagMap['gender']; // Gender not needed for this table type
       
-      // print(">>> Extracted: person=$person, number=$number"); // <--- 제거
-
       final String personKey = _getPersonLabel(person, l10n); 
       final String numberKey = (number == 'sg') ? 'Singular' : (number == 'pl') ? 'Plural' : '-';
       
-      // print(">>> Keys: personKey=$personKey, numberKey=$numberKey"); // <--- 제거
-
       if (personKey != '-' && numberKey != '-') { 
-        // print(">>> Condition met, adding to tableData..."); // <--- 제거
         if (!tableData.containsKey(personKey)) tableData[personKey] = {};
 
-        if (isPastTense && gender != null) {
-          // Past tense: Append gender info using localized label
-          String displayForm = "$form (${_getGenderLabel(gender, l10n)})"; 
-          if (tableData[personKey]![numberKey] != null && tableData[personKey]![numberKey] != '-') {
-            // Append if multiple genders exist
-            tableData[personKey]![numberKey] = "${tableData[personKey]![numberKey]}, $displayForm";
-          } else {
-            tableData[personKey]![numberKey] = displayForm;
-          }
-        } else if (!isPastTense) {
-          // Other tenses: Directly assign form (Handles potential overwrites from impt/impt_periph)
-          tableData[personKey]![numberKey] = form;
-        }
-        // --- 반복문 내부 tableData 상태 확인 로그 추가 ---
-        // print(">>> Inside loop, current tableData: $tableData"); // <--- 제거
-        // ---------------------------------------------
+        // --- REMOVE isPastTense logic --- (Already removed in previous step, just ensuring)
+        // This table handles present, future indicative, imperative
+        tableData[personKey]![numberKey] = form;
+        // --- END REMOVAL ---
+
       } else {
-        // print(">>> Condition NOT met, skipping."); // <--- 제거
+        // print(">>> Condition NOT met, skipping.");
       }
     } // 여기가 for 루프 끝
 
@@ -1052,7 +1035,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
 
     return sections.isEmpty
-        ? Center(child: Text(l10n.conjugationDataNotFound))
+        ? [Center(child: Text(l10n.noConjugationData))] // FIX: Wrap in list and use existing key
         : ListView(children: sections); // Use ListView for scrollability
   }
 
@@ -1061,9 +1044,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     switch (key) {
       case 'conjugationCategoryPresentIndicative': return l10n.conjugationCategoryPresentIndicative;
       case 'conjugationCategoryFuturePerfectiveIndicative': return l10n.conjugationCategoryFuturePerfectiveIndicative;
-      case 'conjugationCategoryFutureImperfectiveIndicative': return l10n.conjugationCategoryFutureImperfectiveIndicative; // ADDED
+      case 'conjugationCategoryFutureImperfectiveIndicative': return l10n.conjugationCategoryFutureImperfectiveIndicative;
       case 'conjugationCategoryPastTense': return l10n.conjugationCategoryPastTense;
-      case 'conjugationCategoryConditional': return l10n.conjugationCategoryConditional; // ADDED
+      case 'conjugationCategoryConditional': return l10n.conjugationCategoryConditional;
       case 'conjugationCategoryImperative': return l10n.conjugationCategoryImperative;
       case 'conjugationCategoryInfinitive': return l10n.conjugationCategoryInfinitive;
       case 'conjugationCategoryPresentAdverbialParticiple': return l10n.conjugationCategoryPresentAdverbialParticiple;
@@ -1073,8 +1056,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case 'conjugationCategoryVerbalNoun': return l10n.conjugationCategoryVerbalNoun;
       case 'conjugationCategoryPresentImpersonal': return l10n.conjugationCategoryPresentImpersonal;
       case 'conjugationCategoryPastImpersonal': return l10n.conjugationCategoryPastImpersonal;
-      case 'conjugationCategoryFutureImpersonal': return l10n.conjugationCategoryFutureImpersonal;
-      case 'conjugationCategoryConditionalImpersonal': return l10n.conjugationCategoryConditionalImpersonal;
+      case 'conjugationCategoryFutureImpersonal': return l10n.conjugationCategoryFutureImpersonal; // Needs key in .arb
+      case 'conjugationCategoryConditionalImpersonal': return l10n.conjugationCategoryConditionalImpersonal; // Needs key in .arb
       case 'conjugationCategoryOtherForms': return l10n.conjugationCategoryOtherForms;
       default: return key; // Fallback to the key itself
     }
@@ -1404,39 +1387,100 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       String? person;
       String? gender;
 
+      // Extract relevant parts from the tag
       for (String part in parts) {
         if (part == 'sg' || part == 'pl') number = part;
         if (part == 'pri' || part == 'sec' || part == 'ter') person = part;
-        // Check for specific gender tags
+        // Find the specific gender tag
         if (sgGenders.contains(part) || plGenders.contains(part)) gender = part;
       }
 
       if (number != null && person != null && gender != null) {
-         // Normalize 'm2' and 'm3' to 'm1' for singular display if needed,
-         // or handle them separately if the table design allows.
-         // For now, group m1/m2/m3 under a generic 'm' if necessary or keep separate.
-         // Let's assume we can display m1, f, n for sg and m1, non-m1 for pl.
-
-         // Simplify plural gender for mapping
-         if (gender == 'm2.m3.f.n') gender = 'non-m1';
+        // Normalize singular masculine genders for display grouping if desired
+        String displayGenderKey = gender;
+        if (number == 'pl' && gender == 'm2.m3.f.n') {
+             displayGenderKey = 'non-m1'; // Use a consistent key for non-personal plural
+        }
+        // Group m1/m2/m3 under 'm' for singular for simpler table display
+        if (number == 'sg' && ['m1', 'm2', 'm3'].contains(gender)) {
+            displayGenderKey = 'm';
+        }
 
          if (conditionalForms.containsKey(person) && conditionalForms[person]!.containsKey(number)) {
-           conditionalForms[person]![number]![gender] = form.form;
+           // Store the form using the possibly simplified gender key
+           // Use ??= to only assign if the key doesn't exist yet
+           conditionalForms[person]![number]![displayGenderKey] ??= form.form;
          }
       }
     }
 
+    // Person order for table rows
+    const personOrder = ['pri', 'sec', 'ter'];
 
-    // ... rest of _buildConditionalTable to construct the Table widget ...
-    // This part needs careful implementation to map the populated `conditionalForms`
-    // structure to the correct TableRow and TableCell widgets, similar to
-    // how _buildPastTenseTable does it, but accounting for the person dimension.
+    // Build the Table widget
+    return Table(
+      border: TableBorder.all(color: Colors.grey.shade300),
+      columnWidths: const {
+        0: IntrinsicColumnWidth(), // Person column
+        1: IntrinsicColumnWidth(), // Singular column
+        2: IntrinsicColumnWidth(), // Plural column
+      },
+      defaultVerticalAlignment: TableCellVerticalAlignment.top, // Align content top
+      children: [
+        // Header row
+        TableRow(
+          decoration: BoxDecoration(color: Colors.grey.shade100),
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(l10n.tableHeaderPerson, style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(l10n.tableHeaderSingular, style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(l10n.tableHeaderPlural, style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+        // Data rows (Iterate through person order)
+        ...personOrder.map((personCode) {
+          final sgForms = conditionalForms[personCode]?['sg'] ?? {};
+          final plForms = conditionalForms[personCode]?['pl'] ?? {};
 
-    // Placeholder: just list the forms for now until table structure is built
-    return Column(
-       crossAxisAlignment: CrossAxisAlignment.start,
-       children: forms.map((f) => Text('${f.form} (${f.tag})', style: TextStyle(fontSize: Theme.of(context).textTheme.bodyMedium!.fontSize! * ref.watch(fontSizeFactorProvider)))).toList(),
-     );
+          // Format cell content with gender labels
+          String sgCellText = [
+            if (sgForms['m'] != null) "${sgForms['m']} (${l10n.genderLabelM1}/${l10n.genderLabelM2}/${l10n.genderLabelM3})", // Use combined label for 'm'
+            if (sgForms['f'] != null) "${sgForms['f']} (${l10n.genderLabelF})",
+            if (sgForms['n'] != null) "${sgForms['n']} (${l10n.genderLabelN1}/${l10n.genderLabelN2})",
+          ].where((s) => s.isNotEmpty).join('\n'); // Filter out empty strings and join
+
+          String plCellText = [
+            if (plForms['m1'] != null) "${plForms['m1']} (${l10n.genderLabelM1})",
+            if (plForms['non-m1'] != null) "${plForms['non-m1']} (non-${l10n.genderLabelM1})", // Label for non-personal plural
+          ].where((s) => s.isNotEmpty).join('\n'); // Filter out empty strings and join
+
+          return TableRow(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(_getPersonLabel(personCode, l10n)), // Person label column
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(sgCellText.isNotEmpty ? sgCellText : '-'), // Show sg forms or '-'
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(plCellText.isNotEmpty ? plCellText : '-'), // Show pl forms or '-'
+              ),
+            ],
+          );
+        }).toList(),
+      ],
+    );
   }
 
   // --- Helper functions for tag parsing ---
