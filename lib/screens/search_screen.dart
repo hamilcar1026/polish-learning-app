@@ -738,22 +738,29 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     // Group forms by person and number
     final Map<String, Map<String, String>> tableData = {}; // {personLabel: {numberLabel: form}}
     
-    // --- 수정: personOrder를 l10n을 사용하여 동적으로 생성 ---
+    // --- Person order using l10n
     final personOrder = [
       _getPersonLabel('pri', l10n), // e.g., '1st (I/we)'
       _getPersonLabel('sec', l10n), // e.g., '2nd (you/you)'
       _getPersonLabel('ter', l10n), // e.g., '3rd (he/she/it/they)'
     ];
-    // --------------------------------------------------------
 
-    // final numberOrder = ['Singular', 'Plural']; // Not needed for Table structure
-
+    // Debug the forms for this table
+    print("[_buildConjugationTable] Building table with ${forms.length} forms");
     for (var formInfo in forms) {
+      print("[_buildConjugationTable] Processing form: ${formInfo.form} with tag: ${formInfo.tag}");
+      
       final tagMap = _parseTag(formInfo.tag); 
+      print("[_buildConjugationTable] Parsed tag map: $tagMap");
+      
       final form = formInfo.form;
       final person = tagMap['person']; 
       final number = tagMap['number']; 
-      // final gender = tagMap['gender']; // Gender not needed for this table type
+      
+      if (person == null || number == null) {
+        print("[_buildConjugationTable] Missing person or number for form: $form, tag: ${formInfo.tag}");
+        continue;
+      }
       
       final String personKey = _getPersonLabel(person, l10n); 
       final String numberKey = (number == 'sg') ? 'Singular' : (number == 'pl') ? 'Plural' : '-';
@@ -761,25 +768,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       if (personKey != '-' && numberKey != '-') { 
         if (!tableData.containsKey(personKey)) tableData[personKey] = {};
 
-        // --- REMOVE isPastTense logic --- (Already removed in previous step, just ensuring)
-        // This table handles present, future indicative, imperative
         tableData[personKey]![numberKey] = form;
-        // --- END REMOVAL ---
-
+        print("[_buildConjugationTable] Added form $form to tableData[$personKey][$numberKey]");
       } else {
-        // print(">>> Condition NOT met, skipping.");
+        print("[_buildConjugationTable] Skipping form $form because personKey=$personKey or numberKey=$numberKey");
       }
-    } // 여기가 for 루프 끝
+    }
 
-    // --- 최종 tableData 확인 로그 (기존) ---
-    // print(">>> Final tableData before building rows: $tableData"); // <--- 제거
-    // -----------------------------------
+    // Debug the final tableData
+    print("[_buildConjugationTable] Final tableData: $tableData");
 
-    // --- return 직전 도달 확인 로그 추가 ---
-    // print(">>> Reached point just before returning Table widget."); // <--- 제거
-    // -------------------------------------
-
-    // Build Table (similar to _buildDeclensionResults)
+    // Build Table
     return Table(
       border: TableBorder.all(color: Colors.grey.shade300),
       columnWidths: const {
@@ -808,8 +807,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ],
         ),
         // Data rows
-        ...personOrder.map((personKey) { // Now personKey matches the keys in tableData
-          final personForms = tableData[personKey] ?? {}; // Should correctly retrieve the map
+        ...personOrder.map((personKey) {
+          final personForms = tableData[personKey] ?? {};
           return TableRow(
             children: [
               Padding(
@@ -818,12 +817,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                // Allow slightly more height for past tense genders by using Flexible
-                child: Text(personForms['Singular'] ?? '-'), // Should display the form now
+                child: Text(personForms['Singular'] ?? '-'), 
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(personForms['Plural'] ?? '-'), // Should display the form now
+                child: Text(personForms['Plural'] ?? '-'), 
               ),
             ],
           );
@@ -1316,17 +1314,49 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           final sgForms = tableData[personCode]?['sg'] ?? {};
           final plForms = tableData[personCode]?['pl'] ?? {};
 
-          // Format cell content with gender labels
-          String sgCellText = [
-            if (sgForms['m'] != null) "${sgForms['m']} (${l10n.genderLabelM1}/${l10n.genderLabelM2}/${l10n.genderLabelM3})",
-            if (sgForms['f'] != null) "${sgForms['f']} (${l10n.genderLabelF})",
-            if (sgForms['n'] != null) "${sgForms['n']} (${l10n.genderLabelN1}/${l10n.genderLabelN2})", // Include n label if present
-          ].join('\\n'); // Use newline character for separation
-
-          String plCellText = [
-            if (plForms['m1'] != null) "${plForms['m1']} (${l10n.genderLabelM1})",
-            if (plForms['non-m1'] != null) "${plForms['non-m1']} (non-${l10n.genderLabelM1})", // Simpler label for non-m1
-          ].join('\\n'); // Use newline character for separation
+          // Format cell content with gender labels - using Column widget for proper line breaks
+          Widget buildSingularCell() {
+            List<Widget> contentWidgets = [];
+            
+            if (sgForms['m'] != null) {
+              contentWidgets.add(Text("${sgForms['m']} (${l10n.genderLabelM1}/${l10n.genderLabelM2}/${l10n.genderLabelM3})"));
+            }
+            if (sgForms['f'] != null) {
+              contentWidgets.add(Text("${sgForms['f']} (${l10n.genderLabelF})"));
+            }
+            if (sgForms['n'] != null) {
+              contentWidgets.add(Text("${sgForms['n']} (${l10n.genderLabelN1}/${l10n.genderLabelN2})"));
+            }
+            
+            if (contentWidgets.isEmpty) {
+              return Text('-');
+            }
+            
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: contentWidgets,
+            );
+          }
+          
+          Widget buildPluralCell() {
+            List<Widget> contentWidgets = [];
+            
+            if (plForms['m1'] != null) {
+              contentWidgets.add(Text("${plForms['m1']} (${l10n.genderLabelM1})"));
+            }
+            if (plForms['non-m1'] != null) {
+              contentWidgets.add(Text("${plForms['non-m1']} (non-${l10n.genderLabelM1})"));
+            }
+            
+            if (contentWidgets.isEmpty) {
+              return Text('-');
+            }
+            
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: contentWidgets,
+            );
+          }
 
           return TableRow(
             children: [
@@ -1336,11 +1366,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(sgCellText.isNotEmpty ? sgCellText : '-'), // Show sg forms or '-'
+                child: buildSingularCell(),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(plCellText.isNotEmpty ? plCellText : '-'), // Show pl forms or '-'
+                child: buildPluralCell(),
               ),
             ],
           );
@@ -1434,17 +1464,49 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           final sgForms = conditionalForms[personCode]?['sg'] ?? {};
           final plForms = conditionalForms[personCode]?['pl'] ?? {};
 
-          // Format cell content with gender labels
-          String sgCellText = [
-            if (sgForms['m'] != null) "${sgForms['m']} (${l10n.genderLabelM1}/${l10n.genderLabelM2}/${l10n.genderLabelM3})", // Use combined label for 'm'
-            if (sgForms['f'] != null) "${sgForms['f']} (${l10n.genderLabelF})",
-            if (sgForms['n'] != null) "${sgForms['n']} (${l10n.genderLabelN1}/${l10n.genderLabelN2})",
-          ].where((s) => s.isNotEmpty).join('\n'); // Filter out empty strings and join
-
-          String plCellText = [
-            if (plForms['m1'] != null) "${plForms['m1']} (${l10n.genderLabelM1})",
-            if (plForms['non-m1'] != null) "${plForms['non-m1']} (non-${l10n.genderLabelM1})", // Label for non-personal plural
-          ].where((s) => s.isNotEmpty).join('\n'); // Filter out empty strings and join
+          // Format cell content with gender labels - using Column widget for proper line breaks
+          Widget buildSingularCell() {
+            List<Widget> contentWidgets = [];
+            
+            if (sgForms['m'] != null) {
+              contentWidgets.add(Text("${sgForms['m']} (${l10n.genderLabelM1}/${l10n.genderLabelM2}/${l10n.genderLabelM3})"));
+            }
+            if (sgForms['f'] != null) {
+              contentWidgets.add(Text("${sgForms['f']} (${l10n.genderLabelF})"));
+            }
+            if (sgForms['n'] != null) {
+              contentWidgets.add(Text("${sgForms['n']} (${l10n.genderLabelN1}/${l10n.genderLabelN2})"));
+            }
+            
+            if (contentWidgets.isEmpty) {
+              return Text('-');
+            }
+            
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: contentWidgets,
+            );
+          }
+          
+          Widget buildPluralCell() {
+            List<Widget> contentWidgets = [];
+            
+            if (plForms['m1'] != null) {
+              contentWidgets.add(Text("${plForms['m1']} (${l10n.genderLabelM1})"));
+            }
+            if (plForms['non-m1'] != null) {
+              contentWidgets.add(Text("${plForms['non-m1']} (non-${l10n.genderLabelM1})"));
+            }
+            
+            if (contentWidgets.isEmpty) {
+              return Text('-');
+            }
+            
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: contentWidgets,
+            );
+          }
 
           return TableRow(
             children: [
@@ -1454,11 +1516,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(sgCellText.isNotEmpty ? sgCellText : '-'), // Show sg forms or '-'
+                child: buildSingularCell(),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(plCellText.isNotEmpty ? plCellText : '-'), // Show pl forms or '-'
+                child: buildPluralCell(),
               ),
             ],
           );
