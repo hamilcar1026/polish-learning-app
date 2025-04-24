@@ -833,27 +833,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   // --- Helper Function to prepare Conjugation Data ---
-  Map<String, List<ConjugationForm>> _prepareGroupedConjugationForms(ConjugationResult? conjugationData) {
-    // The keys of this map will now be localization keys (e.g., 'conjugationCategoryPresentIndicative')
-    final Map<String, List<ConjugationForm>> groupedFormsByKey = {};
-    if (conjugationData == null || conjugationData.forms.isEmpty) {
-      return groupedFormsByKey;
-    }
-
-    for (var formInfo in conjugationData.forms) {
-      final tagMap = _parseTag(formInfo.tag);
-      String categoryKey = _getConjugationCategoryKey(tagMap); // Get the localization key
-
-      if (!groupedFormsByKey.containsKey(categoryKey)) {
-        groupedFormsByKey[categoryKey] = [];
-      }
-      groupedFormsByKey[categoryKey]!.add(formInfo);
-    }
-
-    return groupedFormsByKey;
-  }
-
-  // Helper function to get localized string for a Morfeusz tag or qualifier
+    
   String _translateGrammarTerm(String term, AppLocalizations l10n) {
     // Handle combined cases like nom.acc
     if (term.contains('.')) {
