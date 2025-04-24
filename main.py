@@ -308,7 +308,7 @@ def _clean_lemma(lemma):
 # Helper function to check if a tag represents a verb
 def is_verb(tag):
     # Add more verb tags if needed based on Morfeusz tagset
-    return tag in ['fin', 'bedzie', 'impt', 'imps', 'inf', 'pact', 'pant', 'pcon', 'ppas']
+    return tag in ['fin', 'impt', 'imps', 'inf', 'pact', 'pant', 'pcon', 'ppas', 'praet', 'bedzie', 'ger', 'imps', 'cond']
 
 # Helper function to check if a tag represents a declinable word (noun, adjective, etc.)
 def is_declinable(tag):
