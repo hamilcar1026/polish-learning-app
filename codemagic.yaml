@@ -6,11 +6,6 @@ workflows:
     max_build_duration: 60 # 최대 빌드 시간 (분)
     environment:
       flutter: stable # 사용할 Flutter 버전 (stable, beta, specific version)
-      # 그룹 이름은 Codemagic UI에서 설정한 것과 일치해야 합니다.
-      # 여기에 변수를 직접 넣지 마세요! UI에서 설정합니다.
-      groups:
-        - firebase_credentials # Firebase Token, Project ID 저장용
-        - backend_url # Backend URL 저장용
       # vars: # 일반 (비보안) 변수가 필요하다면 여기에 정의
       #   FIREBASE_PROJECT_ID: YOUR_FIREBASE_PROJECT_ID # 예시: Firebase 프로젝트 ID (UI에서 설정해도 됨)
     scripts:
@@ -18,15 +13,15 @@ workflows:
         script: flutter packages pub get
       - name: Build Flutter web app
         script: |
-          # 변수 참조 시 그룹 이름 명시 ($그룹이름.변수이름)
-          flutter build web --release --dart-define=BACKEND_URL=$backend_url.BACKEND_URL 
-          # $backend_url.BACKEND_URL 환경 변수는 Codemagic UI에서 주입됩니다.
+          # 기본 변수 참조 사용 ($변수이름)
+          flutter build web --release --dart-define=BACKEND_URL=$BACKEND_URL 
+          # $BACKEND_URL 환경 변수는 Codemagic UI에서 주입됩니다.
     artifacts:
       - build/web/** # 빌드 결과물 경로
     publishing:
       # Firebase Hosting 배포 설정
       firebase:
-        # 변수 참조 시 그룹 이름 명시 ($그룹이름.변수이름)
-        project: $firebase_credentials.FIREBASE_PROJECT_ID # UI 환경 변수 (firebase_credentials 그룹)
-        token: $firebase_credentials.FIREBASE_TOKEN # UI 보안 환경 변수 (firebase_credentials 그룹)
+        # 기본 변수 참조 사용 ($변수이름)
+        project: $FIREBASE_PROJECT_ID # UI 환경 변수
+        token: $FIREBASE_TOKEN # UI 보안 환경 변수
         # channel: live # 배포 채널 (선택 사항, 예: 'live', 'beta')
