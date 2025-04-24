@@ -22,6 +22,7 @@ jobs:
       run: flutter pub get # Flutter 패키지 다운로드
 
     - name: Build Flutter web app
+      working-directory: ./  # 작업 디렉토리를 저장소 루트로 명시
       run: flutter build web --release --dart-define=BACKEND_URL=${{ secrets.BACKEND_URL }}
       # GitHub Secrets에서 BACKEND_URL 값을 가져와 빌드 시 주입
 
