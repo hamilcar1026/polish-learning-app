@@ -1428,13 +1428,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       return;
     }
 
+    // Get base forms for generation if needed
     String mascSgBase = tableData['ter']!['sg']!['m']!;
+    
+    // Get plural base forms if available
+    String? mascPlBaseM1 = tableData['ter']?['pl']?['m1'];
+    String? mascPlBaseNonM1 = tableData['ter']?['pl']?['non-m1'];
+    
+    print("[attemptToAddMissingPersonForms] Using base forms: mascSgBase=$mascSgBase, mascPlBaseM1=$mascPlBaseM1, mascPlBaseNonM1=$mascPlBaseNonM1");
     
     // Try to locate specific forms with endings or Aglt (auxiliary) that indicate 1st/2nd person
     for (var form in forms) {
       if (!form.tag.startsWith('praet')) continue;
       
       final String formText = form.form;
+      print("[attemptToAddMissingPersonForms] Examining form: $formText, tag: ${form.tag}");
       
       // Check for common 1st/2nd person endings and suffixes
       if (formText.endsWith('łem') || formText.endsWith('łam')) {
@@ -1447,7 +1455,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         if (formText.endsWith('łeś')) tableData['sec']!['sg']!['m'] ??= formText;
         if (formText.endsWith('łaś')) tableData['sec']!['sg']!['f'] ??= formText;
         print("[attemptToAddMissingPersonForms] Added 2nd person form: $formText");
-      } else if (formText.endsWith('liśmy')) {
+      } else if (formText.endsWith('liśmy') || formText.endsWith('łiśmy')) {
         // Likely 1st person plural masculine
         tableData['pri']!['pl']!['m1'] ??= formText;
         print("[attemptToAddMissingPersonForms] Added 1st person plural m1 form: $formText");
@@ -1455,7 +1463,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         // Likely 1st person plural non-masculine
         tableData['pri']!['pl']!['non-m1'] ??= formText;
         print("[attemptToAddMissingPersonForms] Added 1st person plural non-m1 form: $formText");
-      } else if (formText.endsWith('liście')) {
+      } else if (formText.endsWith('liście') || formText.endsWith('łiście')) {
         // Likely 2nd person plural masculine
         tableData['sec']!['pl']!['m1'] ??= formText;
         print("[attemptToAddMissingPersonForms] Added 2nd person plural m1 form: $formText");
@@ -1470,21 +1478,87 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     
     // 1st person singular forms
     if (tableData['pri']!['sg']!['m'] == null && mascSgBase.isNotEmpty) {
-      // Typically: 3rd sg masc + "em" ending
-      String suggestedForm = mascSgBase + "em";
+      // Check for common mascSgBase endings to determine the proper suffix
+      String suggestedForm;
+      if (mascSgBase.endsWith('ł')) {
+        suggestedForm = mascSgBase + "em";
+      } else {
+        suggestedForm = mascSgBase + "em";
+      }
       tableData['pri']!['sg']!['m'] = suggestedForm;
       print("[attemptToAddMissingPersonForms] Generated 1st person sg m form: $suggestedForm");
     }
     
     // 2nd person singular forms
     if (tableData['sec']!['sg']!['m'] == null && mascSgBase.isNotEmpty) {
-      // Typically: 3rd sg masc + "eś" ending
-      String suggestedForm = mascSgBase + "eś";
+      // Check for common mascSgBase endings to determine the proper suffix
+      String suggestedForm;
+      if (mascSgBase.endsWith('ł')) {
+        suggestedForm = mascSgBase + "eś";
+      } else {
+        suggestedForm = mascSgBase + "eś";
+      }
       tableData['sec']!['sg']!['m'] = suggestedForm;
       print("[attemptToAddMissingPersonForms] Generated 2nd person sg m form: $suggestedForm");
     }
     
-    // Other forms can be generated similarly if needed
+    // Generate plural forms if missing
+    
+    // 1st person plural masculine form
+    if (tableData['pri']!['pl']!['m1'] == null && mascPlBaseM1 != null && mascPlBaseM1.isNotEmpty) {
+      // The pattern is usually to replace 'li' ending with 'liśmy'
+      String suggestedForm;
+      if (mascPlBaseM1.endsWith('li')) {
+        suggestedForm = mascPlBaseM1.substring(0, mascPlBaseM1.length - 2) + "liśmy";
+      } else {
+        // Fallback if the expected pattern isn't found
+        suggestedForm = mascPlBaseM1 + "śmy";
+      }
+      tableData['pri']!['pl']!['m1'] = suggestedForm;
+      print("[attemptToAddMissingPersonForms] Generated 1st person pl m1 form: $suggestedForm");
+    }
+    
+    // 1st person plural non-masculine form
+    if (tableData['pri']!['pl']!['non-m1'] == null && mascPlBaseNonM1 != null && mascPlBaseNonM1.isNotEmpty) {
+      // The pattern is usually to replace 'ły' ending with 'łyśmy'
+      String suggestedForm;
+      if (mascPlBaseNonM1.endsWith('ły')) {
+        suggestedForm = mascPlBaseNonM1.substring(0, mascPlBaseNonM1.length - 2) + "łyśmy";
+      } else {
+        // Fallback if the expected pattern isn't found
+        suggestedForm = mascPlBaseNonM1 + "śmy";
+      }
+      tableData['pri']!['pl']!['non-m1'] = suggestedForm;
+      print("[attemptToAddMissingPersonForms] Generated 1st person pl non-m1 form: $suggestedForm");
+    }
+    
+    // 2nd person plural masculine form
+    if (tableData['sec']!['pl']!['m1'] == null && mascPlBaseM1 != null && mascPlBaseM1.isNotEmpty) {
+      // The pattern is usually to replace 'li' ending with 'liście'
+      String suggestedForm;
+      if (mascPlBaseM1.endsWith('li')) {
+        suggestedForm = mascPlBaseM1.substring(0, mascPlBaseM1.length - 2) + "liście";
+      } else {
+        // Fallback if the expected pattern isn't found
+        suggestedForm = mascPlBaseM1 + "ście";
+      }
+      tableData['sec']!['pl']!['m1'] = suggestedForm;
+      print("[attemptToAddMissingPersonForms] Generated 2nd person pl m1 form: $suggestedForm");
+    }
+    
+    // 2nd person plural non-masculine form
+    if (tableData['sec']!['pl']!['non-m1'] == null && mascPlBaseNonM1 != null && mascPlBaseNonM1.isNotEmpty) {
+      // The pattern is usually to replace 'ły' ending with 'łyście'
+      String suggestedForm;
+      if (mascPlBaseNonM1.endsWith('ły')) {
+        suggestedForm = mascPlBaseNonM1.substring(0, mascPlBaseNonM1.length - 2) + "łyście";
+      } else {
+        // Fallback if the expected pattern isn't found
+        suggestedForm = mascPlBaseNonM1 + "ście";
+      }
+      tableData['sec']!['pl']!['non-m1'] = suggestedForm;
+      print("[attemptToAddMissingPersonForms] Generated 2nd person pl non-m1 form: $suggestedForm");
+    }
   }
 
   // 명령법 및 다른 동사 형태에서 태그 표시를 한글로 변환하는 함수
