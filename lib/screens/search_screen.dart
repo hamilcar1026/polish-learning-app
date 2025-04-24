@@ -1085,13 +1085,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case 'conjugationCategoryPresentActiveParticiple': return l10n.conjugationCategoryPresentActiveParticiple;
       case 'conjugationCategoryPastPassiveParticiple': return l10n.conjugationCategoryPastPassiveParticiple;
       case 'conjugationCategoryVerbalNoun': return l10n.conjugationCategoryVerbalNoun;
-      case 'conjugationCategoryPresentImpersonal': return l10n.conjugationCategoryPresentImpersonal;
-      case 'conjugationCategoryPastImpersonal': return l10n.conjugationCategoryPastImpersonal;
-      case 'conjugationCategoryFutureImpersonal': return l10n.conjugationCategoryFutureImpersonal;
-      case 'conjugationCategoryConditionalImpersonal': return l10n.conjugationCategoryConditionalImpersonal;
-      case 'conjugationCategoryImperativeImpersonal': return l10n.conjugationCategoryImperativeImpersonal;
-      case 'conjugationCategoryOtherForms': return l10n.conjugationCategoryOtherForms;
-      default: return key; // Fallback to the key itself
+      // --- MODIFICATION START: Differentiate Impersonal based on aspect --- 
+      case 'imps': 
+        if (aspect.contains('perf')) {
+          return 'conjugationCategoryPastImpersonal'; // Assume perf = past impersonal
+        } else { 
+          return 'conjugationCategoryPresentImpersonal'; // Assume imperf or no aspect = present impersonal
+        }
+      // --- MODIFICATION END ---
+      case 'cond': return 'conjugationCategoryConditional'; // 조건법
+      case 'conjugationCategoryImperativeImpersonal': return 'conjugationCategoryImperativeImpersonal'; // Added for impersonal imperative
+      default: return 'conjugationCategoryOtherForms'; // Group others
     }
   }
 
@@ -1286,6 +1290,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     // Person order for rows
     const personOrder = ['pri', 'sec', 'ter'];
 
+    // 모든 형태에 대해 디버그 로깅 추가
+    print("=================== 과거 시제 형태 디버깅 ===================");
+    for (var form in forms) {
+      print("과거 형태: ${form.form}, 태그: ${form.tag}");
+    }
+    print("===========================================================");
+
     // 1단계: 기본 형태 수집 (명시적으로 레이블이 지정된 3인칭 형태)
     for (var formInfo in forms) {
       if (formInfo.tag.startsWith('praet')) { // 과거 시제 형태만 처리
@@ -1294,6 +1305,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         final number = tagMap['number'];
         final gender = tagMap['gender'];
         final form = formInfo.form;
+
+        // 디버그 로깅 추가
+        print("파싱된 태그: person=$person, number=$number, gender=$gender, form=$form");
 
         // 필수 필드가 존재하는지 확인
         if (person == null || number == null || gender == null) {
@@ -1315,8 +1329,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             displayGenderKey = 'm1'; // 복수 인격 남성
           } else if (gender == 'f' || gender.contains('f')) {
             displayGenderKey = 'f'; // 복수 여성형
-          } else if (gender.contains('n')) {
-            displayGenderKey = 'n'; // 복수 중성형
+          } else if (gender == 'n' || gender.contains('n') || gender == 'n1' || gender == 'n2') {
+            displayGenderKey = 'n'; // 복수 중성형 - 모든 중성 형태 포함하도록 확장
           } else {
             displayGenderKey = 'non-m1'; // 분류할 수 없는 비남성
           }
@@ -1325,12 +1339,26 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         // tableData 채우기, 각 슬롯에 대해 찾은 첫 번째 형태를 취함
         if (tableData.containsKey(person) && tableData[person]!.containsKey(number) && displayGenderKey.isNotEmpty) {
           tableData[person]![number]![displayGenderKey] ??= form;
+          // 설정된 값에 대한 디버그 로깅
+          print("테이블 항목 설정: tableData[$person][$number][$displayGenderKey] = $form");
         }
       }
     }
 
+    // 테이블 데이터 디버깅 출력
+    print("최종 테이블 데이터(누락된 형태 추가 전):");
+    personOrder.forEach((person) {
+      print("$person: sg=${tableData[person]!['sg']}, pl=${tableData[person]!['pl']}");
+    });
+
     // 2단계: 누락된 1인칭 및 2인칭 형태 채우기
     attemptToAddMissingPersonForms(tableData, forms);
+
+    // 테이블 데이터 디버깅 출력
+    print("최종 테이블 데이터(누락된 형태 추가 후):");
+    personOrder.forEach((person) {
+      print("$person: sg=${tableData[person]!['sg']}, pl=${tableData[person]!['pl']}");
+    });
 
     // 테이블 위젯 구성: 인칭별 행, 수(단수/복수)별 열
     return Table(
@@ -1452,6 +1480,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     String? femPlBase = tableData['ter']?['pl']?['f'];
     String? neutPlBase = tableData['ter']?['pl']?['n'];
     
+    // 디버그 로깅 추가
+    print("복수 기본 형태: mascPlBaseM1=$mascPlBaseM1, femPlBase=$femPlBase, neutPlBase=$neutPlBase, mascPlBaseNonM1=$mascPlBaseNonM1");
+    
     // 1인칭/2인칭을 나타내는 끝이나 Aglt(보조)가 있는 특정 형태 찾기
     for (var form in forms) {
       if (!form.tag.startsWith('praet')) continue;
@@ -1537,6 +1568,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       tableData['pri']!['pl']!['m1'] = suggestedForm;
     }
     
+    // 여성 복수 형태에 대한 검사 개선
+    femPlBase ??= findFeminineFormFromAPI(forms, 'pl');
+    print("찾은 여성형 기본 형태: $femPlBase");
+
+    // 중성 복수 형태에 대한 검사 개선
+    neutPlBase ??= findNeuterFormFromAPI(forms, 'pl');
+    print("찾은 중성형 기본 형태: $neutPlBase");
+    
     // 1인칭 복수 여성 형태
     if (tableData['pri']!['pl']!['f'] == null) {
       if (femPlBase != null && femPlBase.isNotEmpty) {
@@ -1548,6 +1587,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           suggestedForm = femPlBase + "śmy";
         }
         tableData['pri']!['pl']!['f'] = suggestedForm;
+        print("1인칭 복수 여성형 생성: ${tableData['pri']!['pl']!['f']}");
       } else if (mascPlBaseNonM1 != null && mascPlBaseNonM1.isNotEmpty) {
         // non-m1 형태로부터 생성
         String suggestedForm;
@@ -1557,6 +1597,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           suggestedForm = mascPlBaseNonM1 + "śmy";
         }
         tableData['pri']!['pl']!['f'] = suggestedForm;
+        print("1인칭 복수 여성형 생성(non-m1 기반): ${tableData['pri']!['pl']!['f']}");
       }
     }
     
@@ -1571,6 +1612,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           suggestedForm = neutPlBase + "śmy";
         }
         tableData['pri']!['pl']!['n'] = suggestedForm;
+        print("1인칭 복수 중성형 생성: ${tableData['pri']!['pl']!['n']}");
+      } else if (femPlBase != null && femPlBase.isNotEmpty) {
+        // 여성 기본형으로부터 생성(중성형 대체)
+        String suggestedForm;
+        if (femPlBase.endsWith('ły')) {
+          suggestedForm = femPlBase.substring(0, femPlBase.length - 2) + "łyśmy";
+        } else {
+          suggestedForm = femPlBase + "śmy";
+        }
+        tableData['pri']!['pl']!['n'] = suggestedForm;
+        print("1인칭 복수 중성형 생성(여성형 기반): ${tableData['pri']!['pl']!['n']}");
       } else if (mascPlBaseNonM1 != null && mascPlBaseNonM1.isNotEmpty) {
         // non-m1 형태로부터 생성
         String suggestedForm;
@@ -1580,6 +1632,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           suggestedForm = mascPlBaseNonM1 + "śmy";
         }
         tableData['pri']!['pl']!['n'] = suggestedForm;
+        print("1인칭 복수 중성형 생성(non-m1 기반): ${tableData['pri']!['pl']!['n']}");
       }
     }
     
@@ -1607,6 +1660,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           suggestedForm = femPlBase + "ście";
         }
         tableData['sec']!['pl']!['f'] = suggestedForm;
+        print("2인칭 복수 여성형 생성: ${tableData['sec']!['pl']!['f']}");
       } else if (mascPlBaseNonM1 != null && mascPlBaseNonM1.isNotEmpty) {
         // non-m1 형태로부터 생성
         String suggestedForm;
@@ -1616,6 +1670,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           suggestedForm = mascPlBaseNonM1 + "ście";
         }
         tableData['sec']!['pl']!['f'] = suggestedForm;
+        print("2인칭 복수 여성형 생성(non-m1 기반): ${tableData['sec']!['pl']!['f']}");
       }
     }
     
@@ -1630,6 +1685,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           suggestedForm = neutPlBase + "ście";
         }
         tableData['sec']!['pl']!['n'] = suggestedForm;
+        print("2인칭 복수 중성형 생성: ${tableData['sec']!['pl']!['n']}");
+      } else if (femPlBase != null && femPlBase.isNotEmpty) {
+        // 여성 기본형으로부터 생성(중성형 대체)
+        String suggestedForm;
+        if (femPlBase.endsWith('ły')) {
+          suggestedForm = femPlBase.substring(0, femPlBase.length - 2) + "łyście";
+        } else {
+          suggestedForm = femPlBase + "ście";
+        }
+        tableData['sec']!['pl']!['n'] = suggestedForm;
+        print("2인칭 복수 중성형 생성(여성형 기반): ${tableData['sec']!['pl']!['n']}");
       } else if (mascPlBaseNonM1 != null && mascPlBaseNonM1.isNotEmpty) {
         // non-m1 형태로부터 생성
         String suggestedForm;
@@ -1639,70 +1705,48 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           suggestedForm = mascPlBaseNonM1 + "ście";
         }
         tableData['sec']!['pl']!['n'] = suggestedForm;
+        print("2인칭 복수 중성형 생성(non-m1 기반): ${tableData['sec']!['pl']!['n']}");
       }
     }
   }
-
-  // 명령법 및 다른 동사 형태에서 태그 표시를 한글로 변환하는 함수
-  String _getFormattedTagDescription(String tag, AppLocalizations l10n) {
-    final tagParts = tag.split(':');
-    final translatedParts = tagParts.map((part) => _translateGrammarTerm(part, l10n)).toList();
-    
-    // 언어 설정과 관계없이 태그를 적절한 순서로 정렬하여 표시
-    if (translatedParts.isNotEmpty) {
-      // 기본 형태 (품사)
-      String result = translatedParts[0];
-      
-      // 단/복수 추가
-      if (tagParts.contains('sg')) {
-        result += ' ${l10n.qualifier_sg}';
-      } else if (tagParts.contains('pl')) {
-        result += ' ${l10n.qualifier_pl}';
+  
+  // API 응답에서 특정 성별 및 수의 형태를 찾는 보조 함수
+  String? findFeminineFormFromAPI(List<ConjugationForm> forms, String number) {
+    for (var form in forms) {
+      if (form.tag.startsWith('praet')) {
+        final tagMap = _parseTag(form.tag);
+        final formNumber = tagMap['number'];
+        final gender = tagMap['gender'];
+        final person = tagMap['person'];
+        
+        // 3인칭이고 지정된 수의 여성 형태 찾기
+        if (person == 'ter' && formNumber == number && (gender == 'f' || gender?.contains('f') == true)) {
+          print("API에서 여성 형태 발견: ${form.form}, 태그: ${form.tag}");
+          return form.form;
+        }
       }
-      
-      // 인칭 추가
-      if (tagParts.contains('pri')) {
-        result += ' ${l10n.qualifier_pri}';
-      } else if (tagParts.contains('sec')) {
-        result += ' ${l10n.qualifier_sec}';
-      } else if (tagParts.contains('ter')) {
-        result += ' ${l10n.qualifier_ter}';
-      }
-      
-      // 상 추가 (미완료/완료)
-      if (tagParts.contains('imperf')) {
-        result += ' ${l10n.qualifier_imperf}';
-      } else if (tagParts.contains('perf')) {
-        result += ' ${l10n.qualifier_perf}';
-      }
-      
-      return result;
     }
-    
-    // 변환할 수 없는 경우 원래 태그 반환
-    return tagParts.join(':');
+    return null;
   }
-
-  // 시제 정보를 포함한 형태소 태그 설명
-  String _getFormMorphDescription(ConjugationForm form, AppLocalizations l10n) {
-    // 동사 형태에 대한 한글 설명 생성
-    return _getFormattedTagDescription(form.tag, l10n);
-  }
-
-  // 기본 형태소를 표시하는 위젯
-  Widget _buildFormWithDescription(ConjugationForm form, AppLocalizations l10n) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(form.form, style: const TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 4),
-        Text(
-          _getFormMorphDescription(form, l10n),
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
-        ),
-      ],
-    );
+  
+  // API 응답에서 중성 형태를 찾는 보조 함수
+  String? findNeuterFormFromAPI(List<ConjugationForm> forms, String number) {
+    for (var form in forms) {
+      if (form.tag.startsWith('praet')) {
+        final tagMap = _parseTag(form.tag);
+        final formNumber = tagMap['number'];
+        final gender = tagMap['gender'];
+        final person = tagMap['person'];
+        
+        // 3인칭이고 지정된 수의 중성 형태 찾기
+        if (person == 'ter' && formNumber == number && 
+            (gender == 'n' || gender == 'n1' || gender == 'n2' || gender?.contains('n') == true)) {
+          print("API에서 중성 형태 발견: ${form.form}, 태그: ${form.tag}");
+          return form.form;
+        }
+      }
+    }
+    return null;
   }
 
   // --- Helper function to build Conditional Table ---
