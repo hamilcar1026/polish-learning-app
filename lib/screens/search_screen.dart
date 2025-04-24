@@ -2241,12 +2241,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: forms.map((form) {
-            // Get the aspect from the tag
+            // 태그에서 추출한 정보를 기반으로 형태 설명 생성
             final tagMap = _parseTag(form.tag);
-            final aspect = tagMap['aspect'] ?? '';
             
-            // Create a simplified or fully localized description based on the form tag
+            // 비인칭 형태에 대한 현지화된 설명 텍스트 생성
             String description = '';
+            
+            // 태그에 따라 적절한 현지화 키 사용
             if (form.tag.contains('imps:imperf')) {
               description = l10n.impersonalPresentForm;
             } else if (form.tag.contains('imps:perf')) {
@@ -2256,16 +2257,24 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             } else if (form.tag.contains('cond_imps')) {
               description = l10n.impersonalConditionalForm;
             } else {
-              // If not a special case, use the full description
-              description = _getFormMorphDescription(form, l10n);
+              // 태그 기반 추가 처리
+              final aspect = tagMap['aspect'] ?? '';
+              
+              if (aspect == 'imperf') {
+                description = l10n.qualifier_imperf;
+              } else if (aspect == 'perf') {
+                description = l10n.qualifier_perf;
+              } else {
+                // 기본 처리: 전체 태그 형식화 시도
+                description = _getFormattedTagDescription(form.tag, l10n);
+              }
             }
             
-            // Return the widget with the appropriate description
             return Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(form.form, style: const TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
@@ -2277,6 +2286,75 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
             );
           }).toList(),
+        ),
+      ],
+    );
+  }
+
+  // 명령법 및 다른 동사 형태에서 태그 표시를 현지화하는 함수
+  String _getFormattedTagDescription(String tag, AppLocalizations l10n) {
+    final tagParts = tag.split(':');
+    final translatedParts = tagParts.map((part) => _translateGrammarTerm(part, l10n)).toList();
+    
+    // 언어 설정과 관계없이 태그를 적절한 순서로 정렬하여 표시
+    if (translatedParts.isNotEmpty) {
+      // 기본 형태 (품사)
+      String result = translatedParts[0];
+      
+      // 단/복수 추가
+      if (tagParts.contains('sg')) {
+        result += ' ${l10n.qualifier_sg}';
+      } else if (tagParts.contains('pl')) {
+        result += ' ${l10n.qualifier_pl}';
+      }
+      
+      // 인칭 추가
+      if (tagParts.contains('pri')) {
+        result += ' ${l10n.qualifier_pri}';
+      } else if (tagParts.contains('sec')) {
+        result += ' ${l10n.qualifier_sec}';
+      } else if (tagParts.contains('ter')) {
+        result += ' ${l10n.qualifier_ter}';
+      }
+      
+      // 상 추가 (미완료/완료)
+      if (tagParts.contains('imperf')) {
+        result += ' ${l10n.qualifier_imperf}';
+      } else if (tagParts.contains('perf')) {
+        result += ' ${l10n.qualifier_perf}';
+      }
+      
+      return result;
+    }
+    
+    // 변환할 수 없는 경우 원래 태그 반환
+    return tagParts.join(':');
+  }
+  
+  // 시제 정보를 포함한 형태소 태그 설명
+  String _getFormMorphDescription(ConjugationForm form, AppLocalizations l10n) {
+    // 특수 케이스 먼저 확인
+    if (form.tag.contains('fut_imps')) {
+      return l10n.impersonalFutureForm;
+    } else if (form.tag.contains('cond_imps')) {
+      return l10n.impersonalConditionalForm;
+    }
+    
+    // 그 외 일반적인 태그에 대한 설명 생성
+    return _getFormattedTagDescription(form.tag, l10n);
+  }
+
+  // 기본 형태소를 표시하는 위젯
+  Widget _buildFormWithDescription(ConjugationForm form, AppLocalizations l10n) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(form.form, style: const TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 4),
+        Text(
+          _getFormMorphDescription(form, l10n),
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
         ),
       ],
     );
