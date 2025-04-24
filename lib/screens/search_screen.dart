@@ -732,7 +732,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   // --- Helper Widget to build the conjugation Table (replaced DataTable) ---
-  Widget _buildConjugationTable(List<ConjugationForm> forms, bool isPastTense, AppLocalizations l10n) {
+  Widget _buildConjugationTable(List<ConjugationForm> forms, AppLocalizations l10n) {
     // Group forms by person and number
     final Map<String, Map<String, String>> tableData = {}; // {personLabel: {numberLabel: form}}
     
@@ -944,124 +944,145 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   // --- Helper methods for building conjugation sections ---
   List<Widget> _buildConjugationSections(BuildContext context, Map<String, List<ConjugationForm>> groupedForms, AppLocalizations l10n) {
-     // Define the desired display order using the localization KEYS
-     final displayOrder = [
-        'conjugationCategoryPresentIndicative',
-        'conjugationCategoryFuturePerfectiveIndicative',
-        'conjugationCategoryFutureImperfectiveIndicative',
-        'conjugationCategoryPastTense', // Past tense included here
-        'conjugationCategoryImperative',
-        'conjugationCategoryInfinitive',
-        'conjugationCategoryPresentAdverbialParticiple',
-        'conjugationCategoryAnteriorAdverbialParticiple',
-        'conjugationCategoryVerbalNoun', // Added gerund
-        'conjugationCategoryPresentImpersonal', // NEW
-        'conjugationCategoryPastImpersonal', // NEW
-        'conjugationCategoryConditional', // Added conditional
-     ];
-     // Sort keys based on displayOrder, add others at the end
-     final List<String> sortedGroupKeys = groupedForms.keys.where((key) => displayOrder.contains(key)).toList();
-     sortedGroupKeys.sort((a, b) => displayOrder.indexOf(a).compareTo(displayOrder.indexOf(b)));
-     // Add any keys from groupedForms that weren't explicitly in displayOrder
-     sortedGroupKeys.addAll(groupedForms.keys.where((key) => !displayOrder.contains(key)).toList()..sort());
+    // Define the desired order of sections
+    final displayOrder = [
+      'conjugationCategoryPresentIndicative',
+      'conjugationCategoryFuturePerfectiveIndicative', // Added for completeness
+      'conjugationCategoryFutureImperfectiveIndicative', // ADDED
+      'conjugationCategoryPastTense',
+      'conjugationCategoryConditional', // ADDED
+      'conjugationCategoryImperative',
+      'conjugationCategoryInfinitive',
+      'conjugationCategoryPresentAdverbialParticiple',
+      'conjugationCategoryAnteriorAdverbialParticiple',
+      'conjugationCategoryPresentActiveParticiple',
+      'conjugationCategoryPastPassiveParticiple',
+      'conjugationCategoryVerbalNoun',
+      'conjugationCategoryPresentImpersonal',
+      'conjugationCategoryPastImpersonal',
+      'conjugationCategoryFutureImpersonal', // Added for completeness
+      'conjugationCategoryConditionalImpersonal', // Added for completeness
+      'conjugationCategoryOtherForms', // Keep other forms at the end
+    ];
 
-     List<Widget> sections = [];
-     for (String categoryKey in sortedGroupKeys) {
-       if (!groupedForms.containsKey(categoryKey)) continue;
+    List<Widget> sections = [];
 
-       final formsInCategory = groupedForms[categoryKey]!;
-       final bool isExpanded = _expandedCategories[categoryKey] ?? false;
+    for (var key in displayOrder) {
+      if (groupedForms.containsKey(key)) {
+        final forms = groupedForms[key]!;
+        if (forms.isNotEmpty) {
+          final title = _getConjugationCategoryTitle(key, l10n);
+          bool isExpanded = _expandedCategories[key] ?? true; // Default to expanded
 
-       // --- Determine which table type to use --- 
-       final bool useConjugationTable = [
-            'conjugationCategoryPresentIndicative', 
-            'conjugationCategoryFuturePerfectiveIndicative',
-            'conjugationCategoryFutureImperfectiveIndicative',
-            'conjugationCategoryImperative' 
-       ].contains(categoryKey);
+          // Determine which builder to use based on the key
+          bool useConjugationTable = [
+            'conjugationCategoryPresentIndicative',
+            'conjugationCategoryFuturePerfectiveIndicative', // fin:perf
+            'conjugationCategoryFutureImperfectiveIndicative', // fut:... (będzie)
+          ].contains(key);
 
-       // --- FIX: Check for Participle Declension Table ---
-       final bool useParticipleTable = [
-           'conjugationCategoryPresentActiveParticiple', // pact
-           'conjugationCategoryPastPassiveParticiple', // ppas
-           // Add other participle-like categories if needed (e.g., adja, adjp)
-       ].contains(categoryKey);
-       // -------------------------------------------------
+          bool useGerundTable = key == 'conjugationCategoryVerbalNoun'; // ger:...
+          bool useConditionalTable = key == 'conjugationCategoryConditional'; // cond:...
 
-       // NEW: Check for Past Tense Table
-       final bool usePastTenseTable = categoryKey == 'conjugationCategoryPastTense';
+          bool useParticipleTable = [
+            'conjugationCategoryPresentActiveParticiple', // pact
+            'conjugationCategoryPastPassiveParticiple', // ppas
+          ].contains(key);
 
-       // NEW: Check for Gerund Table
-       final bool useGerundTable = categoryKey == 'conjugationCategoryVerbalNoun';
+           bool usePastTenseTable = key == 'conjugationCategoryPastTense'; // praet
 
-       // --- Build Section Header --- 
-       sections.add(
-         InkWell(
-           onTap: () => _toggleCategoryExpansion(categoryKey),
-           child: Padding(
-             padding: const EdgeInsets.symmetric(vertical: 12.0),
-             child: Row(
-               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+          Widget content;
+          if (useConjugationTable) {
+            content = _buildConjugationTable(forms, l10n);
+          } else if (useGerundTable) {
+            content = _buildGerundDeclensionTable(forms, l10n);
+          } else if (useConditionalTable) {
+            content = _buildConditionalTable(forms, l10n); // Use conditional builder
+          } else if (useParticipleTable) {
+             content = _buildParticipleDeclensionTable(forms, l10n, key == 'conjugationCategoryPresentActiveParticiple');
+          } else if (usePastTenseTable) {
+             content = _buildPastTenseTable(forms, l10n);
+          } else {
+            // Default simple list view for other categories
+            content = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: forms.map((form) => Text('${form.form} (${form.tag})', style: TextStyle(fontSize: Theme.of(context).textTheme.bodyMedium!.fontSize! * ref.watch(fontSizeFactorProvider)))).toList(),
+            );
+          }
+
+          sections.add(
+            ExpansionTile(
+              key: PageStorageKey<String>(key), // Preserve state on scroll
+              title: Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: Theme.of(context).textTheme.titleMedium!.fontSize! * ref.watch(fontSizeFactorProvider))),
+              initiallyExpanded: isExpanded,
+              onExpansionChanged: (expanding) => setState(() {
+                _expandedCategories[key] = expanding;
+              }),
+              children: [Padding(padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0), child: content)],
+            )
+          );
+          sections.add(const SizedBox(height: 8)); // Spacing between sections
+        }
+      }
+    }
+    // Add any remaining categories not in displayOrder (should ideally be empty or just 'other')
+    groupedForms.forEach((key, forms) {
+       if (!displayOrder.contains(key) && forms.isNotEmpty) {
+          final title = _getConjugationCategoryTitle(key, l10n);
+           sections.add(
+             ExpansionTile(
+               key: PageStorageKey<String>(key),
+               title: Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: Theme.of(context).textTheme.titleMedium!.fontSize! * ref.watch(fontSizeFactorProvider))),
+               initiallyExpanded: true,
                children: [
-                 Flexible( 
-                  child: Text(_getLocalizedConjugationCategoryTitle(categoryKey, l10n), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold))
+                 Padding(
+                   padding: const EdgeInsets.all(8.0),
+                   child: Column(
+                     crossAxisAlignment: CrossAxisAlignment.start,
+                     children: forms.map((form) => Text('${form.form} (${form.tag})', style: TextStyle(fontSize: Theme.of(context).textTheme.bodyMedium!.fontSize! * ref.watch(fontSizeFactorProvider)))).toList(),
+                   ),
                  ),
-                 Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
                ],
              ),
-           ),
-         )
-       );
-
-       // --- Build Section Content (Expanded) --- 
-       if (isExpanded) {
-         sections.add(
-           Padding(
-             padding: const EdgeInsets.only(top: 4.0, bottom: 8.0),
-             child: useConjugationTable
-               ? SingleChildScrollView( // Standard Conjugation (Person x Number)
-                   scrollDirection: Axis.horizontal,
-                   child: _buildConjugationTable(formsInCategory, false, l10n), 
-                 )
-               : usePastTenseTable 
-                   ? SingleChildScrollView( // Past Tense (Gender x Number)
-                       scrollDirection: Axis.horizontal,
-                       child: _buildPastTenseTable(formsInCategory, l10n), // NEW function call
-                     )
-                   : useParticipleTable 
-                       ? SingleChildScrollView( // Participle Declension (Case x Number) - FIX: Was missing call
-                           scrollDirection: Axis.horizontal,
-                           child: _buildParticipleDeclensionTable(formsInCategory, l10n),
-                         )
-                       : useGerundTable
-                           ? SingleChildScrollView( // Gerund Declension (Case x Number)
-                               scrollDirection: Axis.horizontal,
-                               child: _buildGerundDeclensionTable(formsInCategory, l10n), // NEW function call
-                             )
-                           : Column( // Simple List for others (Inf, pcon, pant, imps, etc.)
-                               crossAxisAlignment: CrossAxisAlignment.start,
-                               mainAxisSize: MainAxisSize.min,
-                               children: formsInCategory.map((formInfo) => ListTile(
-                                 dense: true,
-                                 contentPadding: EdgeInsets.zero, 
-                                 title: Text(formInfo.form),
-                                 subtitle: Text(
-                                   formInfo.tag.split(':').map((part) => _translateGrammarTerm(part, l10n)).join(':'),
-                                   style: const TextStyle(fontSize: 12, color: Colors.grey)
-                                 ),
-                               )).toList(),
-                             ),
-           )
-         );
+           );
+           sections.add(const SizedBox(height: 8));
        }
-       sections.add(const Divider(height: 1));
-     }
-     return sections;
-   }
+    });
+
+
+    return sections.isEmpty
+        ? Center(child: Text(l10n.conjugationDataNotFound))
+        : ListView(children: sections); // Use ListView for scrollability
+  }
+
+  String _getConjugationCategoryTitle(String key, AppLocalizations l10n) {
+    // Map backend keys to localization keys
+    switch (key) {
+      case 'conjugationCategoryPresentIndicative': return l10n.conjugationCategoryPresentIndicative;
+      case 'conjugationCategoryFuturePerfectiveIndicative': return l10n.conjugationCategoryFuturePerfectiveIndicative;
+      case 'conjugationCategoryFutureImperfectiveIndicative': return l10n.conjugationCategoryFutureImperfectiveIndicative; // ADDED
+      case 'conjugationCategoryPastTense': return l10n.conjugationCategoryPastTense;
+      case 'conjugationCategoryConditional': return l10n.conjugationCategoryConditional; // ADDED
+      case 'conjugationCategoryImperative': return l10n.conjugationCategoryImperative;
+      case 'conjugationCategoryInfinitive': return l10n.conjugationCategoryInfinitive;
+      case 'conjugationCategoryPresentAdverbialParticiple': return l10n.conjugationCategoryPresentAdverbialParticiple;
+      case 'conjugationCategoryAnteriorAdverbialParticiple': return l10n.conjugationCategoryAnteriorAdverbialParticiple;
+      case 'conjugationCategoryPresentActiveParticiple': return l10n.conjugationCategoryPresentActiveParticiple;
+      case 'conjugationCategoryPastPassiveParticiple': return l10n.conjugationCategoryPastPassiveParticiple;
+      case 'conjugationCategoryVerbalNoun': return l10n.conjugationCategoryVerbalNoun;
+      case 'conjugationCategoryPresentImpersonal': return l10n.conjugationCategoryPresentImpersonal;
+      case 'conjugationCategoryPastImpersonal': return l10n.conjugationCategoryPastImpersonal;
+      case 'conjugationCategoryFutureImpersonal': return l10n.conjugationCategoryFutureImpersonal;
+      case 'conjugationCategoryConditionalImpersonal': return l10n.conjugationCategoryConditionalImpersonal;
+      case 'conjugationCategoryOtherForms': return l10n.conjugationCategoryOtherForms;
+      default: return key; // Fallback to the key itself
+    }
+  }
 
   // --- Helper function to build Participle Declension Table ---
   // (Similar structure to _buildDeclensionResults, but parses pact/ppas tags)
-  Widget _buildParticipleDeclensionTable(List<ConjugationForm> forms, AppLocalizations l10n) {
+  Widget _buildParticipleDeclensionTable(List<ConjugationForm> forms, AppLocalizations l10n, bool isActive) {
     Map<String, Map<String, String>> declensionTable = {}; // {caseCode: {sg: form, pl: form}}
     final casesOrder = ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc']; 
 
@@ -1359,6 +1380,63 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         }).toList(),
       ],
     );
+  }
+
+  // --- Helper function to build Conditional Table ---
+  Widget _buildConditionalTable(List<ConjugationForm> forms, AppLocalizations l10n) {
+    // Map<Person, Map<Number, Map<Gender, Form>>>
+    Map<String, Map<String, Map<String, String>>> conditionalForms = {
+      'pri': {'sg': {}, 'pl': {}},
+      'sec': {'sg': {}, 'pl': {}},
+      'ter': {'sg': {}, 'pl': {}},
+    };
+
+    // Genders to look for
+    const sgGenders = ['m1', 'm2', 'm3', 'f', 'n']; // Check for all possible singular genders
+    const plGenders = ['m1', 'm2.m3.f.n']; // Typical plural gender tags
+
+    for (var form in forms) {
+      // Parse the tag (e.g., "cond:sg:f:pri:imperf", "cond:pl:m1:ter:imperf")
+      List<String> parts = form.tag.split(':');
+      if (parts[0] != 'cond') continue; // Ensure it's a conditional form
+
+      String? number;
+      String? person;
+      String? gender;
+
+      for (String part in parts) {
+        if (part == 'sg' || part == 'pl') number = part;
+        if (part == 'pri' || part == 'sec' || part == 'ter') person = part;
+        // Check for specific gender tags
+        if (sgGenders.contains(part) || plGenders.contains(part)) gender = part;
+      }
+
+      if (number != null && person != null && gender != null) {
+         // Normalize 'm2' and 'm3' to 'm1' for singular display if needed,
+         // or handle them separately if the table design allows.
+         // For now, group m1/m2/m3 under a generic 'm' if necessary or keep separate.
+         // Let's assume we can display m1, f, n for sg and m1, non-m1 for pl.
+
+         // Simplify plural gender for mapping
+         if (gender == 'm2.m3.f.n') gender = 'non-m1';
+
+         if (conditionalForms.containsKey(person) && conditionalForms[person]!.containsKey(number)) {
+           conditionalForms[person]![number]![gender] = form.form;
+         }
+      }
+    }
+
+
+    // ... rest of _buildConditionalTable to construct the Table widget ...
+    // This part needs careful implementation to map the populated `conditionalForms`
+    // structure to the correct TableRow and TableCell widgets, similar to
+    // how _buildPastTenseTable does it, but accounting for the person dimension.
+
+    // Placeholder: just list the forms for now until table structure is built
+    return Column(
+       crossAxisAlignment: CrossAxisAlignment.start,
+       children: forms.map((f) => Text('${f.form} (${f.tag})', style: TextStyle(fontSize: Theme.of(context).textTheme.bodyMedium!.fontSize! * ref.watch(fontSizeFactorProvider)))).toList(),
+     );
   }
 
   // --- Helper functions for tag parsing ---
