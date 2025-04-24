@@ -2,3 +2,4 @@ Flask
 Flask-CORS
 morfeusz2
 gunicorn 
+requests
