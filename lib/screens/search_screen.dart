@@ -2196,10 +2196,43 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         const SizedBox(height: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: forms.map((form) => Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: _buildFormWithDescription(form, l10n),
-          )).toList(),
+          children: forms.map((form) {
+            // Get the aspect from the tag
+            final tagMap = _parseTag(form.tag);
+            final aspect = tagMap['aspect'] ?? '';
+            
+            // Create a simplified or fully localized description based on the form tag
+            String description = '';
+            if (form.tag.contains('imps:imperf')) {
+              description = l10n.impersonalPresentForm;
+            } else if (form.tag.contains('imps:perf')) {
+              description = l10n.impersonalPastForm;
+            } else if (form.tag.contains('fut_imps')) {
+              description = l10n.impersonalFutureForm;
+            } else if (form.tag.contains('cond_imps')) {
+              description = l10n.impersonalConditionalForm;
+            } else {
+              // If not a special case, use the full description
+              description = _getFormMorphDescription(form, l10n);
+            }
+            
+            // Return the widget with the appropriate description
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(form.form, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
         ),
       ],
     );

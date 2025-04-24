@@ -249,5 +249,22 @@
    "@suggestionErrorFallback": {
      "description": "Error message shown when suggestion status is received but suggested word is missing."
    },
-   "impersonalAccuracyWarning": "May not be accurate"
+   "impersonalAccuracyWarning": "May not be accurate",
+   
+   "impersonalPresentForm": "Impersonal present form (imperf)",
+   "@impersonalPresentForm": {
+     "description": "Description for the impersonal present form"
+   },
+   "impersonalPastForm": "Impersonal past form (perf)",
+   "@impersonalPastForm": {
+     "description": "Description for the impersonal past form"
+   },
+   "impersonalFutureForm": "Impersonal future form",
+   "@impersonalFutureForm": {
+     "description": "Description for the impersonal future form"
+   },
+   "impersonalConditionalForm": "Impersonal conditional form",
+   "@impersonalConditionalForm": {
+     "description": "Description for the impersonal conditional form"
+   }
 } 
