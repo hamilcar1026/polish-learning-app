@@ -780,14 +780,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           // Other tenses: Directly assign form (Handles potential overwrites from impt/impt_periph)
           tableData[personKey]![numberKey] = form;
         }
+        // --- 반복문 내부 tableData 상태 확인 로그 추가 ---
+        print(">>> Inside loop, current tableData: $tableData"); 
+        // ---------------------------------------------
       } else {
-        print(">>> Condition NOT met, skipping."); // <--- 추가 5
+        print(">>> Condition NOT met, skipping."); // <--- 기존 로그 5
       }
     } // 여기가 for 루프 끝
 
-    // --- 최종 tableData 확인 로그 추가 ---
+    // --- 최종 tableData 확인 로그 (기존) ---
     print(">>> Final tableData before building rows: $tableData"); 
     // -----------------------------------
+
+    // --- return 직전 도달 확인 로그 추가 ---
+    print(">>> Reached point just before returning Table widget."); 
+    // -------------------------------------
 
     // Build Table (similar to _buildDeclensionResults)
     return Table(
@@ -938,6 +945,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   // --- Helper methods for building conjugation sections ---
   List<Widget> _buildConjugationSections(BuildContext context, Map<String, List<ConjugationForm>> groupedForms, AppLocalizations l10n) {
+     // --- groupedForms 키 확인 로그 추가 ---
+     print(">>> _buildConjugationSections received groupedForms keys: ${groupedForms.keys}");
+     // ---------------------------------
+
      // Define the desired display order using the localization KEYS
      final displayOrder = [
         'conjugationCategoryPresentIndicative',
