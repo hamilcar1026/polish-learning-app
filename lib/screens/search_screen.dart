@@ -1655,6 +1655,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     // --- Specific overrides based on base tag ---
     switch (tagMap['base']) {
       case 'fin': // Finite verb
+        if (parts.length > 1) tagMap['number'] = parts[1];
+        if (parts.length > 2) tagMap['person'] = parts[2];
+        if (parts.length > 3) tagMap['tense_aspect'] = parts[3]; // Includes aspect
+        break;
+      case 'fut': // Future tense - Add this case to handle future forms properly
+        if (parts.length > 1) tagMap['number'] = parts[1];
+        if (parts.length > 2) tagMap['person'] = parts[2];
+        if (parts.length > 3) tagMap['aspect'] = parts[3];
+        break;
       case 'bedzie': // Future auxiliary
         if (parts.length > 1) tagMap['number'] = parts[1];
         if (parts.length > 2) tagMap['person'] = parts[2];
@@ -1671,32 +1680,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         break;
       case 'praet': // Past tense (CRITICAL FIX: Extract person correctly)
         if (parts.length > 1) tagMap['number'] = parts[1];
-        // Person is typically inferred for past tense, not explicitly in tag.
-        // However, we need it for the table. Let's try to infer it based on common endings,
-        // or maybe the backend should provide it explicitly if possible.
-        // *** TEMPORARY INFERENCE (MIGHT BE UNRELIABLE) - Check if backend can send person info ***
-        // If backend doesn't send person, this table logic needs rethinking.
-        // For now, let's assume person IS sent somehow or is in a predictable position.
-        // Example: Assuming person might be in pos 4 (index 3) for praet if sent
-        // if (parts.length > 3) tagMap['person'] = parts[3]; // Check this position
-
-        // --> REVISED based on standard praet tag: number:gender:aspect
+        // In praet tags, gender is in position 2, person is typically at the end
         if (parts.length > 2) tagMap['gender'] = parts[2];
         if (parts.length > 3) tagMap['aspect'] = parts[3];
-        // ** Crucially, person is NOT typically in the standard Morfeusz praet tag **
-        // The logic in _buildPastTenseTable now needs to handle missing person info
-        // or rely on backend providing it through other means.
-        // Let's assume for now the `forms` list coming from backend *includes* person info somehow,
-        // maybe added by the backend logic itself before sending.
-        // IF NOT, the table building will fail.
-        // We also need to add 'person' extraction IF it's present in a non-standard way.
-        // Let's add a check for a potential 5th element if it exists.
-        if (parts.length > 4) tagMap['person'] = parts[4]; // Non-standard guess
+        // Look for 'person' in the remaining positions
+        for (int i = 4; i < parts.length; i++) {
+          if (['pri', 'sec', 'ter'].contains(parts[i])) {
+            tagMap['person'] = parts[i];
+            break;
+          }
+        }
+        // If person wasn't found, default to 'ter' for 3rd person (most common default)
+        tagMap['person'] ??= 'ter';
         break;
       case 'cond': // Conditional (added base tag)
          if (parts.length > 1) tagMap['number'] = parts[1];
-         if (parts.length > 2) tagMap['person'] = parts[2];
-         if (parts.length > 3) tagMap['gender'] = parts[3]; // Gender is relevant for conditional
+         if (parts.length > 2) tagMap['gender'] = parts[2];
+         if (parts.length > 3) tagMap['person'] = parts[3]; // Person is in position 3 for conditional
          if (parts.length > 4) tagMap['aspect'] = parts[4]; // Aspect might be present
          break;
       case 'pcon': // Present Adverbial Participle
@@ -1715,7 +1715,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         // Degree might be in pos 5 for adjp/adja
         if (parts.length > 5 && (tagMap['base']=='adja' || tagMap['base']=='adjp')) tagMap['degree'] = parts[5];
         break;
-      case 'ger': // Gerund
+      case 'ger': // Gerund - Improved handling for verbal nouns
         if (parts.length > 1) tagMap['number'] = parts[1];
         if (parts.length > 2) tagMap['case'] = parts[2]; // Case is relevant
         if (parts.length > 3) tagMap['gender'] = parts[3]; // Gender might be relevant technically
@@ -1749,7 +1749,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         tagMap['case'] = parts[2];
     }
     // Example: If 'case_person_gender' likely holds person
-    if (['fin', 'bedzie', 'impt', 'impt_periph', 'cond'].contains(tagMap['base']) && parts.length > 2) {
+    if (['fin', 'fut', 'bedzie', 'impt', 'impt_periph'].contains(tagMap['base']) && parts.length > 2) {
         tagMap['person'] = parts[2];
     }
      // Example: If 'gender_aspect_etc' likely holds gender
@@ -1758,9 +1758,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
          tagMap['gender'] ??= parts[3];
     }
      // Example: If 'gender_aspect_etc' likely holds aspect/tense
-    if (['fin', 'bedzie', 'inf', 'praet', 'cond', 'pcon', 'pant', 'pact', 'ppas', 'adja', 'adjp', 'ger', 'imps'].contains(tagMap['base']) && parts.length > 3) {
+    if (['fin', 'fut', 'bedzie', 'inf', 'praet', 'cond', 'pcon', 'pant', 'pact', 'ppas', 'adja', 'adjp', 'ger', 'imps'].contains(tagMap['base']) && parts.length > 3) {
          // Use specific field if available, otherwise try general position
-         if (tagMap['base'] == 'fin' || tagMap['base'] == 'bedzie') {
+         if (tagMap['base'] == 'fin' || tagMap['base'] == 'bedzie' || tagMap['base'] == 'fut') {
             tagMap['tense_aspect'] ??= parts[3];
          } else {
             tagMap['aspect'] ??= parts[3];
