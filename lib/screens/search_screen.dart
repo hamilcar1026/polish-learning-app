@@ -1087,7 +1087,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case 'conjugationCategoryVerbalNoun': return l10n.conjugationCategoryVerbalNoun;
       // --- MODIFICATION START: Differentiate Impersonal based on aspect --- 
       case 'imps': 
-        if (aspect.contains('perf')) {
+        if (tagAspect.contains('perf')) {
           return 'conjugationCategoryPastImpersonal'; // Assume perf = past impersonal
         } else { 
           return 'conjugationCategoryPresentImpersonal'; // Assume imperf or no aspect = present impersonal
