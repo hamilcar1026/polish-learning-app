@@ -1,0 +1,34 @@
+name: Deploy Flutter Web to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - master # master 브랜치에 푸시될 때 실행 (필요시 main 등으로 변경)
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest # 빌드를 실행할 환경
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4 # 저장소 코드를 가져옴
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2 # Flutter 환경 설정
+      with:
+        channel: 'stable' # 사용할 Flutter 채널 (stable, beta 등)
+
+    - name: Get Flutter packages
+      run: flutter pub get # Flutter 패키지 다운로드
+
+    - name: Build Flutter web app
+      run: flutter build web --release --dart-define=BACKEND_URL=${{ secrets.BACKEND_URL }}
+      # GitHub Secrets에서 BACKEND_URL 값을 가져와 빌드 시 주입
+
+    - name: Deploy to Firebase Hosting
+      uses: FirebaseExtended/action-hosting-deploy@v0 # Firebase Hosting 배포 액션
+      with:
+        repoToken: '${{ secrets.GITHUB_TOKEN }}' # GitHub 토큰 (자동 제공)
+        firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' # Firebase 서비스 계정 키 (JSON 파일 내용 전체)
+        projectId: '${{ secrets.FIREBASE_PROJECT_ID }}' # Firebase 프로젝트 ID
+        channelId: live # 배포 채널 ID (live, preview 등) 
