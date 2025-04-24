@@ -2085,12 +2085,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case 'ppas': return 'conjugationCategoryPastPassiveParticiple';
       case 'ger': return 'conjugationCategoryVerbalNoun';
       // --- MODIFICATION START: Differentiate Impersonal based on aspect --- 
-      case 'imps': 
-        if (tagAspect.contains('perf')) {
+      case 'imps': {
+        // 확실하게 변수 범위 지정
+        final String aspectValue = tagAspect;
+        if (aspectValue.contains('perf')) {
           return 'conjugationCategoryPastImpersonal'; // Assume perf = past impersonal
         } else { 
           return 'conjugationCategoryPresentImpersonal'; // Assume imperf or no aspect = present impersonal
         }
+      }
       // --- MODIFICATION END ---
       case 'cond': return 'conjugationCategoryConditional'; // 조건법
       case 'conjugationCategoryImperativeImpersonal': return 'conjugationCategoryImperativeImpersonal'; // Added for impersonal imperative
