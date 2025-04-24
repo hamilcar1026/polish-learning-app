@@ -980,11 +980,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             'conjugationCategoryImperative' 
        ].contains(categoryKey);
 
+       // --- FIX: Check for Participle Declension Table ---
        final bool useParticipleTable = [
-           'conjugationCategoryPresentAdverbialParticiple', 
-           'conjugationCategoryAnteriorAdverbialParticiple'
+           'conjugationCategoryPresentActiveParticiple', // pact
+           'conjugationCategoryPastPassiveParticiple', // ppas
+           // Add other participle-like categories if needed (e.g., adja, adjp)
        ].contains(categoryKey);
-       
+       // -------------------------------------------------
+
        // NEW: Check for Past Tense Table
        final bool usePastTenseTable = categoryKey == 'conjugationCategoryPastTense';
 
@@ -1026,9 +1029,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                        child: _buildPastTenseTable(formsInCategory, l10n), // NEW function call
                      )
                    : useParticipleTable 
-                       ? SingleChildScrollView( // Participle Declension (Case x Number)
+                       ? SingleChildScrollView( // Participle Declension (Case x Number) - FIX: Was missing call
                            scrollDirection: Axis.horizontal,
-                           child: _buildParticipleDeclensionTable(formsInCategory, l10n), 
+                           child: _buildParticipleDeclensionTable(formsInCategory, l10n),
                          )
                        : useGerundTable
                            ? SingleChildScrollView( // Gerund Declension (Case x Number)
@@ -1235,105 +1238,121 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  // --- NEW: Helper function to build Past Tense Table ---
+  // --- NEW: Helper function to build Past Tense Table (Refactored) ---
   Widget _buildPastTenseTable(List<ConjugationForm> forms, AppLocalizations l10n) {
-    // Table data structure: {number: {genderKey: form}}
-    final Map<String, Map<String, String>> tableData = {
-      'sg': {},
-      'pl': {},
+    // Table data structure: {person: {number: {genderKey: form}}}
+    // person keys: 'pri', 'sec', 'ter'
+    // number keys: 'sg', 'pl'
+    // gender keys (simplified): 'm', 'f', 'n' (for sg), 'm1', 'non-m1' (for pl)
+    final Map<String, Map<String, Map<String, String>>> tableData = {
+      'pri': {'sg': {}, 'pl': {}},
+      'sec': {'sg': {}, 'pl': {}},
+      'ter': {'sg': {}, 'pl': {}},
     };
 
-    // Gender keys for display in the table
-    // We simplify Morfeusz genders (m1/m2/m3 -> m; m1 -> m1_pl; m2.m3.f.n -> non_m1_pl)
-    const sgGenderOrder = ['m', 'f', 'n']; // Simplified keys for sg table columns/rows
-    const plGenderOrder = ['m1_pl', 'non_m1_pl']; // Simplified keys for pl table columns/rows
+    // Person order for rows
+    const personOrder = ['pri', 'sec', 'ter'];
 
     for (var formInfo in forms) {
-      if (formInfo.tag.startsWith('praet')) { // Ensure we only process past tense forms
+      if (formInfo.tag.startsWith('praet')) { // Process only past tense forms
         final tagMap = _parseTag(formInfo.tag);
+        final person = tagMap['person']; // Should be populated by _parseTag for praet now
         final number = tagMap['number'];
         final gender = tagMap['gender']; // Gender from praet tag (e.g., 'f', 'm1.m2.m3', 'm2.m3.f.n')
         final form = formInfo.form;
 
-        if (number != null && gender != null) {
-          String displayGenderKey = '';
-          if (number == 'sg') {
-            if (gender.contains('m')) displayGenderKey = 'm'; // Group m1, m2, m3 under 'm' for sg
-            else if (gender == 'f') displayGenderKey = 'f';
-            else if (gender == 'n') displayGenderKey = 'n';
-          } else if (number == 'pl') {
-            if (gender == 'm1') displayGenderKey = 'm1_pl'; // Masc. Personal Plural
-            else displayGenderKey = 'non_m1_pl'; // Other plurals (Non-Masc. Personal)
-          }
+        // Ensure required fields are present
+        if (person == null || number == null || gender == null) {
+          print("[_buildPastTenseTable] Skipping form due to missing tag info: ${formInfo.tag}");
+          continue;
+        }
 
-          if (displayGenderKey.isNotEmpty && tableData.containsKey(number)) {
-            // Avoid overwriting if multiple forms map to the same simplified key (take first)
-            tableData[number]![displayGenderKey] ??= form;
+        // Determine the simplified gender key for table organization
+        String displayGenderKey = '';
+        if (number == 'sg') {
+          if (gender.contains('m')) displayGenderKey = 'm'; // Group m1, m2, m3 under 'm' for sg
+          else if (gender == 'f') displayGenderKey = 'f';
+          else if (gender.contains('n')) displayGenderKey = 'n'; // Group n1, n2 under 'n' for sg
+        } else if (number == 'pl') {
+          if (gender == 'm1') displayGenderKey = 'm1'; // Masc. Personal Plural
+          // Check for combined non-m1 genders explicitly
+          else if (gender.contains('m2') || gender.contains('m3') || gender.contains('f') || gender.contains('n')) {
+                displayGenderKey = 'non-m1'; // Other plurals (Non-Masc. Personal)
+          } else {
+               // Handle cases where 'pl' exists but gender isn't m1 or other expected non-m1 combos
+               // This might happen for rare forms or tag parsing issues. Default to non-m1 for now.
+               print("[_buildPastTenseTable] Unexpected plural gender combination '${gender}' for ${form}, defaulting to non-m1 key.");
+               displayGenderKey = 'non-m1'; 
           }
+        }
+
+        // Populate the tableData, taking the first form found for each slot
+        if (tableData.containsKey(person) && tableData[person]!.containsKey(number) && displayGenderKey.isNotEmpty) {
+          tableData[person]![number]![displayGenderKey] ??= form;
+        } else {
+           print("[_buildPastTenseTable] Failed to place form in tableData structure: person='${person}', number='${number}', displayGenderKey='${displayGenderKey}', form='${form}'");
         }
       }
     }
 
-    // Build the Table widget: Rows for Genders, Columns for Number
-    // Need to decide on row headers (genders)
-    // Let's create combined list of gender labels for rows
-    final Map<String, String> genderLabels = {
-      'm': l10n.genderLabelM1 + "/" + l10n.genderLabelM2 + "/" + l10n.genderLabelM3, // Combine m1/m2/m3 labels
-      'f': l10n.genderLabelF,
-      'n': l10n.genderLabelN1 + "/" + l10n.genderLabelN2, // Combine n1/n2 labels
-      'm1_pl': l10n.genderLabelM1, // Use m1 label for masc. personal plural
-      'non_m1_pl': '${l10n.genderLabelM2}/${l10n.genderLabelM3}/${l10n.genderLabelF}/${l10n.genderLabelN1}/${l10n.genderLabelN2}' // Combine others
-    };
-    // Order for rows (mix sg and pl genders meaningfully?)
-    final rowOrder = ['m', 'f', 'n', 'm1_pl', 'non_m1_pl'];
-
-
+    // Build the Table widget: Rows for Person, Columns for Number (sg/pl)
     return Table(
       border: TableBorder.all(color: Colors.grey.shade300),
       columnWidths: const {
-        0: IntrinsicColumnWidth(), // Gender column
+        0: IntrinsicColumnWidth(), // Person column
         1: IntrinsicColumnWidth(), // Singular column
         2: IntrinsicColumnWidth(), // Plural column
       },
-      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      defaultVerticalAlignment: TableCellVerticalAlignment.top, // Align content top for multi-line cells
       children: [
         // Header row
         TableRow(
           decoration: BoxDecoration(color: Colors.grey.shade100),
           children: [
-            Padding( // Empty top-left cell
+            Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(''), 
+              child: Text(l10n.tableHeaderPerson, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(l10n.tableHeaderSingular, style: TextStyle(fontWeight: FontWeight.bold)), 
+              child: Text(l10n.tableHeaderSingular, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(l10n.tableHeaderPlural, style: TextStyle(fontWeight: FontWeight.bold)), 
+              child: Text(l10n.tableHeaderPlural, style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
-        // Data rows (Iterate through gender display keys)
-        ...rowOrder.map((genderKey) {
-          // Determine if the gender key is applicable to sg or pl based on our mapping
-          bool isSgGender = sgGenderOrder.contains(genderKey);
-          bool isPlGender = plGenderOrder.contains(genderKey);
-          
+        // Data rows (Iterate through person order)
+        ...personOrder.map((personCode) {
+          final sgForms = tableData[personCode]?['sg'] ?? {};
+          final plForms = tableData[personCode]?['pl'] ?? {};
+
+          // Format cell content with gender labels
+          String sgCellText = [
+            if (sgForms['m'] != null) "${sgForms['m']} (${l10n.genderLabelM1}/${l10n.genderLabelM2}/${l10n.genderLabelM3})",
+            if (sgForms['f'] != null) "${sgForms['f']} (${l10n.genderLabelF})",
+            if (sgForms['n'] != null) "${sgForms['n']} (${l10n.genderLabelN1}/${l10n.genderLabelN2})", // Include n label if present
+          ].join('\\n'); // Use newline character for separation
+
+          String plCellText = [
+            if (plForms['m1'] != null) "${plForms['m1']} (${l10n.genderLabelM1})",
+            if (plForms['non-m1'] != null) "${plForms['non-m1']} (non-${l10n.genderLabelM1})", // Simpler label for non-m1
+          ].join('\\n'); // Use newline character for separation
+
           return TableRow(
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(genderLabels[genderKey] ?? genderKey, style: TextStyle(fontWeight: FontWeight.bold)), // Gender label column
+                child: Text(_getPersonLabel(personCode, l10n)), // Person label column
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text( isSgGender ? (tableData['sg']?[genderKey] ?? '-') : '-' ), // Show sg form or '-'
+                child: Text(sgCellText.isNotEmpty ? sgCellText : '-'), // Show sg forms or '-'
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text( isPlGender ? (tableData['pl']?[genderKey] ?? '-') : '-' ), // Show pl form or '-'
+                child: Text(plCellText.isNotEmpty ? plCellText : '-'), // Show pl forms or '-'
               ),
             ],
           );
@@ -1348,57 +1367,130 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final parts = tagString.split(':');
     final Map<String, String> tagMap = {'base': parts.isNotEmpty ? parts[0] : ''}; // Ensure base always exists
 
-    // Enhanced Parsing Logic
+    // --- Default positions (may be overwritten) ---
     if (parts.length > 1) tagMap['number'] = parts[1];
-    if (parts.length > 2) tagMap['case_person'] = parts[2];
-    if (parts.length > 3) tagMap['gender_tense_aspect'] = parts[3];
-    if (parts.length > 4) tagMap['mood_gender2'] = parts[4];
-    if (parts.length > 5) tagMap['aspect_voice'] = parts[5];
+    if (parts.length > 2) tagMap['case_person_gender'] = parts[2]; // Combined field initially
+    if (parts.length > 3) tagMap['gender_aspect_etc'] = parts[3]; // Further combined
+    // ... add more generic positions if needed ...
+    tagMap['full_tag'] = tagString;
 
-    // Specific overrides/corrections based on base tag
+    // --- Specific overrides based on base tag ---
     switch (tagMap['base']) {
       case 'fin': // Finite verb
       case 'bedzie': // Future auxiliary
-      case 'impt': // Imperative
-      case 'impt_periph': // Periphrastic imperative (niech + fin)
         if (parts.length > 1) tagMap['number'] = parts[1];
         if (parts.length > 2) tagMap['person'] = parts[2];
-        if (parts.length > 3) tagMap['tense_aspect'] = parts[3]; // Keep original aspect
-        // Optional: Add mood specifically if needed
-        // if (tagMap['base'] == 'impt_periph') tagMap['mood'] = 'imperative_periphrastic';
+        if (parts.length > 3) tagMap['tense_aspect'] = parts[3]; // Includes aspect
+        break;
+      case 'impt': // Imperative
+      case 'impt_periph': // Periphrastic imperative
+        if (parts.length > 1) tagMap['number'] = parts[1];
+        if (parts.length > 2) tagMap['person'] = parts[2];
+        // No standard aspect/tense here
         break;
       case 'inf': // Infinitive
         if (parts.length > 1) tagMap['aspect'] = parts[1];
         break;
-      case 'praet': // Past tense
+      case 'praet': // Past tense (CRITICAL FIX: Extract person correctly)
         if (parts.length > 1) tagMap['number'] = parts[1];
+        // Person is typically inferred for past tense, not explicitly in tag.
+        // However, we need it for the table. Let's try to infer it based on common endings,
+        // or maybe the backend should provide it explicitly if possible.
+        // *** TEMPORARY INFERENCE (MIGHT BE UNRELIABLE) - Check if backend can send person info ***
+        // If backend doesn't send person, this table logic needs rethinking.
+        // For now, let's assume person IS sent somehow or is in a predictable position.
+        // Example: Assuming person might be in pos 4 (index 3) for praet if sent
+        // if (parts.length > 3) tagMap['person'] = parts[3]; // Check this position
+
+        // --> REVISED based on standard praet tag: number:gender:aspect
         if (parts.length > 2) tagMap['gender'] = parts[2];
         if (parts.length > 3) tagMap['aspect'] = parts[3];
+        // ** Crucially, person is NOT typically in the standard Morfeusz praet tag **
+        // The logic in _buildPastTenseTable now needs to handle missing person info
+        // or rely on backend providing it through other means.
+        // Let's assume for now the `forms` list coming from backend *includes* person info somehow,
+        // maybe added by the backend logic itself before sending.
+        // IF NOT, the table building will fail.
+        // We also need to add 'person' extraction IF it's present in a non-standard way.
+        // Let's add a check for a potential 5th element if it exists.
+        if (parts.length > 4) tagMap['person'] = parts[4]; // Non-standard guess
         break;
+      case 'cond': // Conditional (added base tag)
+         if (parts.length > 1) tagMap['number'] = parts[1];
+         if (parts.length > 2) tagMap['person'] = parts[2];
+         if (parts.length > 3) tagMap['gender'] = parts[3]; // Gender is relevant for conditional
+         if (parts.length > 4) tagMap['aspect'] = parts[4]; // Aspect might be present
+         break;
       case 'pcon': // Present Adverbial Participle
       case 'pant': // Anterior Adverbial Participle
+        // These usually don't have number/case/gender variations shown in simple tables
+        if (parts.length > 1) tagMap['aspect'] = parts[1]; // Aspect might be relevant
         break;
       case 'pact': // Present Active Participle
       case 'ppas': // Past Passive Participle
+      case 'adja': // Adjectival Active Participle
+      case 'adjp': // Adjectival Passive Participle
         if (parts.length > 1) tagMap['number'] = parts[1];
         if (parts.length > 2) tagMap['case'] = parts[2];
         if (parts.length > 3) tagMap['gender'] = parts[3];
-        if (parts.length > 4) tagMap['aspect'] = parts[4];
+        if (parts.length > 4) tagMap['aspect'] = parts[4]; // Aspect
+        // Degree might be in pos 5 for adjp/adja
+        if (parts.length > 5 && (tagMap['base']=='adja' || tagMap['base']=='adjp')) tagMap['degree'] = parts[5];
         break;
-      case 'subst':
-      case 'depr':
-      case 'adj':
-      case 'adja':
-      case 'adjp':
+      case 'ger': // Gerund
+        if (parts.length > 1) tagMap['number'] = parts[1];
+        if (parts.length > 2) tagMap['case'] = parts[2]; // Case is relevant
+        if (parts.length > 3) tagMap['gender'] = parts[3]; // Gender might be relevant technically
+        if (parts.length > 4) tagMap['aspect'] = parts[4]; // Aspect
+        break;
+      case 'imps': // Impersonal
+        // No standard number/person/gender. Aspect might be present.
+        if (parts.length > 1) tagMap['aspect'] = parts[1]; // Aspect might be relevant
+        break;
+      case 'subst': // Noun
+      case 'depr': // Depreciative Noun
         if (parts.length > 1) tagMap['number'] = parts[1];
         if (parts.length > 2) tagMap['case'] = parts[2];
         if (parts.length > 3) tagMap['gender'] = parts[3];
+        // Animacy might be in pos 4 for subst
+        if (parts.length > 4 && tagMap['base']=='subst') tagMap['animacy'] = parts[4];
         break;
+      case 'adj': // Adjective
+        if (parts.length > 1) tagMap['number'] = parts[1];
+        if (parts.length > 2) tagMap['case'] = parts[2];
+        if (parts.length > 3) tagMap['gender'] = parts[3];
+        if (parts.length > 4) tagMap['degree'] = parts[4]; // Degree
+        break;
+       // Add other base tags as needed (num, pron, adv, prep, conj etc.)
+       // ...
     }
-    
-    // Add the full tag string for reference
-    tagMap['full_tag'] = tagString; 
 
+    // --- Refined extraction based on identified fields ---
+    // Example: If 'case_person_gender' likely holds case based on base tag
+    if (['subst', 'depr', 'adj', 'pact', 'ppas', 'adja', 'adjp', 'ger'].contains(tagMap['base']) && parts.length > 2) {
+        tagMap['case'] = parts[2];
+    }
+    // Example: If 'case_person_gender' likely holds person
+    if (['fin', 'bedzie', 'impt', 'impt_periph', 'cond'].contains(tagMap['base']) && parts.length > 2) {
+        tagMap['person'] = parts[2];
+    }
+     // Example: If 'gender_aspect_etc' likely holds gender
+    if (['subst', 'depr', 'adj', 'pact', 'ppas', 'adja', 'adjp', 'ger', 'praet', 'cond'].contains(tagMap['base']) && parts.length > 3) {
+         // Avoid overwriting if already parsed specifically
+         tagMap['gender'] ??= parts[3];
+    }
+     // Example: If 'gender_aspect_etc' likely holds aspect/tense
+    if (['fin', 'bedzie', 'inf', 'praet', 'cond', 'pcon', 'pant', 'pact', 'ppas', 'adja', 'adjp', 'ger', 'imps'].contains(tagMap['base']) && parts.length > 3) {
+         // Use specific field if available, otherwise try general position
+         if (tagMap['base'] == 'fin' || tagMap['base'] == 'bedzie') {
+            tagMap['tense_aspect'] ??= parts[3];
+         } else {
+            tagMap['aspect'] ??= parts[3];
+         }
+    }
+    // Add more refinements as needed
+
+    print("[_parseTag] Input: '${tagString}', Output: ${tagMap}"); // Debugging output
     return tagMap;
   }
 

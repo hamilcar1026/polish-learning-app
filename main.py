@@ -6,7 +6,15 @@ from flask_cors import CORS
 import logging
 
 app = Flask(__name__)
-CORS(app)
+# --- CORS 설정 (명시적 출처 지정) ---
+origins = [
+    "http://localhost:8000", # 로컬 개발 환경 (필요하다면)
+    "http://localhost:3000", # 또 다른 로컬 개발 환경 포트 (필요하다면)
+    "https://polish-learning-app.web.app", # 배포된 프론트엔드 주소
+    # 필요한 다른 프론트엔드 주소 추가 가능
+]
+CORS(app, origins=origins, supports_credentials=True, methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]) # 명시적으로 출처와 메소드 지정
+# ------------------------------------
 
 # --- Lingvanex API Key ---
 LINGVANEX_API_KEY = os.environ.get("LINGVANEX_API_KEY")
