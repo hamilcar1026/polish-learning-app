@@ -1034,10 +1034,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     });
 
 
-    return sections.isEmpty
-        ? [Center(child: Text(l10n.noConjugationData))] // FIX: Wrap in list and use existing key
-        : ListView(children: sections); // Use ListView for scrollability
-  }
+    if (sections.isEmpty) {
+      return [Center(child: Text(l10n.noConjugationData))]; // Return List<Widget>
+    } else {
+      return sections; // Return List<Widget>
+    }
+  } // End of _buildConjugationSections function
 
   String _getConjugationCategoryTitle(String key, AppLocalizations l10n) {
     // Map backend keys to localization keys
