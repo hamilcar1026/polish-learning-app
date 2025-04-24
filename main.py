@@ -198,7 +198,12 @@ def analyze_word(word):
             cleaned_lemma = _clean_lemma(primary_lemma)
             translation_result = None
             if cleaned_lemma:
-                # --- Use Lingvanex for Translation --- 
+                # --- 임시 디버깅 코드 추가 ---
+                temp_api_key = os.environ.get("LINGVANEX_API_KEY")
+                print(f"[analyze_word] DEBUG: LINGVANEX_API_KEY value before calling translate: {'SET' if temp_api_key else 'NOT SET'}")
+                # --------------------------
+
+                # --- Use Lingvanex for Translation ---
                 print(f"[analyze_word] DEBUG: Calling translate_text_lingvanex with target_lang = {target_lang}")
                 translation_result = translate_text_lingvanex(cleaned_lemma, target_lang)
                 # -------------------------------------
