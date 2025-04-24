@@ -1276,7 +1276,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     // Table data structure: {person: {number: {genderKey: form}}}
     // person keys: 'pri', 'sec', 'ter'
     // number keys: 'sg', 'pl'
-    // gender keys (simplified): 'm', 'f', 'n' (for sg), 'm1', 'non-m1' (for pl)
+    // gender keys (simplified): 'm', 'f', 'n' (for sg), 'm1', 'f', 'n' (for pl)
     final Map<String, Map<String, Map<String, String>>> tableData = {
       'pri': {'sg': {}, 'pl': {}},
       'sec': {'sg': {}, 'pl': {}},
@@ -1300,7 +1300,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           continue;
         }
 
-        // 테이블 구성을 위한 간소화된 성별 키 결정
+        // 테이블 구성을 위한 성별 키 결정
         String displayGenderKey = '';
         if (number == 'sg') {
           if (gender.contains('m1') || gender.contains('m2') || gender.contains('m3') || gender == 'm') {
@@ -1313,8 +1313,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         } else if (number == 'pl') {
           if (gender == 'm1' || gender.contains('m1')) {
             displayGenderKey = 'm1'; // 복수 인격 남성
+          } else if (gender == 'f' || gender.contains('f')) {
+            displayGenderKey = 'f'; // 복수 여성형
+          } else if (gender.contains('n')) {
+            displayGenderKey = 'n'; // 복수 중성형
           } else {
-            displayGenderKey = 'non-m1'; // 기타 복수(비인격 남성)
+            displayGenderKey = 'non-m1'; // 분류할 수 없는 비남성
           }
         }
 
@@ -1391,7 +1395,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             if (plForms['m1'] != null) {
               contentWidgets.add(Text("${plForms['m1']} (${l10n.genderLabelM1})"));
             }
-            if (plForms['non-m1'] != null) {
+            if (plForms['f'] != null) {
+              contentWidgets.add(Text("${plForms['f']} (${l10n.genderLabelF})"));
+            }
+            if (plForms['n'] != null) {
+              contentWidgets.add(Text("${plForms['n']} (${l10n.genderLabelN1}/${l10n.genderLabelN2})"));
+            }
+            if (plForms['non-m1'] != null && plForms['f'] == null && plForms['n'] == null) {
               contentWidgets.add(Text("${plForms['non-m1']} (non-${l10n.genderLabelM1})"));
             }
             
@@ -1439,12 +1449,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     // 사용 가능한 경우 복수 기본 형태 가져오기
     String? mascPlBaseM1 = tableData['ter']?['pl']?['m1'];
     String? mascPlBaseNonM1 = tableData['ter']?['pl']?['non-m1'];
+    String? femPlBase = tableData['ter']?['pl']?['f'];
+    String? neutPlBase = tableData['ter']?['pl']?['n'];
     
     // 1인칭/2인칭을 나타내는 끝이나 Aglt(보조)가 있는 특정 형태 찾기
     for (var form in forms) {
       if (!form.tag.startsWith('praet')) continue;
       
       final String formText = form.form;
+      final tagMap = _parseTag(form.tag);
+      final gender = tagMap['gender'];
       
       // 공통적인 1인칭/2인칭 어미 및 접미사 확인
       if (formText.endsWith('łem') || formText.endsWith('łam')) {
@@ -1460,13 +1474,25 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         tableData['pri']!['pl']!['m1'] ??= formText;
       } else if (formText.endsWith('łyśmy')) {
         // 1인칭 복수 비남성일 가능성이 높음
-        tableData['pri']!['pl']!['non-m1'] ??= formText;
+        if (gender == 'f' || gender?.contains('f') == true) {
+          tableData['pri']!['pl']!['f'] ??= formText;
+        } else if (gender == 'n' || gender?.contains('n') == true) {
+          tableData['pri']!['pl']!['n'] ??= formText;
+        } else {
+          tableData['pri']!['pl']!['non-m1'] ??= formText;
+        }
       } else if (formText.endsWith('liście') || formText.endsWith('łiście')) {
         // 2인칭 복수 남성일 가능성이 높음
         tableData['sec']!['pl']!['m1'] ??= formText;
       } else if (formText.endsWith('łyście')) {
         // 2인칭 복수 비남성일 가능성이 높음
-        tableData['sec']!['pl']!['non-m1'] ??= formText;
+        if (gender == 'f' || gender?.contains('f') == true) {
+          tableData['sec']!['pl']!['f'] ??= formText;
+        } else if (gender == 'n' || gender?.contains('n') == true) {
+          tableData['sec']!['pl']!['n'] ??= formText;
+        } else {
+          tableData['sec']!['pl']!['non-m1'] ??= formText;
+        }
       }
     }
     
@@ -1511,17 +1537,50 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       tableData['pri']!['pl']!['m1'] = suggestedForm;
     }
     
-    // 1인칭 복수 비남성 형태
-    if (tableData['pri']!['pl']!['non-m1'] == null && mascPlBaseNonM1 != null && mascPlBaseNonM1.isNotEmpty) {
-      // 일반적으로 'ły' 어미를 'łyśmy'로 대체하는 패턴
-      String suggestedForm;
-      if (mascPlBaseNonM1.endsWith('ły')) {
-        suggestedForm = mascPlBaseNonM1.substring(0, mascPlBaseNonM1.length - 2) + "łyśmy";
-      } else {
-        // 예상된 패턴이 발견되지 않은 경우 대체
-        suggestedForm = mascPlBaseNonM1 + "śmy";
+    // 1인칭 복수 여성 형태
+    if (tableData['pri']!['pl']!['f'] == null) {
+      if (femPlBase != null && femPlBase.isNotEmpty) {
+        // 여성 기본형으로부터 생성
+        String suggestedForm;
+        if (femPlBase.endsWith('ły')) {
+          suggestedForm = femPlBase.substring(0, femPlBase.length - 2) + "łyśmy";
+        } else {
+          suggestedForm = femPlBase + "śmy";
+        }
+        tableData['pri']!['pl']!['f'] = suggestedForm;
+      } else if (mascPlBaseNonM1 != null && mascPlBaseNonM1.isNotEmpty) {
+        // non-m1 형태로부터 생성
+        String suggestedForm;
+        if (mascPlBaseNonM1.endsWith('ły')) {
+          suggestedForm = mascPlBaseNonM1.substring(0, mascPlBaseNonM1.length - 2) + "łyśmy";
+        } else {
+          suggestedForm = mascPlBaseNonM1 + "śmy";
+        }
+        tableData['pri']!['pl']!['f'] = suggestedForm;
       }
-      tableData['pri']!['pl']!['non-m1'] = suggestedForm;
+    }
+    
+    // 1인칭 복수 중성 형태
+    if (tableData['pri']!['pl']!['n'] == null) {
+      if (neutPlBase != null && neutPlBase.isNotEmpty) {
+        // 중성 기본형으로부터 생성
+        String suggestedForm;
+        if (neutPlBase.endsWith('ły')) {
+          suggestedForm = neutPlBase.substring(0, neutPlBase.length - 2) + "łyśmy";
+        } else {
+          suggestedForm = neutPlBase + "śmy";
+        }
+        tableData['pri']!['pl']!['n'] = suggestedForm;
+      } else if (mascPlBaseNonM1 != null && mascPlBaseNonM1.isNotEmpty) {
+        // non-m1 형태로부터 생성
+        String suggestedForm;
+        if (mascPlBaseNonM1.endsWith('ły')) {
+          suggestedForm = mascPlBaseNonM1.substring(0, mascPlBaseNonM1.length - 2) + "łyśmy";
+        } else {
+          suggestedForm = mascPlBaseNonM1 + "śmy";
+        }
+        tableData['pri']!['pl']!['n'] = suggestedForm;
+      }
     }
     
     // 2인칭 복수 남성 형태
@@ -1537,17 +1596,50 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       tableData['sec']!['pl']!['m1'] = suggestedForm;
     }
     
-    // 2인칭 복수 비남성 형태
-    if (tableData['sec']!['pl']!['non-m1'] == null && mascPlBaseNonM1 != null && mascPlBaseNonM1.isNotEmpty) {
-      // 일반적으로 'ły' 어미를 'łyście'로 대체하는 패턴
-      String suggestedForm;
-      if (mascPlBaseNonM1.endsWith('ły')) {
-        suggestedForm = mascPlBaseNonM1.substring(0, mascPlBaseNonM1.length - 2) + "łyście";
-      } else {
-        // 예상된 패턴이 발견되지 않은 경우 대체
-        suggestedForm = mascPlBaseNonM1 + "ście";
+    // 2인칭 복수 여성 형태
+    if (tableData['sec']!['pl']!['f'] == null) {
+      if (femPlBase != null && femPlBase.isNotEmpty) {
+        // 여성 기본형으로부터 생성
+        String suggestedForm;
+        if (femPlBase.endsWith('ły')) {
+          suggestedForm = femPlBase.substring(0, femPlBase.length - 2) + "łyście";
+        } else {
+          suggestedForm = femPlBase + "ście";
+        }
+        tableData['sec']!['pl']!['f'] = suggestedForm;
+      } else if (mascPlBaseNonM1 != null && mascPlBaseNonM1.isNotEmpty) {
+        // non-m1 형태로부터 생성
+        String suggestedForm;
+        if (mascPlBaseNonM1.endsWith('ły')) {
+          suggestedForm = mascPlBaseNonM1.substring(0, mascPlBaseNonM1.length - 2) + "łyście";
+        } else {
+          suggestedForm = mascPlBaseNonM1 + "ście";
+        }
+        tableData['sec']!['pl']!['f'] = suggestedForm;
       }
-      tableData['sec']!['pl']!['non-m1'] = suggestedForm;
+    }
+    
+    // 2인칭 복수 중성 형태
+    if (tableData['sec']!['pl']!['n'] == null) {
+      if (neutPlBase != null && neutPlBase.isNotEmpty) {
+        // 중성 기본형으로부터 생성
+        String suggestedForm;
+        if (neutPlBase.endsWith('ły')) {
+          suggestedForm = neutPlBase.substring(0, neutPlBase.length - 2) + "łyście";
+        } else {
+          suggestedForm = neutPlBase + "ście";
+        }
+        tableData['sec']!['pl']!['n'] = suggestedForm;
+      } else if (mascPlBaseNonM1 != null && mascPlBaseNonM1.isNotEmpty) {
+        // non-m1 형태로부터 생성
+        String suggestedForm;
+        if (mascPlBaseNonM1.endsWith('ły')) {
+          suggestedForm = mascPlBaseNonM1.substring(0, mascPlBaseNonM1.length - 2) + "łyście";
+        } else {
+          suggestedForm = mascPlBaseNonM1 + "ście";
+        }
+        tableData['sec']!['pl']!['n'] = suggestedForm;
+      }
     }
   }
 
@@ -1752,8 +1844,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             if (plForms['m1'] != null) {
               contentWidgets.add(Text("${plForms['m1']} (${l10n.genderLabelM1})"));
             }
-            if (plForms['non-m1'] != null) {
-              contentWidgets.add(Text("${plForms['non-m1']} (non-${l10n.genderLabelM1})"));
+            if (plForms['f'] != null) {
+              contentWidgets.add(Text("${plForms['f']} (${l10n.genderLabelF})"));
+            }
+            if (plForms['n'] != null) {
+              contentWidgets.add(Text("${plForms['n']} (${l10n.genderLabelN1}/${l10n.genderLabelN2})"));
             }
             
             if (contentWidgets.isEmpty) {
