@@ -555,32 +555,26 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         
         return conjugationAsyncValue.when(
           data: (c) {
-            // --- 디버깅 로그 추가 ---
             print(">>> _buildConjugationTab DATA received: status=${c.status}, message=${c.message}, data=${c.data}"); 
-            // -----------------------
             if (c.status == 'success' && c.data != null && c.data!.isNotEmpty) {
               final lemmaData = c.data!.first;
               final groupedForms = _prepareGroupedConjugationForms(lemmaData);
-              // --- 디버깅 로그 추가 ---
-              print(">>> _prepareGroupedConjugationForms result keys: ${groupedForms.keys}"); 
-              // -----------------------
               
               if (groupedForms.isEmpty) {
-                 print(">>> groupedForms is EMPTY!"); // <--- 추가
+                 print(">>> groupedForms is EMPTY!"); 
                  return Center(child: Text(l10n.noConjugationData));
               }
               
-              // Improved layout with scrolling
-              return SingleChildScrollView( // Ensure tab content is scrollable
-                 padding: const EdgeInsets.symmetric(vertical: 8.0), // Add padding within scroll view
+              return SingleChildScrollView( 
+                 padding: const EdgeInsets.symmetric(vertical: 8.0), 
                  child: Card(
                     elevation: 2.0,
-                    margin: EdgeInsets.zero, // No margin needed as padding is outside
+                    margin: EdgeInsets.zero, 
                     child: Padding(
                        padding: const EdgeInsets.all(12.0),
                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min, // Important for proper sizing
+                          mainAxisSize: MainAxisSize.min, 
                           children: [
                              Text(
                                 l10n.conjugationTableTitle(lemmaData.lemma),
@@ -588,7 +582,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                              ),
                              const SizedBox(height: 10),
                              const Divider(),
-                             // Pass l10n to the helper method
                              ..._buildConjugationSections(context, groupedForms, l10n),
                           ],
                        ),
@@ -596,7 +589,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                  ),
               );
             } else {
-              print(">>> Conjugation status is not success or data is empty/null."); // <--- 추가
+              print(">>> Conjugation status is not success or data is empty/null."); 
               return Center(
                 child: Text(c.message ?? l10n.noConjugationData),
               );
@@ -881,10 +874,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       }
       groupedFormsByKey[categoryKey]!.add(formInfo);
     }
-    // --- 최종 키 확인 로그 (이전 로그 재활용 및 수정) ---
-    // print(">>> _prepareGroupedConjugationForms result keys: ${groupedForms.keys}"); // 이전 로그 주석 처리 또는 제거
-    print(">>> _prepareGroupedConjugationForms FINISHED. Result keys: ${groupedFormsByKey.keys}");
-    // ---------------------------------------
+
+    // --- 최종 키 존재 여부 확인 로그 ---
+    final hasPast = groupedFormsByKey.containsKey('conjugationCategoryPastTense');
+    final hasPresent = groupedFormsByKey.containsKey('conjugationCategoryPresentIndicative');
+    final hasFuturePerf = groupedFormsByKey.containsKey('conjugationCategoryFuturePerfectiveIndicative');
+    final hasFutureImperf = groupedFormsByKey.containsKey('conjugationCategoryFutureImperfectiveIndicative');
+    final hasImperative = groupedFormsByKey.containsKey('conjugationCategoryImperative');
+    final hasGer = groupedFormsByKey.containsKey('conjugationCategoryVerbalNoun');
+    final hasImps = groupedFormsByKey.containsKey('conjugationCategoryImpersonal');
+    // ... 필요한 다른 키들도 추가 가능 ...
+    print(">>> _prepareGroupedConjugationForms FINISHED. Key Check: Past=$hasPast, Present=$hasPresent, FutPerf=$hasFuturePerf, FutImperf=$hasFutureImperf, Impt=$hasImperative, Ger=$hasGer, Imps=$hasImps");
+    // -----------------------------------
+
     return groupedFormsByKey;
   }
 
