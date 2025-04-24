@@ -2059,6 +2059,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case 'conjugationCategoryFuturePerfectiveIndicative': return l10n.conjugationCategoryFuturePerfectiveIndicative;
       case 'conjugationCategoryFutureImperfectiveIndicative': return l10n.conjugationCategoryFutureImperfectiveIndicative;
       case 'conjugationCategoryPastTense': return l10n.conjugationCategoryPastTense;
+      case 'conjugationCategoryConditional': return l10n.conjugationCategoryConditional;
       case 'conjugationCategoryImperative': return l10n.conjugationCategoryImperative;
       case 'conjugationCategoryInfinitive': return l10n.conjugationCategoryInfinitive;
       case 'conjugationCategoryPresentAdverbialParticiple': return l10n.conjugationCategoryPresentAdverbialParticiple;
@@ -2066,11 +2067,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case 'conjugationCategoryPresentActiveParticiple': return l10n.conjugationCategoryPresentActiveParticiple;
       case 'conjugationCategoryPastPassiveParticiple': return l10n.conjugationCategoryPastPassiveParticiple;
       case 'conjugationCategoryFiniteVerb': return l10n.conjugationCategoryFiniteVerb;
+      case 'conjugationCategoryVerbalNoun': return l10n.conjugationCategoryVerbalNoun;
       case 'conjugationCategoryOtherForms': return l10n.conjugationCategoryOtherForms;
       // --- ADDITIONS for Impersonal separation ---
       case 'conjugationCategoryPresentImpersonal': return l10n.conjugationCategoryPresentImpersonal;
       case 'conjugationCategoryPastImpersonal': return l10n.conjugationCategoryPastImpersonal;
-      case 'conjugationCategoryImperativeImpersonal': return l10n.conjugationCategoryImperativeImpersonal; // Added for impersonal imperative
+      case 'conjugationCategoryFutureImpersonal': return l10n.conjugationCategoryFutureImpersonal;
+      case 'conjugationCategoryConditionalImpersonal': return l10n.conjugationCategoryConditionalImpersonal;
+      case 'conjugationCategoryImperativeImpersonal': return l10n.conjugationCategoryImperativeImpersonal;
       // --- END ADDITIONS ---
       default: return categoryKey; // Fallback to the key itself if unknown
     }
