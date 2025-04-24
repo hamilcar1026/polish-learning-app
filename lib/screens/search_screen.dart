@@ -745,26 +745,34 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget _buildConjugationTable(List<ConjugationForm> forms, bool isPastTense, AppLocalizations l10n) {
     // Group forms by person and number
     final Map<String, Map<String, String>> tableData = {}; // {personLabel: {numberLabel: form}}
-    final personOrder = ['1st (ja/my)', '2nd (ty/wy)', '3rd (on/ona/ono/oni/one)'];
+    
+    // --- 수정: personOrder를 l10n을 사용하여 동적으로 생성 ---
+    final personOrder = [
+      _getPersonLabel('pri', l10n), // e.g., '1st (I/we)'
+      _getPersonLabel('sec', l10n), // e.g., '2nd (you/you)'
+      _getPersonLabel('ter', l10n), // e.g., '3rd (he/she/it/they)'
+    ];
+    // --------------------------------------------------------
+
     // final numberOrder = ['Singular', 'Plural']; // Not needed for Table structure
 
     for (var formInfo in forms) {
       final tagMap = _parseTag(formInfo.tag); 
-      print(">>> _parseTag result: $tagMap"); // <--- 추가 1
+      // print(">>> _parseTag result: $tagMap"); // <--- 제거
       final form = formInfo.form;
       final person = tagMap['person']; 
       final number = tagMap['number']; 
       final gender = tagMap['gender']; 
       
-      print(">>> Extracted: person=$person, number=$number"); // <--- 추가 2
+      // print(">>> Extracted: person=$person, number=$number"); // <--- 제거
 
       final String personKey = _getPersonLabel(person, l10n); 
       final String numberKey = (number == 'sg') ? 'Singular' : (number == 'pl') ? 'Plural' : '-';
       
-      print(">>> Keys: personKey=$personKey, numberKey=$numberKey"); // <--- 추가 3
+      // print(">>> Keys: personKey=$personKey, numberKey=$numberKey"); // <--- 제거
 
       if (personKey != '-' && numberKey != '-') { 
-        print(">>> Condition met, adding to tableData..."); // <--- 추가 4
+        // print(">>> Condition met, adding to tableData..."); // <--- 제거
         if (!tableData.containsKey(personKey)) tableData[personKey] = {};
 
         if (isPastTense && gender != null) {
@@ -781,19 +789,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           tableData[personKey]![numberKey] = form;
         }
         // --- 반복문 내부 tableData 상태 확인 로그 추가 ---
-        print(">>> Inside loop, current tableData: $tableData"); 
+        // print(">>> Inside loop, current tableData: $tableData"); // <--- 제거
         // ---------------------------------------------
       } else {
-        print(">>> Condition NOT met, skipping."); // <--- 기존 로그 5
+        // print(">>> Condition NOT met, skipping."); // <--- 제거
       }
     } // 여기가 for 루프 끝
 
     // --- 최종 tableData 확인 로그 (기존) ---
-    print(">>> Final tableData before building rows: $tableData"); 
+    // print(">>> Final tableData before building rows: $tableData"); // <--- 제거
     // -----------------------------------
 
     // --- return 직전 도달 확인 로그 추가 ---
-    print(">>> Reached point just before returning Table widget."); 
+    // print(">>> Reached point just before returning Table widget."); // <--- 제거
     // -------------------------------------
 
     // Build Table (similar to _buildDeclensionResults)
@@ -825,8 +833,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ],
         ),
         // Data rows
-        ...personOrder.map((personKey) {
-          final personForms = tableData[personKey] ?? {};
+        ...personOrder.map((personKey) { // Now personKey matches the keys in tableData
+          final personForms = tableData[personKey] ?? {}; // Should correctly retrieve the map
           return TableRow(
             children: [
               Padding(
@@ -836,11 +844,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 // Allow slightly more height for past tense genders by using Flexible
-                child: Text(personForms['Singular'] ?? '-'), 
+                child: Text(personForms['Singular'] ?? '-'), // Should display the form now
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(personForms['Plural'] ?? '-'), 
+                child: Text(personForms['Plural'] ?? '-'), // Should display the form now
               ),
             ],
           );
@@ -946,7 +954,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   // --- Helper methods for building conjugation sections ---
   List<Widget> _buildConjugationSections(BuildContext context, Map<String, List<ConjugationForm>> groupedForms, AppLocalizations l10n) {
      // --- groupedForms 키 확인 로그 추가 ---
-     print(">>> _buildConjugationSections received groupedForms keys: ${groupedForms.keys}");
+     // print(">>> _buildConjugationSections received groupedForms keys: ${groupedForms.keys}");
      // ---------------------------------
 
      // Define the desired display order using the localization KEYS
