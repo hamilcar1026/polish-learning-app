@@ -555,12 +555,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         
         return conjugationAsyncValue.when(
           data: (c) {
+            // --- 디버깅 로그 추가 ---
+            print(">>> _buildConjugationTab DATA received: status=${c.status}, message=${c.message}, data=${c.data}"); 
+            // -----------------------
             if (c.status == 'success' && c.data != null && c.data!.isNotEmpty) {
               final lemmaData = c.data!.first;
               final groupedForms = _prepareGroupedConjugationForms(lemmaData);
+              // --- 디버깅 로그 추가 ---
+              print(">>> _prepareGroupedConjugationForms result keys: ${groupedForms.keys}"); 
+              // -----------------------
               
               if (groupedForms.isEmpty) {
-                return Center(child: Text(l10n.noConjugationData));
+                 print(">>> groupedForms is EMPTY!"); // <--- 추가
+                 return Center(child: Text(l10n.noConjugationData));
               }
               
               // Improved layout with scrolling
@@ -589,6 +596,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                  ),
               );
             } else {
+              print(">>> Conjugation status is not success or data is empty/null."); // <--- 추가
               return Center(
                 child: Text(c.message ?? l10n.noConjugationData),
               );
@@ -775,7 +783,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       } else {
         print(">>> Condition NOT met, skipping."); // <--- 추가 5
       }
-    }
+    } // 여기가 for 루프 끝
+
+    // --- 최종 tableData 확인 로그 추가 ---
+    print(">>> Final tableData before building rows: $tableData"); 
+    // -----------------------------------
 
     // Build Table (similar to _buildDeclensionResults)
     return Table(
