@@ -556,8 +556,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         return conjugationAsyncValue.when(
           data: (c) {
             if (c.status == 'success' && c.data != null && c.data!.isNotEmpty) {
-              final lemmaData = c.data!.first;
-              final groupedForms = _prepareGroupedConjugationForms(lemmaData);
+              final lemmaData = c.data!.first; // lemmaData is now ConjugationResult
+              // final groupedForms = _prepareGroupedConjugationForms(lemmaData); // REMOVED: No longer need to prepare
+              final groupedForms = lemmaData.grouped_forms; // NEW: Directly access the map
               
               if (groupedForms.isEmpty) {
                  return Center(child: Text(l10n.noConjugationData));
@@ -580,6 +581,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                              ),
                              const SizedBox(height: 10),
                              const Divider(),
+                             // Pass the already grouped forms directly
                              ..._buildConjugationSections(context, groupedForms, l10n),
                           ],
                        ),

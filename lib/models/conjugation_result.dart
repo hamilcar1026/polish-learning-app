@@ -29,25 +29,34 @@ class ConjugationForm {
 @immutable
 class ConjugationResult {
   final String lemma;
-  final List<ConjugationForm> forms;
+  final Map<String, List<ConjugationForm>> grouped_forms;
 
   const ConjugationResult({
     required this.lemma,
-    required this.forms,
+    required this.grouped_forms,
   });
 
   factory ConjugationResult.fromJson(Map<String, dynamic> json) {
+    Map<String, List<ConjugationForm>> parsedGroupedForms = {};
+    if (json['grouped_forms'] is Map<String, dynamic>) {
+      (json['grouped_forms'] as Map<String, dynamic>).forEach((key, value) {
+        if (value is List<dynamic>) {
+          parsedGroupedForms[key] = value
+              .map((item) => ConjugationForm.fromJson(item as Map<String, dynamic>))
+              .toList();
+        }
+      });
+    }
+
     return ConjugationResult(
       lemma: json['lemma'] as String? ?? '',
-      forms: (json['forms'] as List<dynamic>? ?? [])
-          .map((item) => ConjugationForm.fromJson(item as Map<String, dynamic>))
-          .toList(),
+      grouped_forms: parsedGroupedForms,
     );
   }
 
    @override
   String toString() {
-    return 'ConjugationResult(lemma: $lemma, forms: ${forms.length} forms)';
+    return 'ConjugationResult(lemma: $lemma, grouped_forms: ${grouped_forms.length} categories)';
   }
 }
 
