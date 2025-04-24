@@ -24,7 +24,9 @@ if not LINGVANEX_API_KEY:
 
 # Initialize Morfeusz2
 try:
-    morf = morfeusz2.Morfeusz()
+    # 향상된 옵션으로 Morfeusz2 초기화
+    morf = morfeusz2.Morfeusz(praet="composite", aggl="permissive")
+    print(f"Morfeusz2 initialized with enhanced options: praet=composite, aggl=permissive")
 except Exception as e:
     print(f"Error initializing Morfeusz2: {e}")
     morf = None # Handle initialization failure gracefully
