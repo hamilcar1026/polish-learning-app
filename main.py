@@ -86,7 +86,32 @@ def is_declinable(tag):
     # Add more declinable tags if needed
     return tag in ['subst', 'depr', 'adj', 'adja', 'adjp']
 
-# Helper function to generate forms and format them
+# Helper function to extract the primary gender/animacy tag (m1, m2, m3, f, n1, n2)
+def get_primary_analysis_tag(analysis_result):
+    if not analysis_result:
+        return None
+    # Assume the first analysis result is the most likely one
+    first_result = analysis_result[0]
+    if len(first_result) >= 3 and isinstance(first_result[2], tuple) and len(first_result[2]) >= 3:
+        tag_with_qualifiers = first_result[2][2] # e.g., 'subst:sg:nom:m2'
+        parts = tag_with_qualifiers.split(':')
+        # Find the gender/animacy tag (usually the 4th part for subst)
+        for part in parts:
+            if part in ['m1', 'm2', 'm3', 'f', 'n1', 'n2']:
+                print(f"[Debug] Primary tag identified: {part}")
+                return part
+    print("[Debug] Could not identify primary tag from first analysis.")
+    return None
+
+# Helper function to extract the gender/animacy tag from a generated form's tag
+def get_form_tag_gender_animacy(form_tag_full):
+     parts = form_tag_full.split(':')
+     for part in parts:
+         if part in ['m1', 'm2', 'm3', 'f', 'n1', 'n2']:
+             return part
+     return None
+
+# Helper function to generate forms and format them (MODIFIED)
 def generate_and_format_forms(word, check_func):
     if morf is None:
         return jsonify({"status": "error", "message": "Morfeusz2 analyzer not available."}), 500
@@ -97,6 +122,10 @@ def generate_and_format_forms(word, check_func):
         analysis_result = morf.analyse(word)
         if not analysis_result:
             return jsonify({"status": "success", "word": word, "data": [], "message": "Word not found or cannot be analyzed."}), 200
+
+        # --- Get the primary tag of the input word ---
+        primary_tag_gender = get_primary_analysis_tag(analysis_result)
+        # --------------------------------------------
 
         generated_data = []
         processed_lemmas = set()
@@ -110,78 +139,83 @@ def generate_and_format_forms(word, check_func):
                 analysis_tuple = r[2]
                 lemma = analysis_tuple[1]
                 tag_with_qualifiers = analysis_tuple[2] # e.g., 'subst:sg:nom:m3'
-                 # Split tag from the string
-                tag = tag_with_qualifiers.split(':', 1)[0]
+                tag = tag_with_qualifiers.split(':', 1)[0] # Get base tag like 'subst'
             else:
                  print(f"[generate_and_format_forms] Skipping unexpected analysis tuple format: {r}")
                  continue # Skip to next analysis result
 
-            # Now use the correctly parsed tag for the check_func condition
             if tag and check_func(tag) and lemma not in processed_lemmas:
                 processed_lemmas.add(lemma)
-                # print(f"[generate_and_format_forms] Generating forms for lemma='{lemma}', tag='{tag}' (check_func passed)") # DEBUG REMOVED
-                # Generate all forms for the lemma
-                # generate result: list of tuples (form, lemma, tag, qualifiers...)
                 generated_forms_raw = morf.generate(lemma)
-                # --- ADD DEBUG PRINT BACK --- 
-                print(f"  -> Raw generated forms for lemma '{lemma}': {generated_forms_raw}")
-                # --- END DEBUG PRINT BACK ---
+                print(f"  -> Raw generated forms for lemma '{lemma}': {generated_forms_raw}") # DEBUG
 
                 formatted_forms = []
                 for form_tuple in generated_forms_raw:
-                    # --- ADD DEBUG PRINT BACK --- 
-                    print(f"    >> Processing generated tuple: {form_tuple}")
-                    # --- END DEBUG PRINT BACK ---
+                    print(f"    >> Processing generated tuple: {form_tuple}") # DEBUG
                     if len(form_tuple) >= 3:
-                        form_lemma_full = form_tuple[1] # e.g., 'nowy:S' or 'nowy:A'
-                        form_tag_full = form_tuple[2] 
-                        
-                        # Extract base lemma and base tag for filtering
+                        form = form_tuple[0]
+                        form_lemma_full = form_tuple[1]
+                        form_tag_full = form_tuple[2]
+
                         base_form_lemma = form_lemma_full.split(':', 1)[0]
-                        base_tag = form_tag_full.split(':', 1)[0] 
+                        base_tag = form_tag_full.split(':', 1)[0]
+                        form_gender_animacy = get_form_tag_gender_animacy(form_tag_full)
+                        is_plural = ':pl:' in form_tag_full # Check if it's a plural form
 
-                        # --- ADD MORE DEBUG BACK --- 
-                        print(f"      Extracted: form='{form_tuple[0]}', base_lemma='{base_form_lemma}', base_tag='{base_tag}', full_tag='{form_tag_full}'")
-                        # --- END DEBUG BACK ---
+                        print(f"      Extracted: form='{form}', base_lemma='{base_form_lemma}', base_tag='{base_tag}', form_gender='{form_gender_animacy}', is_plural={is_plural}, full_tag='{form_tag_full}'") # DEBUG
 
-                        # Compare BASE lemmas - REMOVE filter1
-                        # filter1 = base_form_lemma == lemma 
-                        filter2 = check_func(base_tag)
-                        # --- ADD DEBUG PRINT BACK --- 
-                        print(f"      Filters: check_func('{base_tag}') -> {filter2} (using base tag)") 
-                        # --- END DEBUG PRINT BACK ---
+                        # --- Filtering Logic ---
+                        passes_check_func = check_func(base_tag)
+                        passes_gender_filter = True # Assume passes by default
 
-                        # Only check filter2 now
-                        if filter2:
-                            print(f"      >>>>> Filter PASSED for form '{form_tuple[0]}' <<<<<") # ADD DEBUG BACK
+                        if primary_tag_gender and form_gender_animacy:
+                            # Rule 1: If primary is m1, only accept m1 forms (for plurals mostly)
+                            if primary_tag_gender == 'm1' and form_gender_animacy != 'm1' and is_plural:
+                                passes_gender_filter = False
+                            # Rule 2: If primary is m2/m3, EXCLUDE m1 forms (for plurals)
+                            elif primary_tag_gender in ['m2', 'm3'] and form_gender_animacy == 'm1' and is_plural:
+                                passes_gender_filter = False
+                            # Rule 3: If primary is f/n1/n2, ensure form matches (less critical for m1 exclusion)
+                            elif primary_tag_gender in ['f', 'n1', 'n2'] and form_gender_animacy != primary_tag_gender:
+                                # This might be too strict, could allow some cross-gender forms? Revisit if needed.
+                                # For now, let's keep it simpler and focus on m1/m2/m3 issue.
+                                # We could relax this later if needed.
+                                pass # Let's not filter based on f/n for now, focus on m1/m2/m3
+
+                        print(f"      Filters: check_func({base_tag}) -> {passes_check_func}, gender_filter -> {passes_gender_filter} (primary: {primary_tag_gender}, form: {form_gender_animacy}, plural: {is_plural})") # DEBUG
+
+                        if passes_check_func and passes_gender_filter:
+                            print(f"      >>>>> Filter PASSED for form '{form}' <<<<<" ) # DEBUG
                             formatted_forms.append({
-                                "form": form_tuple[0],
-                                "tag": form_tag_full, # Keep the full tag for the response
-                                "qualifiers": list(form_tuple[3:]) 
+                                "form": form,
+                                "tag": form_tag_full,
+                                "qualifiers": list(form_tuple[3:])
                             })
                         else:
-                            print(f"      >>>>> Filter FAILED for form '{form_tuple[0]}' <<<<<") # ADD DEBUG BACK
+                            print(f"      >>>>> Filter FAILED for form '{form}' <<<<<" ) # DEBUG
                     else:
-                        print(f"    >> Skipping unexpected generated tuple format: {form_tuple}") # Keep this potentially useful one?
-                # --- ADD DEBUG PRINT BACK --- 
-                print(f"  -> Filtered forms count for lemma '{lemma}': {len(formatted_forms)}")
-                # --- END DEBUG PRINT BACK --- 
+                         print(f"    >> Skipping unexpected generated tuple format: {form_tuple}")
+
+                print(f"  -> Filtered forms count for lemma '{lemma}': {len(formatted_forms)}") # DEBUG
                 if formatted_forms:
                      generated_data.append({
                         "lemma": lemma,
                         "forms": formatted_forms
                     })
-            # Add an else case for debugging why the block might be skipped
             elif lemma is not None: # Only print if lemma was parsed
                  print(f"[generate_and_format_forms] Skipping generation for lemma '{lemma}': tag='{tag}', check_func result={check_func(tag)}, already processed={lemma in processed_lemmas}")
 
         if not generated_data:
-            return jsonify({"status": "success", "word": word, "data": [], "message": f"No relevant forms found for '{word}'. It might not be the expected part of speech."}), 200
+             # Return success but indicate no forms match the criteria
+             return jsonify({"status": "success", "word": word, "data": [], "message": f"No relevant forms found matching the primary analysis for '{word}'. Check the word or its category."}), 200
 
         return jsonify({"status": "success", "word": word, "data": generated_data})
 
     except Exception as e:
         print(f"Error during generation for '{word}': {e}")
+        # Consider logging the traceback for better debugging
+        import traceback
+        traceback.print_exc()
         return jsonify({"status": "error", "message": f"An error occurred during form generation: {e}"}), 500
 
 
