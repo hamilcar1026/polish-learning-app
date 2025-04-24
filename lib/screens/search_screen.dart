@@ -2065,7 +2065,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   String _getConjugationCategoryKey(Map<String, String> tagMap) {
     String base = tagMap['base'] ?? '';
     // Try to get aspect from various possible fields in the tagMap
-    String aspect = tagMap['aspect'] ?? tagMap['tense_aspect'] ?? tagMap['aspect_voice'] ?? tagMap['mood_gender2'] ?? '';
+    String tagAspect = tagMap['aspect'] ?? tagMap['tense_aspect'] ?? tagMap['aspect_voice'] ?? tagMap['mood_gender2'] ?? '';
     String tenseAspect = tagMap['tense_aspect'] ?? tagMap['aspect'] ?? tagMap['gender_tense_aspect'] ?? '';
     String mood = tagMap['mood'] ?? '';
 
@@ -2086,7 +2086,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case 'ger': return 'conjugationCategoryVerbalNoun';
       // --- MODIFICATION START: Differentiate Impersonal based on aspect --- 
       case 'imps': 
-        if (aspect.contains('perf')) {
+        if (tagAspect.contains('perf')) {
           return 'conjugationCategoryPastImpersonal'; // Assume perf = past impersonal
         } else { 
           return 'conjugationCategoryPresentImpersonal'; // Assume imperf or no aspect = present impersonal
@@ -2243,6 +2243,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           children: forms.map((form) {
             // 태그에서 추출한 정보를 기반으로 형태 설명 생성
             final tagMap = _parseTag(form.tag);
+            final String tagAspect = tagMap['aspect'] ?? '';
             
             // 비인칭 형태에 대한 현지화된 설명 텍스트 생성
             String description = '';
@@ -2258,11 +2259,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               description = l10n.impersonalConditionalForm;
             } else {
               // 태그 기반 추가 처리
-              final aspect = tagMap['aspect'] ?? '';
-              
-              if (aspect == 'imperf') {
+              if (tagAspect == 'imperf') {
                 description = l10n.qualifier_imperf;
-              } else if (aspect == 'perf') {
+              } else if (tagAspect == 'perf') {
                 description = l10n.qualifier_perf;
               } else {
                 // 기본 처리: 전체 태그 형식화 시도
