@@ -555,13 +555,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         
         return conjugationAsyncValue.when(
           data: (c) {
-            print(">>> _buildConjugationTab DATA received: status=${c.status}, message=${c.message}, data=${c.data}"); 
             if (c.status == 'success' && c.data != null && c.data!.isNotEmpty) {
               final lemmaData = c.data!.first;
               final groupedForms = _prepareGroupedConjugationForms(lemmaData);
               
               if (groupedForms.isEmpty) {
-                 print(">>> groupedForms is EMPTY!"); 
                  return Center(child: Text(l10n.noConjugationData));
               }
               
@@ -589,7 +587,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                  ),
               );
             } else {
-              print(">>> Conjugation status is not success or data is empty/null."); 
               return Center(
                 child: Text(c.message ?? l10n.noConjugationData),
               );
@@ -853,39 +850,20 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   // --- Helper Function to prepare Conjugation Data ---
   Map<String, List<ConjugationForm>> _prepareGroupedConjugationForms(ConjugationResult? conjugationData) {
     // The keys of this map will now be localization keys (e.g., 'conjugationCategoryPresentIndicative')
-    final Map<String, List<ConjugationForm>> groupedFormsByKey = {}; 
+    final Map<String, List<ConjugationForm>> groupedFormsByKey = {};
     if (conjugationData == null || conjugationData.forms.isEmpty) {
       return groupedFormsByKey;
     }
 
-    print(">>> Starting _prepareGroupedConjugationForms for ${conjugationData.lemma} with ${conjugationData.forms.length} forms."); // 함수 시작 로그
-
     for (var formInfo in conjugationData.forms) {
-      // --- 상세 로그 추가 ---
-      print("  Processing form tag: ${formInfo.tag}"); 
       final tagMap = _parseTag(formInfo.tag);
-      print("    _parseTag result: $tagMap"); 
       String categoryKey = _getConjugationCategoryKey(tagMap); // Get the localization key
-      print("    _getConjugationCategoryKey result: $categoryKey"); 
-      // --------------------
 
       if (!groupedFormsByKey.containsKey(categoryKey)) {
         groupedFormsByKey[categoryKey] = [];
       }
       groupedFormsByKey[categoryKey]!.add(formInfo);
     }
-
-    // --- 최종 키 존재 여부 확인 로그 ---
-    final hasPast = groupedFormsByKey.containsKey('conjugationCategoryPastTense');
-    final hasPresent = groupedFormsByKey.containsKey('conjugationCategoryPresentIndicative');
-    final hasFuturePerf = groupedFormsByKey.containsKey('conjugationCategoryFuturePerfectiveIndicative');
-    final hasFutureImperf = groupedFormsByKey.containsKey('conjugationCategoryFutureImperfectiveIndicative');
-    final hasImperative = groupedFormsByKey.containsKey('conjugationCategoryImperative');
-    final hasGer = groupedFormsByKey.containsKey('conjugationCategoryVerbalNoun');
-    final hasImps = groupedFormsByKey.containsKey('conjugationCategoryImpersonal');
-    // ... 필요한 다른 키들도 추가 가능 ...
-    print(">>> _prepareGroupedConjugationForms FINISHED. Key Check: Past=$hasPast, Present=$hasPresent, FutPerf=$hasFuturePerf, FutImperf=$hasFutureImperf, Impt=$hasImperative, Ger=$hasGer, Imps=$hasImps");
-    // -----------------------------------
 
     return groupedFormsByKey;
   }
@@ -966,48 +944,54 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   // --- Helper methods for building conjugation sections ---
   List<Widget> _buildConjugationSections(BuildContext context, Map<String, List<ConjugationForm>> groupedForms, AppLocalizations l10n) {
-     // --- groupedForms 키 확인 로그 추가 ---
-     // print(">>> _buildConjugationSections received groupedForms keys: ${groupedForms.keys}");
-     // ---------------------------------
-
      // Define the desired display order using the localization KEYS
      final displayOrder = [
         'conjugationCategoryPresentIndicative',
         'conjugationCategoryFuturePerfectiveIndicative',
         'conjugationCategoryFutureImperfectiveIndicative',
-        'conjugationCategoryPastTense',
+        'conjugationCategoryPastTense', // Past tense included here
         'conjugationCategoryImperative',
         'conjugationCategoryInfinitive',
-        'conjugationCategoryPresentActiveParticiple',
-        'conjugationCategoryPastPassiveParticiple',
         'conjugationCategoryPresentAdverbialParticiple',
         'conjugationCategoryAnteriorAdverbialParticiple',
-        'conjugationCategoryOtherForms'
+        'conjugationCategoryVerbalNoun', // Added gerund
+        'conjugationCategoryPresentImpersonal', // NEW
+        'conjugationCategoryPastImpersonal', // NEW
+        'conjugationCategoryConditional', // Added conditional
      ];
+     // Sort keys based on displayOrder, add others at the end
      final List<String> sortedGroupKeys = groupedForms.keys.where((key) => displayOrder.contains(key)).toList();
      sortedGroupKeys.sort((a, b) => displayOrder.indexOf(a).compareTo(displayOrder.indexOf(b)));
+     // Add any keys from groupedForms that weren't explicitly in displayOrder
      sortedGroupKeys.addAll(groupedForms.keys.where((key) => !displayOrder.contains(key)).toList()..sort());
 
      List<Widget> sections = [];
      for (String categoryKey in sortedGroupKeys) {
+       if (!groupedForms.containsKey(categoryKey)) continue;
+
        final formsInCategory = groupedForms[categoryKey]!;
-       final bool isExpanded = _expandedCategories[categoryKey] ?? false; 
-       
-       // Determine if standard conjugation table should be used
+       final bool isExpanded = _expandedCategories[categoryKey] ?? false;
+
+       // --- Determine which table type to use --- 
        final bool useConjugationTable = [
             'conjugationCategoryPresentIndicative', 
             'conjugationCategoryFuturePerfectiveIndicative',
             'conjugationCategoryFutureImperfectiveIndicative',
-            'conjugationCategoryPastTense',
             'conjugationCategoryImperative' 
        ].contains(categoryKey);
 
-       // Determine if participle declension table should be used
        final bool useParticipleTable = [
-           'conjugationCategoryPresentActiveParticiple', 
-           'conjugationCategoryPastPassiveParticiple'
+           'conjugationCategoryPresentAdverbialParticiple', 
+           'conjugationCategoryAnteriorAdverbialParticiple'
        ].contains(categoryKey);
+       
+       // NEW: Check for Past Tense Table
+       final bool usePastTenseTable = categoryKey == 'conjugationCategoryPastTense';
 
+       // NEW: Check for Gerund Table
+       final bool useGerundTable = categoryKey == 'conjugationCategoryVerbalNoun';
+
+       // --- Build Section Header --- 
        sections.add(
          InkWell(
            onTap: () => _toggleCategoryExpansion(categoryKey),
@@ -1017,7 +1001,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                children: [
                  Flexible( 
-                  // Get the localized title using the helper function
                   child: Text(_getLocalizedConjugationCategoryTitle(categoryKey, l10n), style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold))
                  ),
                  Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
@@ -1027,33 +1010,44 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
          )
        );
 
+       // --- Build Section Content (Expanded) --- 
        if (isExpanded) {
          sections.add(
            Padding(
              padding: const EdgeInsets.only(top: 4.0, bottom: 8.0),
              child: useConjugationTable
-               ? SingleChildScrollView( // Horizontal scroll for conjugation table
+               ? SingleChildScrollView( // Standard Conjugation (Person x Number)
                    scrollDirection: Axis.horizontal,
-                   child: _buildConjugationTable(formsInCategory, categoryKey == 'conjugationCategoryPastTense', l10n),
+                   child: _buildConjugationTable(formsInCategory, false, l10n), 
                  )
-               : useParticipleTable 
-                   ? SingleChildScrollView( // Horizontal scroll for participle table
+               : usePastTenseTable 
+                   ? SingleChildScrollView( // Past Tense (Gender x Number)
                        scrollDirection: Axis.horizontal,
-                       child: _buildParticipleDeclensionTable(formsInCategory, l10n), // Call the new function
+                       child: _buildPastTenseTable(formsInCategory, l10n), // NEW function call
                      )
-                   : Column( // Vertical list for other non-table items (inf, pcon, pant, ger, etc.)
-                       crossAxisAlignment: CrossAxisAlignment.start,
-                       mainAxisSize: MainAxisSize.min,
-                       children: formsInCategory.map((formInfo) => ListTile(
-                         dense: true,
-                         title: Text(formInfo.form),
-                         subtitle: Text(
-                           // Translate the full tag string part by part
-                           formInfo.tag.split(':').map((part) => _translateGrammarTerm(part, l10n)).join(':'),
-                           style: const TextStyle(fontSize: 12, color: Colors.grey)
-                         ),
-                       )).toList(),
-                     ),
+                   : useParticipleTable 
+                       ? SingleChildScrollView( // Participle Declension (Case x Number)
+                           scrollDirection: Axis.horizontal,
+                           child: _buildParticipleDeclensionTable(formsInCategory, l10n), 
+                         )
+                       : useGerundTable
+                           ? SingleChildScrollView( // Gerund Declension (Case x Number)
+                               scrollDirection: Axis.horizontal,
+                               child: _buildGerundDeclensionTable(formsInCategory, l10n), // NEW function call
+                             )
+                           : Column( // Simple List for others (Inf, pcon, pant, imps, etc.)
+                               crossAxisAlignment: CrossAxisAlignment.start,
+                               mainAxisSize: MainAxisSize.min,
+                               children: formsInCategory.map((formInfo) => ListTile(
+                                 dense: true,
+                                 contentPadding: EdgeInsets.zero, 
+                                 title: Text(formInfo.form),
+                                 subtitle: Text(
+                                   formInfo.tag.split(':').map((part) => _translateGrammarTerm(part, l10n)).join(':'),
+                                   style: const TextStyle(fontSize: 12, color: Colors.grey)
+                                 ),
+                               )).toList(),
+                             ),
            )
          );
        }
@@ -1154,6 +1148,200 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
+  // --- NEW: Helper function to build Gerund Declension Table --- 
+  Widget _buildGerundDeclensionTable(List<ConjugationForm> forms, AppLocalizations l10n) {
+    Map<String, Map<String, String>> declensionTable = {}; // {caseCode: {sg: form, pl: form}}
+    final casesOrder = ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc']; 
+
+    // Find the lemma/base form for title (assuming all forms share the same base)
+    final String baseForm = forms.isNotEmpty ? forms.first.form : 'Gerund'; 
+    print("[_buildGerundDeclensionTable] Building table for: $baseForm");
+
+    for (var formInfo in forms) {
+      final tagMap = _parseTag(formInfo.tag); 
+      // Get case and number from the parsed map (assuming 'case_person' holds case for gerund)
+      final casePart = tagMap['case_person']; // Gerund tags use case_person for case
+      final numberCode = tagMap['number'];
+      // Gender (tagMap['gender_tense_aspect']) exists but isn't typically shown distinctly in gerund declension tables
+
+      if (casePart != null && numberCode != null) {
+        final individualCases = casePart.split('.'); 
+
+        for (var caseCode in individualCases) {
+          if (casesOrder.contains(caseCode)) { 
+            if (!declensionTable.containsKey(caseCode)) {
+              declensionTable[caseCode] = {};
+            }
+            // Assign the form to the singular or plural slot
+            if (numberCode == 'sg') {
+              declensionTable[caseCode]!['sg'] ??= formInfo.form; 
+            } else if (numberCode == 'pl') {
+              declensionTable[caseCode]!['pl'] ??= formInfo.form;
+            }
+          }
+        }
+      }
+    }
+
+    // Build the Table widget (styling copied from other tables)
+    return Table(
+      border: TableBorder.all(color: Colors.grey.shade300),
+      columnWidths: const {
+        0: IntrinsicColumnWidth(), // Case column
+        1: IntrinsicColumnWidth(), // Singular column
+        2: IntrinsicColumnWidth(), // Plural column
+      },
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      children: [
+        // Header row
+        TableRow(
+          decoration: BoxDecoration(color: Colors.grey.shade100),
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(l10n.tableHeaderCase, style: TextStyle(fontWeight: FontWeight.bold)), 
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(l10n.tableHeaderSingular, style: TextStyle(fontWeight: FontWeight.bold)), 
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(l10n.tableHeaderPlural, style: TextStyle(fontWeight: FontWeight.bold)), 
+            ),
+          ],
+        ),
+        // Data rows
+        ...casesOrder.map((caseCode) {
+          final forms = declensionTable[caseCode] ?? {};
+          return TableRow(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(_getCaseName(caseCode, l10n)), // Use helper for localized case name
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(forms['sg'] ?? '-'), 
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(forms['pl'] ?? '-'), 
+              ),
+            ],
+          );
+        }).toList(),
+      ],
+    );
+  }
+
+  // --- NEW: Helper function to build Past Tense Table ---
+  Widget _buildPastTenseTable(List<ConjugationForm> forms, AppLocalizations l10n) {
+    // Table data structure: {number: {genderKey: form}}
+    final Map<String, Map<String, String>> tableData = {
+      'sg': {},
+      'pl': {},
+    };
+
+    // Gender keys for display in the table
+    // We simplify Morfeusz genders (m1/m2/m3 -> m; m1 -> m1_pl; m2.m3.f.n -> non_m1_pl)
+    const sgGenderOrder = ['m', 'f', 'n']; // Simplified keys for sg table columns/rows
+    const plGenderOrder = ['m1_pl', 'non_m1_pl']; // Simplified keys for pl table columns/rows
+
+    for (var formInfo in forms) {
+      if (formInfo.tag.startsWith('praet')) { // Ensure we only process past tense forms
+        final tagMap = _parseTag(formInfo.tag);
+        final number = tagMap['number'];
+        final gender = tagMap['gender']; // Gender from praet tag (e.g., 'f', 'm1.m2.m3', 'm2.m3.f.n')
+        final form = formInfo.form;
+
+        if (number != null && gender != null) {
+          String displayGenderKey = '';
+          if (number == 'sg') {
+            if (gender.contains('m')) displayGenderKey = 'm'; // Group m1, m2, m3 under 'm' for sg
+            else if (gender == 'f') displayGenderKey = 'f';
+            else if (gender == 'n') displayGenderKey = 'n';
+          } else if (number == 'pl') {
+            if (gender == 'm1') displayGenderKey = 'm1_pl'; // Masc. Personal Plural
+            else displayGenderKey = 'non_m1_pl'; // Other plurals (Non-Masc. Personal)
+          }
+
+          if (displayGenderKey.isNotEmpty && tableData.containsKey(number)) {
+            // Avoid overwriting if multiple forms map to the same simplified key (take first)
+            tableData[number]![displayGenderKey] ??= form;
+          }
+        }
+      }
+    }
+
+    // Build the Table widget: Rows for Genders, Columns for Number
+    // Need to decide on row headers (genders)
+    // Let's create combined list of gender labels for rows
+    final Map<String, String> genderLabels = {
+      'm': l10n.genderLabelM1 + "/" + l10n.genderLabelM2 + "/" + l10n.genderLabelM3, // Combine m1/m2/m3 labels
+      'f': l10n.genderLabelF,
+      'n': l10n.genderLabelN1 + "/" + l10n.genderLabelN2, // Combine n1/n2 labels
+      'm1_pl': l10n.genderLabelM1, // Use m1 label for masc. personal plural
+      'non_m1_pl': '${l10n.genderLabelM2}/${l10n.genderLabelM3}/${l10n.genderLabelF}/${l10n.genderLabelN1}/${l10n.genderLabelN2}' // Combine others
+    };
+    // Order for rows (mix sg and pl genders meaningfully?)
+    final rowOrder = ['m', 'f', 'n', 'm1_pl', 'non_m1_pl'];
+
+
+    return Table(
+      border: TableBorder.all(color: Colors.grey.shade300),
+      columnWidths: const {
+        0: IntrinsicColumnWidth(), // Gender column
+        1: IntrinsicColumnWidth(), // Singular column
+        2: IntrinsicColumnWidth(), // Plural column
+      },
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      children: [
+        // Header row
+        TableRow(
+          decoration: BoxDecoration(color: Colors.grey.shade100),
+          children: [
+            Padding( // Empty top-left cell
+              padding: const EdgeInsets.all(8.0),
+              child: Text(''), 
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(l10n.tableHeaderSingular, style: TextStyle(fontWeight: FontWeight.bold)), 
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(l10n.tableHeaderPlural, style: TextStyle(fontWeight: FontWeight.bold)), 
+            ),
+          ],
+        ),
+        // Data rows (Iterate through gender display keys)
+        ...rowOrder.map((genderKey) {
+          // Determine if the gender key is applicable to sg or pl based on our mapping
+          bool isSgGender = sgGenderOrder.contains(genderKey);
+          bool isPlGender = plGenderOrder.contains(genderKey);
+          
+          return TableRow(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(genderLabels[genderKey] ?? genderKey, style: TextStyle(fontWeight: FontWeight.bold)), // Gender label column
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text( isSgGender ? (tableData['sg']?[genderKey] ?? '-') : '-' ), // Show sg form or '-'
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text( isPlGender ? (tableData['pl']?[genderKey] ?? '-') : '-' ), // Show pl form or '-'
+              ),
+            ],
+          );
+        }).toList(),
+      ],
+    );
+  }
+
   // --- Helper functions for tag parsing ---
 
   Map<String, String> _parseTag(String tagString) {
@@ -1219,6 +1407,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   // Returns the localization KEY for the conjugation category
   String _getConjugationCategoryKey(Map<String, String> tagMap) {
     String base = tagMap['base'] ?? '';
+    // Try to get aspect from various possible fields in the tagMap
+    String aspect = tagMap['aspect'] ?? tagMap['tense_aspect'] ?? tagMap['aspect_voice'] ?? tagMap['mood_gender2'] ?? '';
     String tenseAspect = tagMap['tense_aspect'] ?? tagMap['aspect'] ?? tagMap['gender_tense_aspect'] ?? '';
     String mood = tagMap['mood'] ?? '';
 
@@ -1236,8 +1426,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case 'pant': return 'conjugationCategoryAnteriorAdverbialParticiple';
       case 'pact': return 'conjugationCategoryPresentActiveParticiple';
       case 'ppas': return 'conjugationCategoryPastPassiveParticiple';
-      case 'ger': return 'conjugationCategoryVerbalNoun'; // 동명사
-      case 'imps': return 'conjugationCategoryImpersonal'; // 비인칭
+      case 'ger': return 'conjugationCategoryVerbalNoun';
+      // --- MODIFICATION START: Differentiate Impersonal based on aspect --- 
+      case 'imps': 
+        if (aspect.contains('perf')) {
+          return 'conjugationCategoryPastImpersonal'; // Assume perf = past impersonal
+        } else { 
+          return 'conjugationCategoryPresentImpersonal'; // Assume imperf or no aspect = present impersonal
+        }
+      // --- MODIFICATION END ---
       case 'cond': return 'conjugationCategoryConditional'; // 조건법
       default: return 'conjugationCategoryOtherForms'; // Group others
     }
@@ -1345,6 +1542,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case 'conjugationCategoryPastPassiveParticiple': return l10n.conjugationCategoryPastPassiveParticiple;
       case 'conjugationCategoryFiniteVerb': return l10n.conjugationCategoryFiniteVerb;
       case 'conjugationCategoryOtherForms': return l10n.conjugationCategoryOtherForms;
+      // --- ADDITIONS for Impersonal separation ---
+      case 'conjugationCategoryPresentImpersonal': return l10n.conjugationCategoryPresentImpersonal;
+      case 'conjugationCategoryPastImpersonal': return l10n.conjugationCategoryPastImpersonal;
+      // --- END ADDITIONS ---
       default: return categoryKey; // Fallback to the key itself if unknown
     }
   }

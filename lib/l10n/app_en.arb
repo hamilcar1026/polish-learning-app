@@ -102,6 +102,11 @@
    "conjugationCategoryPastPassiveParticiple": "Past Passive Participle",
    "conjugationCategoryFiniteVerb": "Finite Verb",
    "conjugationCategoryOtherForms": "Other Forms",
+   "conjugationCategoryImpersonal": "Impersonal",
+   "conjugationCategoryVerbalNoun": "Verbal Noun",
+   "conjugationCategoryConditional": "Conditional",
+   "conjugationCategoryPresentImpersonal": "Present Impersonal",
+   "conjugationCategoryPastImpersonal": "Past Impersonal",
    
    "drawerRecentSearches": "Recent Searches",
    "drawerClearRecentSearchesTooltip": "Clear Recent Searches",

@@ -1,10 +1,20 @@
 {
   "pl": [
+    "conjugationCategoryImpersonal",
+    "conjugationCategoryVerbalNoun",
+    "conjugationCategoryConditional",
+    "conjugationCategoryPresentImpersonal",
+    "conjugationCategoryPastImpersonal",
     "suggestionDidYouMean",
     "suggestionErrorFallback"
   ],
 
   "ru": [
+    "conjugationCategoryImpersonal",
+    "conjugationCategoryVerbalNoun",
+    "conjugationCategoryConditional",
+    "conjugationCategoryPresentImpersonal",
+    "conjugationCategoryPastImpersonal",
     "suggestionDidYouMean",
     "suggestionErrorFallback"
   ]

@@ -271,6 +271,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get conjugationCategoryOtherForms => '기타 형태';
 
   @override
+  String get conjugationCategoryImpersonal => '비인칭';
+
+  @override
+  String get conjugationCategoryVerbalNoun => '동명사';
+
+  @override
+  String get conjugationCategoryConditional => '조건법';
+
+  @override
+  String get conjugationCategoryPresentImpersonal => '현재 비인칭';
+
+  @override
+  String get conjugationCategoryPastImpersonal => '과거 비인칭';
+
+  @override
   String get drawerRecentSearches => '최근 검색어';
 
   @override

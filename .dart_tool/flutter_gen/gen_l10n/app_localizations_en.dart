@@ -271,6 +271,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get conjugationCategoryOtherForms => 'Other Forms';
 
   @override
+  String get conjugationCategoryImpersonal => 'Impersonal';
+
+  @override
+  String get conjugationCategoryVerbalNoun => 'Verbal Noun';
+
+  @override
+  String get conjugationCategoryConditional => 'Conditional';
+
+  @override
+  String get conjugationCategoryPresentImpersonal => 'Present Impersonal';
+
+  @override
+  String get conjugationCategoryPastImpersonal => 'Past Impersonal';
+
+  @override
   String get drawerRecentSearches => 'Recent Searches';
 
   @override

@@ -615,6 +615,36 @@ abstract class AppLocalizations {
   /// **'Other Forms'**
   String get conjugationCategoryOtherForms;
 
+  /// No description provided for @conjugationCategoryImpersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Impersonal'**
+  String get conjugationCategoryImpersonal;
+
+  /// No description provided for @conjugationCategoryVerbalNoun.
+  ///
+  /// In en, this message translates to:
+  /// **'Verbal Noun'**
+  String get conjugationCategoryVerbalNoun;
+
+  /// No description provided for @conjugationCategoryConditional.
+  ///
+  /// In en, this message translates to:
+  /// **'Conditional'**
+  String get conjugationCategoryConditional;
+
+  /// No description provided for @conjugationCategoryPresentImpersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Present Impersonal'**
+  String get conjugationCategoryPresentImpersonal;
+
+  /// No description provided for @conjugationCategoryPastImpersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Past Impersonal'**
+  String get conjugationCategoryPastImpersonal;
+
   /// No description provided for @drawerRecentSearches.
   ///
   /// In en, this message translates to:
