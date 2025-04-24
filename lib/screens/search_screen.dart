@@ -1381,12 +1381,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   // --- Helper function to build Conditional Table ---
   Widget _buildConditionalTable(List<ConjugationForm> forms, AppLocalizations l10n) {
+    // Person order for table rows
+    const personOrder = ['pri', 'sec', 'ter'];
+    
     // Map<Person, Map<Number, Map<Gender, Form>>>
     Map<String, Map<String, Map<String, String>>> conditionalForms = {
       'pri': {'sg': {}, 'pl': {}},
       'sec': {'sg': {}, 'pl': {}},
       'ter': {'sg': {}, 'pl': {}},
     };
+
+    // 디버깅: 받은 조건법 데이터 전체를 로깅
+    print("===== 조건법 데이터 디버깅 시작 =====");
+    print("조건법 폼 총 ${forms.length}개:");
+    for (var form in forms) {
+      print("태그: ${form.tag}, 폼: ${form.form}");
+    }
+    print("===== 조건법 데이터 디버깅 종료 =====");
 
     // Genders to look for
     const sgGenders = ['m1', 'm2', 'm3', 'f', 'n']; // Check for all possible singular genders
@@ -1410,6 +1421,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       }
 
       if (number != null && person != null && gender != null) {
+        // 디버깅: 파싱된 요소들 로깅
+        print("파싱 결과: number=$number, person=$person, gender=$gender, form=${form.form}");
+        
         // Normalize singular masculine genders for display grouping if desired
         String displayGenderKey = gender;
         if (number == 'pl' && gender == 'm2.m3.f.n') {
@@ -1418,18 +1432,28 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         // Group m1/m2/m3 under 'm' for singular for simpler table display
         if (number == 'sg' && ['m1', 'm2', 'm3'].contains(gender)) {
             displayGenderKey = 'm';
+            // 디버깅: 남성 단수 형태가 변환되는 과정 로깅
+            print("남성 단수 변환: 원래 gender=$gender -> displayGenderKey=$displayGenderKey");
         }
 
          if (conditionalForms.containsKey(person) && conditionalForms[person]!.containsKey(number)) {
            // Store the form using the possibly simplified gender key
            // Use ??= to only assign if the key doesn't exist yet
            conditionalForms[person]![number]![displayGenderKey] ??= form.form;
+           // 디버깅: 테이블에 추가된 항목 로깅
+           print("테이블에 추가: conditionalForms[$person][$number][$displayGenderKey] = ${form.form}");
          }
       }
     }
 
-    // Person order for table rows
-    const personOrder = ['pri', 'sec', 'ter'];
+    // 디버깅: 최종 조건법 데이터 상태 확인
+    print("===== 최종 조건법 테이블 데이터 =====");
+    personOrder.forEach((person) {
+      print("인칭: $person");
+      print("  단수: ${conditionalForms[person]?['sg']}");
+      print("  복수: ${conditionalForms[person]?['pl']}");
+    });
+    print("=====================================");
 
     // Build the Table widget
     return Table(
