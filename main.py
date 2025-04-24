@@ -3,14 +3,10 @@ import requests # 추가
 from flask import Flask, jsonify, request
 import morfeusz2
 from flask_cors import CORS
-import logging # 상단에 추가
+import logging
 
 app = Flask(__name__)
 CORS(app)
-
-# --- 로거 설정 (선택 사항이지만 추가하면 좋음) ---
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-# ---------------------------------------------
 
 # --- Lingvanex API Key ---
 LINGVANEX_API_KEY = os.environ.get("LINGVANEX_API_KEY")
@@ -31,9 +27,6 @@ def translate_text_lingvanex(text, target_language):
         return None # API 키 없으면 번역 안 함
 
     api_url = "https://api-b2b.backenster.com/b1/api/v3/translate"
-    # API 키 형식 확인 필요 (Bearer 토큰인지, 다른 형식인지)
-    # Lingvanex 문서에 따라 Authorization 헤더 형식을 맞춰야 함
-    # 예시에서는 Bearer 토큰으로 가정
     headers = {
         "Authorization": f"Bearer {LINGVANEX_API_KEY}",
         "Content-Type": "application/json",
@@ -41,35 +34,28 @@ def translate_text_lingvanex(text, target_language):
     }
     payload = {
         "platform": "api",
-        "from": "pl_PL", # 항상 폴란드어에서 출발
-        # Lingvanex 언어 코드 형식 확인 필요 (e.g., 'en' or 'en_US')
-        # 문서에는 en_GB, de_DE 등이 예시로 나와있으므로 xx_XX 형식을 따름
+        "from": "pl_PL",
         "to": f"{target_language.lower()}_{target_language.upper()}",
         "data": text,
-        "translateMode": "text" # 일반 텍스트 번역
+        "translateMode": "text"
     }
 
     try:
-        logging.warning(f"[Lingvanex] Requesting translation for '{text}' to {target_language}") # Debug print
-        response = requests.post(api_url, headers=headers, json=payload, timeout=10) # 10초 타임아웃 추가
-        response.raise_for_status() # 오류 발생 시 예외 발생
+        print(f"[Lingvanex] Requesting translation for '{text}' to {target_language}")
+        response = requests.post(api_url, headers=headers, json=payload, timeout=10)
+        response.raise_for_status()
         result = response.json()
-        logging.warning(f"[Lingvanex] Response: {result}") # Debug print
-        # 응답 형식 확인 필요 (실제 API 응답 구조에 맞춰야 함)
-        # 예시에서는 'result' 키에 번역 결과가 있다고 가정
+        print(f"[Lingvanex] Response: {result}")
         if result and "result" in result:
-            return result["result"] # 번역된 텍스트 반환
+            return result["result"]
         else:
-            logging.warning(f"[Lingvanex] Unexpected response format: {result}")
+            print(f"[Lingvanex] Unexpected response format: {result}")
             return None
     except requests.exceptions.RequestException as e:
-        logging.error(f"[Lingvanex] API call failed: {e}")
-        # 오류 세부 정보 출력 (옵션)
-        # print(f"Response status: {e.response.status_code if e.response else 'N/A'}")
-        # print(f"Response text: {e.response.text if e.response else 'N/A'}")
+        print(f"[Lingvanex] API call failed: {e}")
         return None
     except Exception as e:
-        logging.error(f"[Lingvanex] Error processing translation: {e}")
+        print(f"[Lingvanex] Error processing translation: {e}")
         return None
 # -------------------------------------
 
@@ -98,12 +84,12 @@ def get_dictionary_info_lingvanex(text, target_language):
     }
 
     try:
-        logging.warning(f"[Lingvanex Dict] Requesting dictionary info for '{text}' in {target_language} using POST to /lookupDictionary")
+        print(f"[Lingvanex Dict] Requesting dictionary info for '{text}' in {target_language} using POST to /lookupDictionary")
         # Use POST request with json payload and headers
         response = requests.post(api_url, headers=headers, json=payload, timeout=15)
         response.raise_for_status() # Raise exception for bad status codes (4xx or 5xx)
         result = response.json()
-        logging.warning(f"[Lingvanex Dict] Raw Response: {result}") # Print raw response for debugging
+        print(f"[Lingvanex Dict] Raw Response: {result}") # Print raw response for debugging
 
         # --- Extract Examples (Keeping previous guesses, might need adjustment) ---
         extracted_examples = []
@@ -148,118 +134,144 @@ def get_dictionary_info_lingvanex(text, target_language):
                             extracted_examples.append(str(ex_item["text"]))
 
         if not extracted_examples:
-             logging.warning(f"[Lingvanex Dict] No examples found or extracted for '{text}'. Response structure might differ from guesses.")
+             print(f"[Lingvanex Dict] No examples found or extracted for '{text}'. Response structure might differ from guesses.")
         else:
-             logging.warning(f"[Lingvanex Dict] Extracted examples for '{text}': {extracted_examples}")
+             print(f"[Lingvanex Dict] Extracted examples for '{text}': {extracted_examples}")
 
         return extracted_examples # Return list of example strings
 
     except requests.exceptions.Timeout:
-        logging.warning(f"[Lingvanex Dict] API call timed out for '{text}'.")
+        print(f"[Lingvanex Dict] API call timed out for '{text}'.")
         return None
     except requests.exceptions.HTTPError as e:
-         logging.error(f"[Lingvanex Dict] HTTP Error fetching dictionary info for '{text}': {e.response.status_code} {e.response.reason}")
+         print(f"[Lingvanex Dict] HTTP Error fetching dictionary info for '{text}': {e.response.status_code} {e.response.reason}")
          # Optionally log response body for more details on error
-         logging.error(f"[Lingvanex Dict] Error Response Body: {e.response.text}") # Log error body for inspection
+         print(f"[Lingvanex Dict] Error Response Body: {e.response.text}") # Log error body for inspection
          return None # Indicate failure clearly
     except requests.exceptions.RequestException as e:
-        logging.error(f"[Lingvanex Dict] API call failed for '{text}': {e}")
+        print(f"[Lingvanex Dict] API call failed for '{text}': {e}")
         return None
     except Exception as e:
-        logging.error(f"[Lingvanex Dict] Error processing dictionary info for '{text}': {e}")
+        print(f"[Lingvanex Dict] Error processing dictionary info for '{text}': {e}")
         return None
 # --------------------------------------
 
 @app.route('/analyze/<word>', methods=['GET'])
 def analyze_word(word):
-    # --- 로깅 모듈 사용으로 변경 ---
-    logging.warning(f"[analyze_word] SIMPLIFIED Function called! Received word: {word}") # 수정된 로그 메시지
-    # -----------------------------
+    if morf is None:
+        return jsonify({"status": "error", "message": "Morfeusz2 analyzer not available."}), 500
+    
+    target_lang = request.args.get('target_lang', default='en', type=str)
+    print(f"[analyze_word] Target language requested: {target_lang} for word: {word}")
 
-    # --- 임시로 함수 로직 대부분 주석 처리 ---
-    # if morf is None:
-    #     logging.error("Morfeusz2 analyzer not available.") # 오류도 logging 사용 권장
-    #     return jsonify({"status": "error", "message": "Morfeusz2 analyzer not available."}), 500
-    # 
-    # target_lang = request.args.get('target_lang', default='en', type=str)
-    # # logging.info(f"[analyze_word] Target language requested: {target_lang} for word: {word}") # 필요시 INFO 레벨 사용
-    # 
-    # try:
-    #     original_word_lower = word.lower()
-    # 
-    #     # --- Attempt 1: Analyze the original word --- 
-    #     # logging.info(f"[analyze_word] Attempt 1: Analyzing original word '{original_word_lower}'")
-    #     analysis_result = morf.analyse(original_word_lower)
-    # 
-    #     # --- Improved Check: Ensure analysis has valid (non-'ign') results --- 
-    #     # Check if analysis_result is not empty AND if any tuple's tag is NOT 'ign'
-    #     is_analysis_valid = analysis_result and any(
-    #         len(r) >= 3 and isinstance(r[2], tuple) and len(r[2]) >= 3 and r[2][2].split(':', 1)[0] != 'ign'
-    #         for r in analysis_result
-    #     )
-    # 
-    #     if is_analysis_valid:
-    #         logging.warning(f"[analyze_word] Attempt 1 SUCCESS: Found valid analysis for '{original_word_lower}'")
-    #         # --- Format results and get translation --- 
-    #         formatted_results = _format_analysis_results(analysis_result)
-    #         if not formatted_results: # Should not happen if analysis_result was non-empty, but check anyway
-    #              # Should ideally log an error here
-    #              return jsonify({"status": "success", "word": original_word_lower, "data": [], "message": f"Analysis found but formatting failed for '{original_word_lower}'."}), 200
-    #         
-    #         primary_lemma = formatted_results[0].get("lemma")
-    #         cleaned_lemma = _clean_lemma(primary_lemma)
-    #         translation_result = None
-    #         if cleaned_lemma:
-    #             # --- 임시 디버깅 코드 (logging 사용) ---
-    #             temp_api_key = os.environ.get("LINGVANEX_API_KEY")
-    #             logging.warning(f"[analyze_word] DEBUG: LINGVANEX_API_KEY value before calling translate: {'SET' if temp_api_key else 'NOT SET'}")
-    #             # -----------------------------------
-    # 
-    #             # --- Use Lingvanex for Translation --- 
-    #             # logging.info(f"[analyze_word] DEBUG: Calling translate_text_lingvanex with target_lang = {target_lang}")
-    #             translation_result = translate_text_lingvanex(cleaned_lemma, target_lang)
-    #             # -------------------------------------
-    #         
-    #         response_data = {
-    #             "status": "success",
-    #             "word": original_word_lower,
-    #             "data": formatted_results,
-    #             "translation_en": translation_result # Renamed for clarity
-    #         }
-    #         # logging.info(f"[analyze_word] Returning JSON (translation is for {target_lang}): {response_data}")
-    #         return jsonify(response_data)
-    #     else:
-    #         # --- Handle cases where original analysis failed or only returned 'ign' --- 
-    #         if analysis_result: # If analysis_result exists but only contains 'ign'
-    #              logging.warning(f"[analyze_word] Attempt 1 FAILED: Only 'ign' analysis found for '{original_word_lower}'")
-    #         else: # If analysis_result is completely empty
-    #              logging.warning(f"[analyze_word] Attempt 1 FAILED: No analysis found for '{original_word_lower}'")
-    # 
-    #     # --- Attempt 2: Try finding suggestions by correcting potential diacritic errors --- 
-    #     # ... (Attempt 2 logic commented out) ...
-    # 
-    #     # --- All attempts failed --- 
-    #     logging.warning(f"[analyze_word] All attempts failed for '{original_word}'")
-    #     
-    #     # --- Attempt to translate the original word even if analysis failed --- 
-    #     # ... (Fallback translation logic commented out) ...
-    #
-    # except Exception as e:
-    #     logging.error(f"Error during analysis for '{word}': {e}")
-    #     # TODO: Localize message
-    #     return jsonify({"status": "error", "message": f"An error occurred during analysis: {e}"}), 500
-    # ---------------------------------------
+    try:
+        original_word_lower = word.lower()
 
-    # --- 즉시 간단한 응답 반환 ---
-    return jsonify({"status": "simplified_test", "message": f"analyze_word called for {word}"})
-    # -----------------------------
+        # --- Attempt 1: Analyze the original word --- 
+        print(f"[analyze_word] Attempt 1: Analyzing original word '{original_word_lower}'")
+        analysis_result = morf.analyse(original_word_lower)
+
+        is_analysis_valid = analysis_result and any(
+            len(r) >= 3 and isinstance(r[2], tuple) and len(r[2]) >= 3 and r[2][2].split(':', 1)[0] != 'ign'
+            for r in analysis_result
+        )
+
+        if is_analysis_valid:
+            print(f"[analyze_word] Attempt 1 SUCCESS: Found valid analysis for '{original_word_lower}'")
+            formatted_results = _format_analysis_results(analysis_result)
+            if not formatted_results:
+                 return jsonify({"status": "success", "word": original_word_lower, "data": [], "message": f"Analysis found but formatting failed for '{original_word_lower}'."}), 200
+            
+            primary_lemma = formatted_results[0].get("lemma")
+            cleaned_lemma = _clean_lemma(primary_lemma)
+            translation_result = None
+            if cleaned_lemma:
+                print(f"[analyze_word] DEBUG: Calling translate_text_lingvanex with target_lang = {target_lang}")
+                translation_result = translate_text_lingvanex(cleaned_lemma, target_lang)
+            
+            response_data = {
+                "status": "success",
+                "word": original_word_lower,
+                "data": formatted_results,
+                "translation_en": translation_result
+            }
+            print(f"[analyze_word] Returning JSON (translation is for {target_lang}): {response_data}")
+            return jsonify(response_data)
+        else:
+            if analysis_result:
+                 print(f"[analyze_word] Attempt 1 FAILED: Only 'ign' analysis found for '{original_word_lower}'")
+            else:
+                 print(f"[analyze_word] Attempt 1 FAILED: No analysis found for '{original_word_lower}'")
+
+        # --- Attempt 2: Try finding suggestions by correcting potential diacritic errors --- 
+        suggestion_found = False
+        suggested_word = None
+        original_word = original_word_lower
+        diacritic_map = {
+            'a': ['ą'], 'e': ['ę'], 'c': ['ć'], 'l': ['ł'],
+            'n': ['ń'], 'o': ['ó'], 's': ['ś'], 'z': ['ź', 'ż']
+        }
+        print(f"[analyze_word] Attempt 2: Trying diacritic suggestions for '{original_word}'")
+        for i, char in enumerate(original_word):
+            if char in diacritic_map:
+                for replacement in diacritic_map[char]:
+                    potential_suggestion = list(original_word)
+                    potential_suggestion[i] = replacement
+                    potential_suggestion = "".join(potential_suggestion)
+                    print(f"  -> Trying suggestion: '{potential_suggestion}'")
+                    suggestion_analysis = morf.analyse(potential_suggestion)
+                    print(f"  -> Raw analysis for '{potential_suggestion}': {suggestion_analysis}")
+                    is_suggestion_valid = suggestion_analysis and any(
+                        len(r) >= 3 and isinstance(r[2], tuple) and len(r[2]) >= 3 and r[2][2].split(':', 1)[0] != 'ign'
+                        for r in suggestion_analysis
+                    )
+                    if is_suggestion_valid:
+                        print(f"[analyze_word] Attempt 2 SUCCESS: Found valid analysis for suggested word '{potential_suggestion}'")
+                        suggested_word = potential_suggestion
+                        suggestion_found = True
+                        break
+                if suggestion_found:
+                    break
+        if suggestion_found and suggested_word:
+             suggestion_message = f"Did you mean '{suggested_word}'?"
+             response_data = {
+                 "status": "suggestion",
+                 "message": suggestion_message,
+                 "suggested_word": suggested_word,
+                 "original_word": original_word
+             }
+             print(f"[analyze_word] Returning suggestion JSON: {response_data}")
+             return jsonify(response_data)
+        else:
+             print(f"[analyze_word] Attempt 2 FAILED: No valid diacritic suggestion found for '{original_word}'")
+
+        # --- All attempts failed --- 
+        print(f"[analyze_word] All attempts failed for '{original_word}'")
+        failed_translation_result = None
+        print(f"[analyze_word] Trying to translate original word '{original_word}' as fallback.")
+        if original_word:
+            failed_translation_result = translate_text_lingvanex(original_word, target_lang)
+        final_response = {
+             "status": "success", 
+             "word": original_word, 
+             "data": [], 
+             "message": f"No analysis found for '{original_word}'."
+        }
+        if failed_translation_result:
+             final_response["translation_en"] = failed_translation_result
+             print(f"[analyze_word] Added fallback translation for '{original_word}': {failed_translation_result}")
+        return jsonify(final_response), 200
+
+    except Exception as e:
+        print(f"Error during analysis for '{word}': {e}")
+        return jsonify({"status": "error", "message": f"An error occurred during analysis: {e}"}), 500
 
 # --- Helper function to format analysis results (extracted logic) --- 
 def _format_analysis_results(analysis_result):
     formatted_results = []
-    logging.warning(f"Raw analysis result for formatting: {analysis_result}") 
+    print(f"Raw analysis result for formatting: {analysis_result}") 
     for r in analysis_result:
-        logging.warning(f"Processing analysis tuple: {r}") 
+        print(f"Processing analysis tuple: {r}") 
         if len(r) >= 3 and isinstance(r[2], tuple) and len(r[2]) >= 4:
             analysis_tuple = r[2]
             lemma = analysis_tuple[1]
@@ -275,21 +287,21 @@ def _format_analysis_results(analysis_result):
             qualifiers = main_qualifiers + extra_qualifiers
 
             actual_lemma = analysis_tuple[1] 
-            logging.warning(f"  -> Parsed: lemma='{actual_lemma}', tag='{tag}', qualifiers={qualifiers}")
+            print(f"  -> Parsed: lemma='{actual_lemma}', tag='{tag}', qualifiers={qualifiers}")
             formatted_results.append({
                 "lemma": actual_lemma,
                 "tag": tag,
                 "qualifiers": qualifiers
             })
         else:
-            logging.warning(f"  -> Skipping unexpected analysis tuple format: {r}")
+            print(f"  -> Skipping unexpected analysis tuple format: {r}")
     return formatted_results
 
 # --- Helper function to clean lemma (extracted logic) ---
 def _clean_lemma(lemma):
     if lemma and ':' in lemma:
         cleaned = lemma.split(':', 1)[0]
-        logging.warning(f"[lemma cleaning] Cleaned '{lemma}' to '{cleaned}'")
+        print(f"[lemma cleaning] Cleaned '{lemma}' to '{cleaned}'")
         return cleaned
     return lemma
 
@@ -336,7 +348,7 @@ def get_primary_analysis_tag(analysis_result):
                 # If primary is already m2/m3/f/n, don't switch back to m1 unless it's the only option.
                 # Let's stick with the first reasonable tag found or prefer m2/m3.
 
-    logging.warning(f"[Debug] Final primary tag identified: {primary_tag}")
+    print(f"[Debug] Final primary tag identified: {primary_tag}")
     return primary_tag
 
 # Helper function to extract the gender/animacy tag from a generated form's tag
@@ -378,31 +390,31 @@ def generate_and_format_forms(word, check_func):
                          primary_tag_full = current_tag_full
                          primary_base_tag = current_base_tag
                          primary_tag_gender = current_gender
-                         logging.warning(f"[generate_and_format_forms] Selected primary analysis: lemma='{primary_lemma}', tag='{primary_tag_full}'")
+                         print(f"[generate_and_format_forms] Selected primary analysis: lemma='{primary_lemma}', tag='{primary_tag_full}'")
                          break
                     elif primary_lemma is None:
                          primary_lemma = current_lemma
                          primary_tag_full = current_tag_full
                          primary_base_tag = current_base_tag
                          primary_tag_gender = current_gender
-                         logging.warning(f"[generate_and_format_forms] Selected fallback primary analysis (gender mismatch): lemma='{primary_lemma}', tag='{primary_tag_full}'")
+                         print(f"[generate_and_format_forms] Selected fallback primary analysis (gender mismatch): lemma='{primary_lemma}', tag='{primary_tag_full}'")
             else:
-                 logging.warning(f"[generate_and_format_forms] Skipping unexpected analysis tuple format in primary search: {r}")
+                 print(f"[generate_and_format_forms] Skipping unexpected analysis tuple format in primary search: {r}")
 
         if primary_lemma is None:
-             logging.warning(f"[generate_and_format_forms] No primary lemma matching check_func found for '{word}'.")
+             print(f"[generate_and_format_forms] No primary lemma matching check_func found for '{word}'.")
              # 오류 처리 수정: 빈 리스트와 메시지 반환
              return [], f"No analysis matching the required type (verb/declinable) found for '{word}'."
 
         generated_forms_raw = morf.generate(primary_lemma)
-        logging.warning(f"  -> Raw generated forms for primary lemma '{primary_lemma}': {generated_forms_raw}") # DEBUG
+        print(f"  -> Raw generated forms for primary lemma '{primary_lemma}': {generated_forms_raw}") # DEBUG
 
         formatted_forms = []
         present_3sg = None
         present_3pl = None
 
         for form_tuple in generated_forms_raw:
-            logging.warning(f"    >> Processing generated tuple: {form_tuple}") # DEBUG
+            print(f"    >> Processing generated tuple: {form_tuple}") # DEBUG
             if len(form_tuple) >= 3:
                 form = form_tuple[0]
                 form_lemma_full = form_tuple[1]
@@ -412,15 +424,15 @@ def generate_and_format_forms(word, check_func):
                 is_plural = ':pl:' in form_tag_full
                 is_singular = ':sg:' in form_tag_full
                 is_3rd_person = ':ter:' in form_tag_full
-                logging.warning(f"      Extracted: form='{form}', base_tag='{base_tag}', form_gender='{form_gender_animacy}', is_plural={is_plural}, full_tag='{form_tag_full}'") # DEBUG
+                print(f"      Extracted: form='{form}', base_tag='{base_tag}', form_gender='{form_gender_animacy}', is_plural={is_plural}, full_tag='{form_tag_full}'") # DEBUG
 
                 if base_tag == 'fin' and is_3rd_person:
                     if is_singular:
                         present_3sg = {"form": form, "tag": form_tag_full, "qualifiers": list(form_tuple[3:])}
-                        logging.warning(f"      >> Stored present_3sg: {present_3sg}")
+                        print(f"      >> Stored present_3sg: {present_3sg}")
                     elif is_plural:
                         present_3pl = {"form": form, "tag": form_tag_full, "qualifiers": list(form_tuple[3:])}
-                        logging.warning(f"      >> Stored present_3pl: {present_3pl}")
+                        print(f"      >> Stored present_3pl: {present_3pl}")
 
                 passes_check_func = check_func(base_tag)
                 passes_gender_filter = True
@@ -429,17 +441,17 @@ def generate_and_format_forms(word, check_func):
                         passes_gender_filter = False
                     elif primary_tag_gender in ['m2', 'm3'] and form_gender_animacy == 'm1' and is_plural:
                         passes_gender_filter = False
-                logging.warning(f"      Filters: check_func({base_tag}) -> {passes_check_func}, gender_filter -> {passes_gender_filter} (primary_word_gender: {primary_tag_gender}, form_gender: {form_gender_animacy}, plural: {is_plural})") # DEBUG
+                print(f"      Filters: check_func({base_tag}) -> {passes_check_func}, gender_filter -> {passes_gender_filter} (primary_word_gender: {primary_tag_gender}, form_gender: {form_gender_animacy}, plural: {is_plural})") # DEBUG
 
                 if passes_check_func and passes_gender_filter:
-                    logging.warning(f"      >>>>> Filter PASSED for form '{form}' <<<<<" ) # DEBUG
+                    print(f"      >>>>> Filter PASSED for form '{form}' <<<<<" ) # DEBUG
                     formatted_forms.append({
                         "form": form,
                         "tag": form_tag_full,
                         "qualifiers": list(form_tuple[3:])
                     })
                 else:
-                     logging.warning(f"      >>>>> Filter FAILED for form '{form}' <<<<<") # DEBUG
+                     print(f"      >>>>> Filter FAILED for form '{form}' <<<<<") # DEBUG
 
         # --- Add 'niech' forms for Imperative ---
         if check_func == is_verb and present_3sg and present_3pl:
@@ -448,22 +460,22 @@ def generate_and_format_forms(word, check_func):
             # Tag needs adjustment - maybe 'impt_periph:sg:ter' or similar?
             # For now, just use original tag with a note or custom tag
             impt_tag_sg = 'impt_periph:sg:ter'
-            logging.warning(f"      >> Generating 'niech' form (sg): {niech_3sg} with tag {impt_tag_sg}")
+            print(f"      >> Generating 'niech' form (sg): {niech_3sg} with tag {impt_tag_sg}")
             formatted_forms.append({"form": niech_3sg, "tag": impt_tag_sg, "qualifiers": present_3sg['qualifiers']})
 
             # Create 3rd person plural imperative with 'niech'
             niech_3pl = f"niech {present_3pl['form']}"
             impt_tag_pl = 'impt_periph:pl:ter'
-            logging.warning(f"      >> Generating 'niech' form (pl): {niech_3pl} with tag {impt_tag_pl}")
+            print(f"      >> Generating 'niech' form (pl): {niech_3pl} with tag {impt_tag_pl}")
             formatted_forms.append({"form": niech_3pl, "tag": impt_tag_pl, "qualifiers": present_3pl['qualifiers']})
         # ---------------------------------------
 
-        logging.warning(f"  -> Final formatted forms count for lemma '{primary_lemma}': {len(formatted_forms)}") # DEBUG
+        print(f"  -> Final formatted forms count for lemma '{primary_lemma}': {len(formatted_forms)}") # DEBUG
         # Return lemma and forms separately
         return [{"lemma": primary_lemma, "forms": formatted_forms}], None # Return data and no error message
 
     except Exception as e:
-        logging.error(f"Error during form generation for '{word}': {e}")
+        print(f"Error during form generation for '{word}': {e}")
         # Return None and error message
         return None, f"An error occurred during form generation: {e}"
 
@@ -484,6 +496,13 @@ def decline_word(word):
     if data is None or not data: # Check if data is None or empty list
         return jsonify({"status": "success", "word": word, "data": [], "message": f"No declension data found for '{word}' or word type mismatch."}), 200
     return jsonify({"status": "success", "word": word, "data": data})
+
+# --- 간단한 테스트 경로 추가 ---
+@app.route('/test_log/<item>', methods=['GET'])
+def test_log_route(item):
+    logging.warning(f"[test_log_route] Function called! Received item: {item}")
+    return jsonify({"status": "success", "message": f"Test route received: {item}"}) 
+# ---------------------------
 
 if __name__ == '__main__':
     # Use PORT environment variable if available (for Cloud Run), otherwise default to 8080
