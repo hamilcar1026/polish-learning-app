@@ -53,11 +53,12 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
   }
 
   Future<void> setLanguage(String languageCode) async {
-    if (!['en', 'pl', 'ko'].contains(languageCode)) return; // Validate
+    // Validate language code against supported locales
+    if (!['en', 'pl', 'ko', 'ru'].contains(languageCode)) return; // Add 'ru'
     await _initPrefs();
     await _prefs?.setString(_languagePrefKey, languageCode);
     state = state.copyWith(languageCode: languageCode);
-     print("Settings saved: Language=$languageCode"); // Debug print
+    print("Settings saved: Language=$languageCode"); // Debug print
   }
 
   Future<void> setFontSizeFactor(double factor) async {

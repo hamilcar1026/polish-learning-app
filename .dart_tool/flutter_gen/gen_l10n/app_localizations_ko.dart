@@ -296,4 +296,91 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get drawerNoFavorites => '즐겨찾기에 추가된 단어가 없습니다.';
+
+  @override
+  String get settingsThemeSystem => '시스템 기본값';
+
+  @override
+  String get tableHeaderCase => '격';
+
+  @override
+  String get tableHeaderSingular => '단수';
+
+  @override
+  String get tableHeaderPlural => '복수';
+
+  @override
+  String get tableHeaderPerson => '인칭';
+
+  @override
+  String get caseNominative => '주격';
+
+  @override
+  String get caseGenitive => '생격';
+
+  @override
+  String get caseDative => '여격';
+
+  @override
+  String get caseAccusative => '대격';
+
+  @override
+  String get caseInstrumental => '조격';
+
+  @override
+  String get caseLocative => '처격';
+
+  @override
+  String get caseVocative => '호격';
+
+  @override
+  String get settingsContributors => '기여자';
+
+  @override
+  String get personLabelFirst => '1인칭 (나/우리)';
+
+  @override
+  String get personLabelSecond => '2인칭 (너/너희)';
+
+  @override
+  String get personLabelThird => '3인칭 (그/그녀/그것/그들)';
+
+  @override
+  String get genderLabelM1 => '남성 인물';
+
+  @override
+  String get genderLabelM2 => '남성 동물';
+
+  @override
+  String get genderLabelM3 => '남성 사물';
+
+  @override
+  String get genderLabelF => '여성';
+
+  @override
+  String get genderLabelN1 => '중성 1';
+
+  @override
+  String get genderLabelN2 => '중성 2';
+
+  @override
+  String declensionTableTitle(String lemma) {
+    return '\"$lemma\" 곡용';
+  }
+
+  @override
+  String conjugationTableTitle(String lemma) {
+    return '\"$lemma\" 활용';
+  }
+
+  @override
+  String get translationLabel => '번역';
+
+  @override
+  String suggestionDidYouMean(String suggestedWord) {
+    return '혹시 \"$suggestedWord\"(을)를 찾으셨나요?';
+  }
+
+  @override
+  String get suggestionErrorFallback => '제안을 표시하는 중 오류가 발생했습니다.';
 }

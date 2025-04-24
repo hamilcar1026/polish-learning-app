@@ -4,6 +4,7 @@ import 'package:flutter_tts/flutter_tts.dart'; // Import flutter_tts
 import 'package:flutter_gen/gen_l10n/app_localizations.dart'; // Import generated localizations
 import '../providers/api_providers.dart';
 import '../providers/recent_searches_provider.dart'; // Import recent searches provider
+import '../providers/settings_provider.dart'; // Import settings provider
 import '../models/analysis_result.dart'; // Import AnalysisResult model
 import '../models/conjugation_result.dart'; // Import ConjugationResult model
 import '../models/declension_result.dart'; // Import DeclensionResult model
@@ -172,7 +173,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               onPressed: () => Scaffold.of(context).openDrawer(), // Open the drawer
             ),
           ),
-          title: Text(l10n.appTitle), // Use localized title
+          title: InkWell( // Wrap Title with InkWell
+            onTap: () {
+              // Clear the text field
+              _controller.clear();
+              // Reset the search term provider
+              ref.read(searchTermProvider.notifier).state = '';
+              // Reset the submitted word provider to clear results
+              ref.read(submittedWordProvider.notifier).state = null;
+              print("[AppBar Title Tap] Search state reset.");
+            },
+            child: Text(l10n.appTitle), // Use localized title
+          ),
           actions: [ // Add actions for the AppBar
             IconButton(
               icon: const Icon(Icons.settings),
@@ -217,11 +229,50 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   : Consumer(
                       builder: (context, ref, child) {
                         print("[Consumer builder] Watching analysisProvider for: \"$submittedWord\"");
-                        final analysisAsyncValue = ref.watch(analysisProvider(submittedWord));
+                        // Get the current language code from settings
+                        final currentLang = ref.watch(languageCodeProvider); 
+                        // Create params object
+                        final analysisParams = AnalysisParams(word: submittedWord, targetLang: currentLang);
+                        // Watch the provider with the params object
+                        final analysisAsyncValue = ref.watch(analysisProvider(analysisParams));
                         
                         return analysisAsyncValue.when(
                           data: (analysisResponse) {
-                            print("[Consumer builder - data] Analysis received");
+                            print("[Consumer builder - data] Analysis received with status: ${analysisResponse.status}");
+
+                            // --- Handle Suggestion Status --- 
+                            if (analysisResponse.status == 'suggestion') {
+                              // Ensure suggested_word is not null before showing suggestion UI
+                              if (analysisResponse.suggested_word != null) {
+                                final suggested = analysisResponse.suggested_word!;
+                                return Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      // Use localized string for the suggestion message
+                                      Text(l10n.suggestionDidYouMean(suggested)), 
+                                      TextButton(
+                                        onPressed: () {
+                                          print("Suggestion '$suggested' tapped. Submitting new search.");
+                                          // Update the text field and providers for the new search
+                                          _controller.text = suggested;
+                                          _controller.selection = TextSelection.fromPosition(TextPosition(offset: suggested.length));
+                                          ref.read(searchTermProvider.notifier).state = suggested;
+                                          _submitSearch(suggested);
+                                        },
+                                        child: Text("'$suggested'"), // Show clickable suggestion word
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              } else {
+                                // Fallback if suggestion status is received but suggested_word is null (shouldn't happen ideally)
+                                // Use the new localized fallback message
+                                return Center(child: Text(analysisResponse.message ?? l10n.suggestionErrorFallback)); 
+                              }
+                            }
+
+                            // --- Handle Success Status (existing logic) --- 
                             final bool isAnalysisSuccess = analysisResponse.status == 'success' &&
                                                          analysisResponse.data != null &&
                                                          analysisResponse.data!.isNotEmpty;
@@ -229,9 +280,67 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             final bool isDeclinable = isAnalysisSuccess && _isDeclinableBasedOnAnalysis(analysisResponse.data);
                             
                             if (!isAnalysisSuccess) {
-                              // Use localized message for analysis failure
-                              return Center(
-                                child: Text(analysisResponse.message ?? l10n.noAnalysisFound(submittedWord))
+                              // --- Handle Analysis Failure --- 
+                              // Even if analysis fails, we might have a translation or message from the backend.
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  // Show a simplified header with title, buttons, and potential translation
+                                  Card(
+                                    elevation: 2.0,
+                                    margin: const EdgeInsets.symmetric(vertical: 8.0),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Flexible(
+                                                child: Text(
+                                                  // Use submittedWord directly as analysisResponse.word doesn't exist
+                                                  '"${submittedWord ?? ''}" - ${l10n.analysisTitle}', 
+                                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                                  overflow: TextOverflow.ellipsis, 
+                                                ),
+                                              ),
+                                              // Only show TTS button if submittedWord is available
+                                              if (_isTtsInitialized && submittedWord != null)
+                                                IconButton(
+                                                  icon: const Icon(Icons.volume_up),
+                                                  // Speak submittedWord
+                                                  onPressed: () => _speak(submittedWord!), 
+                                                  tooltip: l10n.pronounceWordTooltip, 
+                                                  iconSize: 20, 
+                                                  padding: const EdgeInsets.only(left: 8),
+                                                  constraints: const BoxConstraints(),
+                                                ),
+                                              // Consider disabling favorite button here as there's no lemma
+                                            ],
+                                          ),
+                                          // Display translation if available (even on failure)
+                                          if (analysisResponse.translation_en != null && analysisResponse.translation_en!.isNotEmpty)
+                                            Padding(
+                                              padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                                              child: Text(
+                                                "${l10n.translationLabel}: ${analysisResponse.translation_en!}",
+                                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontStyle: FontStyle.italic, color: Colors.deepPurple),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  // Display the specific failure message from the backend or the generic one
+                                  Center(
+                                    child: Text(
+                                      analysisResponse.message ?? l10n.noAnalysisFound(submittedWord ?? ''),
+                                      textAlign: TextAlign.center,
+                                    )
+                                  ),
+                                ],
                               );
                             }
 
@@ -247,8 +356,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               tabs.add(Tab(text: l10n.conjugationTitle));
                               tabViews.add(_buildConjugationTab(submittedWord, l10n));
                             }
-                             tabs.add(Tab(text: l10n.grammarTitle));
-                             tabViews.add(Center(child: Text('Grammar info for "$submittedWord" coming soon')));
+                             // REMOVE Grammar tab and view
+                             // tabs.add(Tab(text: l10n.grammarTitle));
+                             // tabViews.add(Center(child: Text('Grammar info for "$submittedWord" coming soon')));
 
                             // Need to rebuild TabController if length changes - this is complex with DefaultTabController
                             // For simplicity, let's assume 3 tabs if either verb or declinable, else 1 tab (Analysis only view?)
@@ -389,6 +499,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 )
               ],
             ),
+            // Display the translation here if available
+            if (analysisResponse.translation_en != null && analysisResponse.translation_en!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0, bottom: 4.0), // Add some spacing
+                child: Text(
+                  "${l10n.translationLabel}: ${analysisResponse.translation_en!}", // Display label + translation
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontStyle: FontStyle.italic, color: Colors.deepPurple), // Style the translation
+                ),
+              ),
             const SizedBox(height: 8),
             // Use the helper function to display localized analysis strings
             ...analysisResponse.data!.map((result) { 
@@ -457,7 +576,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           mainAxisSize: MainAxisSize.min, // Important for proper sizing
                           children: [
                              Text(
-                                '${l10n.conjugationTitle} for "${lemmaData.lemma}"',
+                                l10n.conjugationTableTitle(lemmaData.lemma),
                                 style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                              ),
                              const SizedBox(height: 10),
@@ -508,9 +627,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             }
 
             // Assign the form to the singular or plural slot for this case
+            // Avoid overwriting if multiple forms map to the same slot (e.g., different gender variations not shown here)
+            // For simplicity, we take the first one encountered.
             if (numberCode == 'sg') {
-              // Avoid overwriting if multiple forms map to the same slot (e.g., different gender variations not shown here)
-              // For simplicity, we take the first one encountered.
               declensionTable[caseCode]!['sg'] ??= formInfo.form; 
             } else if (numberCode == 'pl') {
               declensionTable[caseCode]!['pl'] ??= formInfo.form;
@@ -523,13 +642,31 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     // Display as a card with a table
     // No Card needed here as the tab builder wraps it
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      // Center the children horizontally
+      crossAxisAlignment: CrossAxisAlignment.center, 
       mainAxisSize: MainAxisSize.min, 
       children: [
-        Text(
-          // Use the passed l10n instance
-          '${l10n.declensionTitle} for "${lemmaData.lemma}"', 
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+        Builder( // Use Builder to get context for theme/l10n access
+          builder: (context) {
+            final l10n = AppLocalizations.of(context)!;
+            // Get the first tag (assuming it's representative, handle potential emptiness)
+            String firstTagString = lemmaData.forms.isNotEmpty ? lemmaData.forms.first.tag : '';
+            String translatedTagString = '';
+
+            if (firstTagString.isNotEmpty) {
+              // Split the tag and translate each part using the existing helper
+              translatedTagString = firstTagString
+                  .split(':')
+                  .map((part) => _translateGrammarTerm(part, l10n)) // Translate each part
+                  .join(':'); // Join back with colons
+            }
+            
+            return Text(
+              // Append translated tag if available
+              '${l10n.declensionTableTitle(lemmaData.lemma)}${translatedTagString.isNotEmpty ? ' ($translatedTagString)' : ''}', 
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            );
+          }
         ),
         const SizedBox(height: 16),
         
@@ -538,55 +675,57 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           scrollDirection: Axis.horizontal,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Table(
-              border: TableBorder.all(color: Colors.grey.shade300),
-              columnWidths: const {
-                0: IntrinsicColumnWidth(), // Case column
-                1: IntrinsicColumnWidth(), // Singular column
-                2: IntrinsicColumnWidth(), // Plural column
-              },
-              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-              children: [
-                // Header row
-                TableRow(
-                  decoration: BoxDecoration(color: Colors.grey.shade100),
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text('Case', style: TextStyle(fontWeight: FontWeight.bold)), 
-                    ),
-                    const Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text('Singular', style: TextStyle(fontWeight: FontWeight.bold)), 
-                    ),
-                    const Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text('Plural', style: TextStyle(fontWeight: FontWeight.bold)), 
-                    ),
-                  ],
-                ),
-                // Data rows
-                ...casesOrder.map((caseCode) {
-                  final forms = declensionTable[caseCode] ?? {};
-                  return TableRow(
+            // Center the Table widget horizontally
+            child: Center( 
+              child: Table(
+                border: TableBorder.all(color: Colors.grey.shade300),
+                columnWidths: const {
+                  0: IntrinsicColumnWidth(), // Case column
+                  1: IntrinsicColumnWidth(), // Singular column
+                  2: IntrinsicColumnWidth(), // Plural column
+                },
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                children: [
+                  // Header row
+                  TableRow(
+                    decoration: BoxDecoration(color: Colors.grey.shade100),
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        // Case names are grammatical terms, typically not localized
-                        child: Text(_getCaseName(caseCode)), 
+                        child: Text(l10n.tableHeaderCase, style: TextStyle(fontWeight: FontWeight.bold)), 
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(forms['sg'] ?? '-'), // Display '-' if null
+                        child: Text(l10n.tableHeaderSingular, style: TextStyle(fontWeight: FontWeight.bold)), 
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(forms['pl'] ?? '-'), // Display '-' if null
+                        child: Text(l10n.tableHeaderPlural, style: TextStyle(fontWeight: FontWeight.bold)), 
                       ),
                     ],
-                  );
-                }).toList(),
-              ],
+                  ),
+                  // Data rows
+                  ...casesOrder.map((caseCode) {
+                    final forms = declensionTable[caseCode] ?? {};
+                    return TableRow(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(_getCaseName(caseCode, l10n)), 
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(forms['sg'] ?? '-'), // Display '-' if null
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(forms['pl'] ?? '-'), // Display '-' if null
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ],
+              ),
             ),
           ),
         ),
@@ -594,12 +733,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  // --- Helper Widget to build the DataTable for conjugation ---
+  // --- Helper Widget to build the conjugation Table (replaced DataTable) ---
   Widget _buildConjugationTable(List<ConjugationForm> forms, bool isPastTense, AppLocalizations l10n) {
     // Group forms by person and number
     final Map<String, Map<String, String>> tableData = {}; // {personLabel: {numberLabel: form}}
     final personOrder = ['1st (ja/my)', '2nd (ty/wy)', '3rd (on/ona/ono/oni/one)'];
-    final numberOrder = ['Singular', 'Plural'];
+    // final numberOrder = ['Singular', 'Plural']; // Not needed for Table structure
 
     for (var formInfo in forms) {
       final tagMap = _parseTag(formInfo.tag);
@@ -608,15 +747,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       final number = tagMap['number'];
       final gender = tagMap['gender']; // Needed for past tense
       
-      final String personKey = _getPersonLabel(person);
+      // Pass l10n to helper functions
+      final String personKey = _getPersonLabel(person, l10n); 
       final String numberKey = (number == 'sg') ? 'Singular' : (number == 'pl') ? 'Plural' : '-';
 
       if (personKey != '-' && numberKey != '-') {
         if (!tableData.containsKey(personKey)) tableData[personKey] = {};
 
         if (isPastTense && gender != null) {
-          // Past tense: Append gender info
-          String displayForm = "$form (${_getGenderLabel(gender).split(' ').first})"; 
+          // Past tense: Append gender info using localized label
+          String displayForm = "$form (${_getGenderLabel(gender, l10n)})"; 
           if (tableData[personKey]![numberKey] != null && tableData[personKey]![numberKey] != '-') {
             // Append if multiple genders exist
             tableData[personKey]![numberKey] = "${tableData[personKey]![numberKey]}, $displayForm";
@@ -624,35 +764,66 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             tableData[personKey]![numberKey] = displayForm;
           }
         } else if (!isPastTense) {
-          // Other tenses: Directly assign form
+          // Other tenses: Directly assign form (Handles potential overwrites from impt/impt_periph)
           tableData[personKey]![numberKey] = form;
         }
       }
     }
 
-    // Build DataTable
-    return DataTable(
-      columnSpacing: 20.0,
-      headingRowHeight: 40.0,
-      dataRowMinHeight: 35.0,
-      dataRowMaxHeight: 45.0, // Allow slightly more height for past tense genders
-      columns: const [
-        DataColumn(label: Text('Person', style: TextStyle(fontWeight: FontWeight.bold))),
-        DataColumn(label: Text('Singular', style: TextStyle(fontWeight: FontWeight.bold))),
-        DataColumn(label: Text('Plural', style: TextStyle(fontWeight: FontWeight.bold))),
+    // Build Table (similar to _buildDeclensionResults)
+    return Table(
+      border: TableBorder.all(color: Colors.grey.shade300),
+      columnWidths: const {
+        0: IntrinsicColumnWidth(), // Person column
+        1: IntrinsicColumnWidth(), // Singular column
+        2: IntrinsicColumnWidth(), // Plural column
+      },
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      children: [
+        // Header row
+        TableRow(
+          decoration: BoxDecoration(color: Colors.grey.shade100),
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(l10n.tableHeaderPerson, style: TextStyle(fontWeight: FontWeight.bold)), 
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(l10n.tableHeaderSingular, style: TextStyle(fontWeight: FontWeight.bold)), 
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(l10n.tableHeaderPlural, style: TextStyle(fontWeight: FontWeight.bold)), 
+            ),
+          ],
+        ),
+        // Data rows
+        ...personOrder.map((personKey) {
+          final personForms = tableData[personKey] ?? {};
+          return TableRow(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(personKey), 
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                // Allow slightly more height for past tense genders by using Flexible
+                child: Text(personForms['Singular'] ?? '-'), 
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(personForms['Plural'] ?? '-'), 
+              ),
+            ],
+          );
+        }).toList(),
       ],
-      rows: personOrder.map((personKey) {
-        final personForms = tableData[personKey] ?? {};
-        return DataRow(cells: [
-          DataCell(Text(personKey)),
-          DataCell(Text(personForms['Singular'] ?? '-')),
-          DataCell(Text(personForms['Plural'] ?? '-')),
-        ]);
-      }).toList(),
     );
   }
 
-  // --- Helper Function to prepare Conjugation Data --- 
+  // --- Helper Function to prepare Conjugation Data ---
   Map<String, List<ConjugationForm>> _prepareGroupedConjugationForms(ConjugationResult? conjugationData) {
     // The keys of this map will now be localization keys (e.g., 'conjugationCategoryPresentIndicative')
     final Map<String, List<ConjugationForm>> groupedFormsByKey = {}; 
@@ -770,14 +941,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
      for (String categoryKey in sortedGroupKeys) {
        final formsInCategory = groupedForms[categoryKey]!;
        final bool isExpanded = _expandedCategories[categoryKey] ?? false; 
-       // Determine if table should be used based on the KEY
-       final bool useDataTable = [
+       
+       // Determine if standard conjugation table should be used
+       final bool useConjugationTable = [
             'conjugationCategoryPresentIndicative', 
             'conjugationCategoryFuturePerfectiveIndicative',
             'conjugationCategoryFutureImperfectiveIndicative',
             'conjugationCategoryPastTense',
             'conjugationCategoryImperative' 
-                            ].contains(categoryKey);
+       ].contains(categoryKey);
+
+       // Determine if participle declension table should be used
+       final bool useParticipleTable = [
+           'conjugationCategoryPresentActiveParticiple', 
+           'conjugationCategoryPastPassiveParticiple'
+       ].contains(categoryKey);
 
        sections.add(
          InkWell(
@@ -802,23 +980,29 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
          sections.add(
            Padding(
              padding: const EdgeInsets.only(top: 4.0, bottom: 8.0),
-             child: useDataTable
-               ? SingleChildScrollView( // Horizontal scroll for table
+             child: useConjugationTable
+               ? SingleChildScrollView( // Horizontal scroll for conjugation table
                    scrollDirection: Axis.horizontal,
                    child: _buildConjugationTable(formsInCategory, categoryKey == 'conjugationCategoryPastTense', l10n),
                  )
-               : Column( // Vertical list for non-table items
-                   crossAxisAlignment: CrossAxisAlignment.start,
-                   mainAxisSize: MainAxisSize.min,
-                   children: formsInCategory.map((formInfo) => ListTile(
-                     dense: true,
-                     title: Text(formInfo.form),
-                     subtitle: Text(
-                       _getShortTagDescription(formInfo.tag), 
-                       style: const TextStyle(fontSize: 12, color: Colors.grey)
+               : useParticipleTable 
+                   ? SingleChildScrollView( // Horizontal scroll for participle table
+                       scrollDirection: Axis.horizontal,
+                       child: _buildParticipleDeclensionTable(formsInCategory, l10n), // Call the new function
+                     )
+                   : Column( // Vertical list for other non-table items (inf, pcon, pant, ger, etc.)
+                       crossAxisAlignment: CrossAxisAlignment.start,
+                       mainAxisSize: MainAxisSize.min,
+                       children: formsInCategory.map((formInfo) => ListTile(
+                         dense: true,
+                         title: Text(formInfo.form),
+                         subtitle: Text(
+                           // Translate the full tag string part by part
+                           formInfo.tag.split(':').map((part) => _translateGrammarTerm(part, l10n)).join(':'),
+                           style: const TextStyle(fontSize: 12, color: Colors.grey)
+                         ),
+                       )).toList(),
                      ),
-                   )).toList(),
-                 ),
            )
          );
        }
@@ -826,6 +1010,98 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
      }
      return sections;
    }
+
+  // --- Helper function to build Participle Declension Table ---
+  // (Similar structure to _buildDeclensionResults, but parses pact/ppas tags)
+  Widget _buildParticipleDeclensionTable(List<ConjugationForm> forms, AppLocalizations l10n) {
+    Map<String, Map<String, String>> declensionTable = {}; // {caseCode: {sg: form, pl: form}}
+    final casesOrder = ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc']; 
+
+    // Find the lemma from the first form (assuming all forms share the same lemma)
+    final String lemma = forms.isNotEmpty ? _parseTag(forms.first.tag)['lemma'] ?? 'Participle' : 'Participle'; 
+    print("[_buildParticipleDeclensionTable] Building table for: $lemma");
+
+    for (var formInfo in forms) {
+      final tagMap = _parseTag(formInfo.tag); 
+      // Get case and number from the parsed map (using keys defined in _parseTag for pact/ppas)
+      final casePart = tagMap['case']; 
+      final numberCode = tagMap['number'];
+      // We will ignore gender for simplicity in this table structure
+
+      if (casePart != null && numberCode != null) {
+        // Split combined cases like "gen.acc" or "nom.acc.voc"
+        final individualCases = casePart.split('.'); 
+
+        for (var caseCode in individualCases) {
+           // Ensure the case is one we want to display in the table
+          if (casesOrder.contains(caseCode)) { 
+            if (!declensionTable.containsKey(caseCode)) {
+              declensionTable[caseCode] = {};
+            }
+
+            // Assign the form to the singular or plural slot for this case
+            // Take the first form encountered for a given slot
+            if (numberCode == 'sg') {
+              declensionTable[caseCode]!['sg'] ??= formInfo.form; 
+            } else if (numberCode == 'pl') {
+              declensionTable[caseCode]!['pl'] ??= formInfo.form;
+            }
+          }
+        }
+      }
+    }
+
+    // Build the Table widget (copied styling from conjugation table)
+    return Table(
+      border: TableBorder.all(color: Colors.grey.shade300),
+      columnWidths: const {
+        0: IntrinsicColumnWidth(), // Case column
+        1: IntrinsicColumnWidth(), // Singular column
+        2: IntrinsicColumnWidth(), // Plural column
+      },
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      children: [
+        // Header row
+        TableRow(
+          decoration: BoxDecoration(color: Colors.grey.shade100),
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(l10n.tableHeaderCase, style: TextStyle(fontWeight: FontWeight.bold)), 
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(l10n.tableHeaderSingular, style: TextStyle(fontWeight: FontWeight.bold)), 
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(l10n.tableHeaderPlural, style: TextStyle(fontWeight: FontWeight.bold)), 
+            ),
+          ],
+        ),
+        // Data rows
+        ...casesOrder.map((caseCode) {
+          final forms = declensionTable[caseCode] ?? {};
+          return TableRow(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(_getCaseName(caseCode, l10n)), // Pass l10n
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(forms['sg'] ?? '-'), 
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(forms['pl'] ?? '-'), 
+              ),
+            ],
+          );
+        }).toList(),
+      ],
+    );
+  }
 
   // --- Helper functions for tag parsing ---
 
@@ -845,10 +1121,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case 'fin': // Finite verb
       case 'bedzie': // Future auxiliary
       case 'impt': // Imperative
+      case 'impt_periph': // Periphrastic imperative (niech + fin)
         if (parts.length > 1) tagMap['number'] = parts[1];
         if (parts.length > 2) tagMap['person'] = parts[2];
-        if (parts.length > 3) tagMap['tense_aspect'] = parts[3];
-        if (parts.length > 4) tagMap['mood'] = parts[4];
+        if (parts.length > 3) tagMap['tense_aspect'] = parts[3]; // Keep original aspect
+        // Optional: Add mood specifically if needed
+        // if (tagMap['base'] == 'impt_periph') tagMap['mood'] = 'imperative_periphrastic';
         break;
       case 'inf': // Infinitive
         if (parts.length > 1) tagMap['aspect'] = parts[1];
@@ -901,6 +1179,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case 'bedzie': return 'conjugationCategoryFutureImperfectiveIndicative';
       case 'praet': return 'conjugationCategoryPastTense';
       case 'impt': return 'conjugationCategoryImperative';
+      case 'impt_periph': return 'conjugationCategoryImperative';
       case 'inf': return 'conjugationCategoryInfinitive';
       case 'pcon': return 'conjugationCategoryPresentAdverbialParticiple';
       case 'pant': return 'conjugationCategoryAnteriorAdverbialParticiple';
@@ -910,43 +1189,53 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
-  String _getPersonLabel(String? personCode) {
-    const map = {'pri': '1st (ja/my)', 'sec': '2nd (ty/wy)', 'ter': '3rd (on/ona/ono/oni/one)'};
-    return map[personCode] ?? personCode ?? '-';
+  String _getPersonLabel(String? personCode, AppLocalizations l10n) {
+    switch (personCode) {
+      case 'pri': return l10n.personLabelFirst;
+      case 'sec': return l10n.personLabelSecond;
+      case 'ter': return l10n.personLabelThird;
+      default: return personCode ?? '-';
+    }
   }
 
   String _getNumberLabel(String? numberCode) {
+    // This function doesn't seem to be used anymore for table headers,
+    // but keep it for potential future use or other contexts.
+    // If it needs localization, add keys similar to person/gender.
     const map = {'sg': 'Singular', 'pl': 'Plural'};
     return map[numberCode] ?? numberCode ?? '-';
   }
 
-  String _getGenderLabel(String? genderCode) {
-    const map = {
-      'm1': 'Masc. Personal (męskoosobowy)',
-      'm2': 'Masc. Animate (męskożywotny)',
-      'm3': 'Masc. Inanimate (męskorzeczowy)',
-      'f': 'Feminine (żeński)',
-      'n1': 'Neuter (nijaki - type 1)',
-      'n2': 'Neuter (nijaki - type 2)',
-    };
-    return map[genderCode] ?? genderCode ?? '-';
+  String _getGenderLabel(String? genderCode, AppLocalizations l10n) {
+    switch (genderCode) {
+      case 'm1': return l10n.genderLabelM1;
+      case 'm2': return l10n.genderLabelM2;
+      case 'm3': return l10n.genderLabelM3;
+      case 'f': return l10n.genderLabelF;
+      case 'n1': return l10n.genderLabelN1;
+      case 'n2': return l10n.genderLabelN2;
+      default: return genderCode ?? '-';
+    }
   }
 
-  String _getCaseName(String? caseCode) {
-    const caseMap = {
-      'nom': 'Nominative (Mianownik)',
-      'gen': 'Genitive (Dopełniacz)',
-      'dat': 'Dative (Celownik)',
-      'acc': 'Accusative (Biernik)',
-      'inst': 'Instrumental (Narzędnik)',
-      'loc': 'Locative (Miejscownik)',
-      'voc': 'Vocative (Wołacz)',
-    };
-    return caseMap[caseCode] ?? caseCode ?? '-';
+  String _getCaseName(String? caseCode, AppLocalizations l10n) {
+    // Get the AppLocalizations instance from the context
+    // Note: This assumes the function is called within a context where l10n is available.
+    // If called from a place without context, this needs adjustment.
+    switch (caseCode) {
+      case 'nom': return l10n.caseNominative;
+      case 'gen': return l10n.caseGenitive;
+      case 'dat': return l10n.caseDative;
+      case 'acc': return l10n.caseAccusative;
+      case 'inst': return l10n.caseInstrumental;
+      case 'loc': return l10n.caseLocative;
+      case 'voc': return l10n.caseVocative;
+      default: return caseCode ?? '-'; // Fallback to the code itself or '-'
+    }
   }
 
   // Helper to get a short tag description for list items
-  String _getShortTagDescription(String tag) {
+  String _getShortTagDescription(String tag, AppLocalizations l10n) {
     final tagMap = _parseTag(tag);
     final base = tagMap['base'] ?? '';
     final aspect = tagMap['aspect'] ?? '';
@@ -959,7 +1248,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     
     // Try other common fields
     if (tagMap.containsKey('mood')) return tagMap['mood']!;
-    if (tagMap.containsKey('case')) return _getCaseName(tagMap['case']);
+    if (tagMap.containsKey('case')) return _getCaseName(tagMap['case'], l10n);
 
     return tagMap['full_tag'] ?? tag; // Fallback to full tag
   }

@@ -94,5 +94,128 @@
   "drawerClearButton": "지우기",
   "drawerNoRecentSearches": "최근 검색어가 없습니다.",
   "drawerFavorites": "즐겨찾기",
-  "drawerNoFavorites": "즐겨찾기에 추가된 단어가 없습니다."
+  "drawerNoFavorites": "즐겨찾기에 추가된 단어가 없습니다.",
+  "settingsThemeSystem": "시스템 기본값",
+  "@settingsThemeSystem": {
+    "description": "시스템 테마 옵션 레이블"
+  },
+  "tableHeaderCase": "격",
+  "@tableHeaderCase": {
+    "description": "곡용/분사 테이블의 격 열 헤더"
+  },
+  "tableHeaderSingular": "단수",
+  "@tableHeaderSingular": {
+    "description": "테이블의 단수 열 헤더"
+  },
+  "tableHeaderPlural": "복수",
+  "@tableHeaderPlural": {
+    "description": "테이블의 복수 열 헤더"
+  },
+  "tableHeaderPerson": "인칭",
+  "@tableHeaderPerson": {
+    "description": "활용 테이블의 인칭 열 헤더"
+  },
+  "caseNominative": "주격",
+  "@caseNominative": {
+    "description": "주격 이름"
+  },
+  "caseGenitive": "생격",
+  "@caseGenitive": {
+    "description": "생격 이름"
+  },
+  "caseDative": "여격",
+  "@caseDative": {
+    "description": "여격 이름"
+  },
+  "caseAccusative": "대격",
+  "@caseAccusative": {
+    "description": "대격 이름"
+  },
+  "caseInstrumental": "조격",
+  "@caseInstrumental": {
+    "description": "조격 이름"
+  },
+  "caseLocative": "처격",
+  "@caseLocative": {
+    "description": "처격 이름"
+  },
+  "caseVocative": "호격",
+  "@caseVocative": {
+    "description": "호격 이름"
+  },
+  "settingsContributors": "기여자",
+  "@settingsContributors": {
+    "description": "기여자 메뉴 항목 텍스트"
+  },
+  "personLabelFirst": "1인칭 (나/우리)",
+  "@personLabelFirst": {
+    "description": "활용표의 1인칭 레이블"
+  },
+  "personLabelSecond": "2인칭 (너/너희)",
+  "@personLabelSecond": {
+    "description": "활용표의 2인칭 레이블"
+  },
+  "personLabelThird": "3인칭 (그/그녀/그것/그들)",
+  "@personLabelThird": {
+    "description": "활용표의 3인칭 레이블"
+  },
+  "genderLabelM1": "남성 인물",
+  "@genderLabelM1": {
+    "description": "남성 인물 성별(m1) 레이블"
+  },
+  "genderLabelM2": "남성 동물",
+  "@genderLabelM2": {
+    "description": "남성 동물 성별(m2) 레이블"
+  },
+  "genderLabelM3": "남성 사물",
+  "@genderLabelM3": {
+    "description": "남성 사물 성별(m3) 레이블"
+  },
+  "genderLabelF": "여성",
+  "@genderLabelF": {
+    "description": "여성 성별(f) 레이블"
+  },
+  "genderLabelN1": "중성 1",
+  "@genderLabelN1": {
+    "description": "중성 1타입 성별(n1) 레이블"
+  },
+  "genderLabelN2": "중성 2",
+  "@genderLabelN2": {
+    "description": "중성 2타입 성별(n2) 레이블"
+  },
+  "declensionTableTitle": "\"{lemma}\" 곡용",
+  "@declensionTableTitle": {
+    "description": "곡용 테이블 제목 형식, {lemma} 자리 표시자 포함",
+    "placeholders": {
+      "lemma": {
+        "type": "String",
+        "example": "kot"
+      }
+    }
+  },
+  "conjugationTableTitle": "\"{lemma}\" 활용",
+  "@conjugationTableTitle": {
+    "description": "활용 테이블 제목 형식, {lemma} 자리 표시자 포함",
+    "placeholders": {
+      "lemma": {
+        "type": "String",
+        "example": "robić"
+      }
+    }
+  },
+  "translationLabel": "번역",
+  "suggestionDidYouMean": "혹시 \"{suggestedWord}\"(을)를 찾으셨나요?",
+  "@suggestionDidYouMean": {
+    "description": "사용자가 악센트 부호 철자를 틀렸을 가능성이 있을 때 보여주는 제안 메시지입니다.",
+    "placeholders": {
+       "suggestedWord": {
+         "type": "String",
+         "example": "robić"
+       }
+    }
+  },
+  "suggestionErrorFallback": "제안을 표시하는 중 오류가 발생했습니다.",
+  "@suggestionErrorFallback": {
+    "description": "제안 상태이지만 제안된 단어가 없을 때 표시되는 오류 메시지입니다."
+  }
 } 

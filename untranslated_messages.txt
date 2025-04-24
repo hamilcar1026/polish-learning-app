@@ -1,0 +1,11 @@
+{
+  "pl": [
+    "suggestionDidYouMean",
+    "suggestionErrorFallback"
+  ],
+
+  "ru": [
+    "suggestionDidYouMean",
+    "suggestionErrorFallback"
+  ]
+}

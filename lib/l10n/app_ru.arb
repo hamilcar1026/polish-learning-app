@@ -1,0 +1,223 @@
+{
+  "@@locale": "ru",
+  "appTitle": "Приложение для изучения польского",
+  "searchHint": "Введите польское слово",
+  "settingsTitle": "Настройки",
+  "languageSettingTitle": "Язык",
+  "fontSizeSettingTitle": "Размер шрифта",
+  "analysisTitle": "Анализ",
+  "declensionTitle": "Склонение",
+  "conjugationTitle": "Спряжение",
+  "grammarTitle": "Грамматика",
+  "pronounceWordTooltip": "Произнести слово",
+  "searchButtonTooltip": "Поиск",
+  "noAnalysisFound": "Анализ для \"{word}\" не найден.",
+  "@noAnalysisFound": {
+    "description": "Сообщение, показываемое, когда анализ не удался или вернул пустой результат.",
+    "placeholders": {
+      "word": {
+        "type": "String",
+        "example": "dom"
+      }
+    }
+  },
+  "noDeclensionData": "Данные склонения не найдены.",
+  "noConjugationData": "Данные спряжения не найдены.",
+  "loadingError": "Ошибка загрузки: {error}",
+  "@loadingError": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "tag_subst": "существительное",
+  "tag_fin": "глагол (fin)",
+  "tag_adj": "прилагательное",
+  "tag_adv": "наречие",
+  "tag_num": "числительное",
+  "tag_ppron12": "местоимение (1/2 л.)",
+  "tag_ppron3": "местоимение (3 л.)",
+  "tag_siebie": "местоимение (возвр.)",
+  "tag_inf": "инфинитив",
+  "tag_praet": "глагол (прош.)",
+  "tag_impt": "повелительное накл.",
+  "tag_pred": "предикатив",
+  "tag_prep": "предлог",
+  "tag_conj": "союз",
+  "tag_comp": "маркер сравн. степени",
+  "tag_interj": "междометие",
+  "tag_pact": "причастие (действ.)",
+  "tag_ppas": "причастие (страд.)",
+  "tag_pcon": "деепричастие (наст.)",
+  "tag_pant": "деепричастие (прош.)",
+  "tag_ger": "герундий",
+  "tag_bedzie": "глагол (буд. всп.)",
+  "tag_aglt": "агглютинант",
+  "tag_qub": "квазилексическая ед.",
+  "tag_depr": "уничижительное сущ.",
+  "tag_adja": "прил. причастие (действ.)",
+  "tag_adjp": "прил. причастие (страд.)",
+  "qualifier_sg": "ед.",
+  "qualifier_pl": "мн.",
+  "qualifier_nom": "им.",
+  "qualifier_gen": "род.",
+  "qualifier_dat": "дат.",
+  "qualifier_acc": "вин.",
+  "qualifier_inst": "тв.",
+  "qualifier_loc": "пр.",
+  "qualifier_voc": "зв.",
+  "qualifier_m1": "м1",
+  "qualifier_m2": "м2",
+  "qualifier_m3": "м3",
+  "qualifier_f": "ж",
+  "qualifier_n": "с",
+  "qualifier_n1": "с1",
+  "qualifier_n2": "с2",
+  "qualifier_p1": "л1",
+  "qualifier_p2": "л2",
+  "qualifier_p3": "л3",
+  "qualifier_pri": "1л",
+  "qualifier_sec": "2л",
+  "qualifier_ter": "3л",
+  "qualifier_imperf": "несов.",
+  "qualifier_perf": "сов.",
+  "qualifier_nazwa_pospolita": "нариц.",
+  "qualifier_imie": "имя",
+  "qualifier_nazwisko": "фамилия",
+  "qualifier_nazwa_geograficzna": "геогр.",
+  "qualifier_skrot": "сокр.",
+  "qualifier_pos": "положит.",
+  "qualifier_com": "сравн.",
+  "qualifier_sup": "превосх.",
+  "conjugationCategoryPresentIndicative": "Настоящее время (изъяв.)",
+  "conjugationCategoryFuturePerfectiveIndicative": "Будущее время (соверш., изъяв.)",
+  "conjugationCategoryFutureImperfectiveIndicative": "Будущее время (несоверш., изъяв.)",
+  "conjugationCategoryPastTense": "Прошедшее время",
+  "conjugationCategoryImperative": "Повелительное наклонение",
+  "conjugationCategoryInfinitive": "Инфинитив",
+  "conjugationCategoryPresentAdverbialParticiple": "Деепричастие настоящего времени",
+  "conjugationCategoryAnteriorAdverbialParticiple": "Деепричастие прошедшего времени",
+  "conjugationCategoryPresentActiveParticiple": "Действительное причастие настоящего времени",
+  "conjugationCategoryPastPassiveParticiple": "Страдательное причастие прошедшего времени",
+  "conjugationCategoryFiniteVerb": "Личный глагол",
+  "conjugationCategoryOtherForms": "Другие формы",
+  "drawerRecentSearches": "Недавние поиски",
+  "drawerClearRecentSearchesTooltip": "Очистить недавние поиски",
+  "drawerClearRecentSearchesDialogTitle": "Очистить недавние поиски?",
+  "drawerClearDialogContent": "Это действие нельзя отменить.",
+  "drawerCancelButton": "Отмена",
+  "drawerClearButton": "Очистить",
+  "drawerNoRecentSearches": "Нет недавних поисков.",
+  "drawerFavorites": "Избранное",
+  "drawerNoFavorites": "Нет избранных слов.",
+  "settingsThemeSystem": "Системная",
+  "@settingsThemeSystem": {
+    "description": "Метка для опции системной темы"
+  },
+  "tableHeaderCase": "Падеж",
+  "@tableHeaderCase": {
+    "description": "Заголовок для столбца Падеж в таблицах склонения/причастий"
+  },
+  "tableHeaderSingular": "Ед. ч.",
+  "@tableHeaderSingular": {
+    "description": "Заголовок для столбца Ед. ч. в таблицах"
+  },
+  "tableHeaderPlural": "Мн. ч.",
+  "@tableHeaderPlural": {
+    "description": "Заголовок для столбца Мн. ч. в таблицах"
+  },
+  "tableHeaderPerson": "Лицо",
+  "@tableHeaderPerson": {
+    "description": "Заголовок для столбца Лицо в таблицах спряжения"
+  },
+  "caseNominative": "Именительный",
+  "@caseNominative": {
+    "description": "Nominative case name"
+  },
+  "caseGenitive": "Родительный",
+  "@caseGenitive": {
+    "description": "Genitive case name"
+  },
+  "caseDative": "Дательный",
+  "@caseDative": {
+    "description": "Dative case name"
+  },
+  "caseAccusative": "Винительный",
+  "@caseAccusative": {
+    "description": "Accusative case name"
+  },
+  "caseInstrumental": "Творительный",
+  "@caseInstrumental": {
+    "description": "Instrumental case name"
+  },
+  "caseLocative": "Предложный",
+  "@caseLocative": {
+    "description": "Locative case name"
+  },
+  "caseVocative": "Звательный",
+  "@caseVocative": {
+    "description": "Vocative case name"
+  },
+  "settingsContributors": "Участники",
+  "@settingsContributors": {
+    "description": "Текст пункта меню для Участников"
+  },
+  "personLabelFirst": "1-е л. (я/мы)",
+  "@personLabelFirst": {
+    "description": "Метка для первого лица в таблицах спряжения"
+  },
+  "personLabelSecond": "2-е л. (ты/вы)",
+  "@personLabelSecond": {
+    "description": "Метка для второго лица в таблицах спряжения"
+  },
+  "personLabelThird": "3-е л. (он/она/оно/они)",
+  "@personLabelThird": {
+    "description": "Метка для третьего лица в таблицах спряжения"
+  },
+  "genderLabelM1": "Мужской личный",
+  "@genderLabelM1": {
+    "description": "Метка для мужского личного рода (m1)"
+  },
+  "genderLabelM2": "Мужской одушевленный",
+  "@genderLabelM2": {
+    "description": "Метка для мужского одушевленного рода (m2)"
+  },
+  "genderLabelM3": "Мужской неодушевленный",
+  "@genderLabelM3": {
+    "description": "Метка для мужского неодушевленного рода (m3)"
+  },
+  "genderLabelF": "Женский",
+  "@genderLabelF": {
+    "description": "Метка для женского рода (f)"
+  },
+  "genderLabelN1": "Средний 1",
+  "@genderLabelN1": {
+    "description": "Метка для среднего рода типа 1 (n1)"
+  },
+  "genderLabelN2": "Средний 2",
+  "@genderLabelN2": {
+    "description": "Метка для среднего рода типа 2 (n2)"
+  },
+  "declensionTableTitle": "Склонение для \"{lemma}\"",
+  "@declensionTableTitle": {
+    "description": "Формат заголовка таблицы склонения, включает плейсхолдер {lemma}",
+    "placeholders": {
+      "lemma": {
+        "type": "String",
+        "example": "kot"
+      }
+    }
+  },
+  "conjugationTableTitle": "Спряжение для \"{lemma}\"",
+  "@conjugationTableTitle": {
+    "description": "Формат заголовка таблицы спряжения, включает плейсхолдер {lemma}",
+    "placeholders": {
+      "lemma": {
+        "type": "String",
+        "example": "robić"
+      }
+    }
+  },
+  "translationLabel": "Перевод"
+} 

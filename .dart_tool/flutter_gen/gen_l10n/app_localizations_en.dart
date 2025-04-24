@@ -296,4 +296,91 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get drawerNoFavorites => 'No favorites added yet.';
+
+  @override
+  String get settingsThemeSystem => 'System Default';
+
+  @override
+  String get tableHeaderCase => 'Case';
+
+  @override
+  String get tableHeaderSingular => 'Singular';
+
+  @override
+  String get tableHeaderPlural => 'Plural';
+
+  @override
+  String get tableHeaderPerson => 'Person';
+
+  @override
+  String get caseNominative => 'Nominative';
+
+  @override
+  String get caseGenitive => 'Genitive';
+
+  @override
+  String get caseDative => 'Dative';
+
+  @override
+  String get caseAccusative => 'Accusative';
+
+  @override
+  String get caseInstrumental => 'Instrumental';
+
+  @override
+  String get caseLocative => 'Locative';
+
+  @override
+  String get caseVocative => 'Vocative';
+
+  @override
+  String get settingsContributors => 'Contributors';
+
+  @override
+  String get personLabelFirst => '1st (I/we)';
+
+  @override
+  String get personLabelSecond => '2nd (you/you)';
+
+  @override
+  String get personLabelThird => '3rd (he/she/it/they)';
+
+  @override
+  String get genderLabelM1 => 'Masc. Personal';
+
+  @override
+  String get genderLabelM2 => 'Masc. Animate';
+
+  @override
+  String get genderLabelM3 => 'Masc. Inanimate';
+
+  @override
+  String get genderLabelF => 'Feminine';
+
+  @override
+  String get genderLabelN1 => 'Neuter 1';
+
+  @override
+  String get genderLabelN2 => 'Neuter 2';
+
+  @override
+  String declensionTableTitle(String lemma) {
+    return 'Declension for \"$lemma\"';
+  }
+
+  @override
+  String conjugationTableTitle(String lemma) {
+    return 'Conjugation for \"$lemma\"';
+  }
+
+  @override
+  String get translationLabel => 'Translation';
+
+  @override
+  String suggestionDidYouMean(String suggestedWord) {
+    return 'Did you mean \"$suggestedWord\"?';
+  }
+
+  @override
+  String get suggestionErrorFallback => 'Error displaying suggestion.';
 }

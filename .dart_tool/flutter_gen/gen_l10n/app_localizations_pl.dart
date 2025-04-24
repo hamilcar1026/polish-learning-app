@@ -296,4 +296,91 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get drawerNoFavorites => 'Nie dodano jeszcze ulubionych.';
+
+  @override
+  String get settingsThemeSystem => 'Domyślny systemowy';
+
+  @override
+  String get tableHeaderCase => 'Przypadek';
+
+  @override
+  String get tableHeaderSingular => 'Liczba pojedyncza';
+
+  @override
+  String get tableHeaderPlural => 'Liczba mnoga';
+
+  @override
+  String get tableHeaderPerson => 'Osoba';
+
+  @override
+  String get caseNominative => 'Mianownik';
+
+  @override
+  String get caseGenitive => 'Dopełniacz';
+
+  @override
+  String get caseDative => 'Celownik';
+
+  @override
+  String get caseAccusative => 'Biernik';
+
+  @override
+  String get caseInstrumental => 'Narzędnik';
+
+  @override
+  String get caseLocative => 'Miejscownik';
+
+  @override
+  String get caseVocative => 'Wołacz';
+
+  @override
+  String get settingsContributors => 'Współtwórcy';
+
+  @override
+  String get personLabelFirst => '1. os. (ja/my)';
+
+  @override
+  String get personLabelSecond => '2. os. (ty/wy)';
+
+  @override
+  String get personLabelThird => '3. os. (on/ona/ono/oni/one)';
+
+  @override
+  String get genderLabelM1 => 'Męskoosobowy';
+
+  @override
+  String get genderLabelM2 => 'Męskożywotny';
+
+  @override
+  String get genderLabelM3 => 'Męskorzeczowy';
+
+  @override
+  String get genderLabelF => 'Żeński';
+
+  @override
+  String get genderLabelN1 => 'Nijaki 1';
+
+  @override
+  String get genderLabelN2 => 'Nijaki 2';
+
+  @override
+  String declensionTableTitle(String lemma) {
+    return 'Deklinacja dla \"$lemma\"';
+  }
+
+  @override
+  String conjugationTableTitle(String lemma) {
+    return 'Koniugacja dla \"$lemma\"';
+  }
+
+  @override
+  String get translationLabel => 'Tłumaczenie';
+
+  @override
+  String suggestionDidYouMean(String suggestedWord) {
+    return 'Did you mean \"$suggestedWord\"?';
+  }
+
+  @override
+  String get suggestionErrorFallback => 'Error displaying suggestion.';
 }

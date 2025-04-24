@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart'; // Import generated localizations
 import '../providers/settings_provider.dart';
+import 'contributors_screen.dart'; // Import the new screen
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -11,6 +12,7 @@ class SettingsScreen extends ConsumerWidget {
     'en': 'English',
     'pl': 'Polski',
     'ko': '한국어',
+    'ru': 'Русский',
   };
 
   @override
@@ -77,6 +79,23 @@ class SettingsScreen extends ConsumerWidget {
               'Current Scale: ${settings.fontSizeFactor.toStringAsFixed(1)}x', // Replace with localized string later
               style: Theme.of(context).textTheme.bodyMedium,
             ),
+          ),
+
+          const SizedBox(height: 24),
+          const Divider(),
+          const SizedBox(height: 24),
+
+          // Contributors Link
+          ListTile(
+            title: Text(l10n.settingsContributors), // Use localized title
+            leading: const Icon(Icons.people_outline),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ContributorsScreen()),
+              );
+            },
           ),
         ],
       ),

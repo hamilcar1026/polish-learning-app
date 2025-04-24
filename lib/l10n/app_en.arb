@@ -111,5 +111,128 @@
    "drawerClearButton": "Clear",
    "drawerNoRecentSearches": "No recent searches.",
    "drawerFavorites": "Favorites",
-   "drawerNoFavorites": "No favorites added yet."
+   "drawerNoFavorites": "No favorites added yet.",
+   "settingsThemeSystem": "System Default",
+   "@settingsThemeSystem": {
+     "description": "Label for the system theme option"
+   },
+   "tableHeaderCase": "Case",
+   "@tableHeaderCase": {
+     "description": "Header for the Case column in declension/participle tables"
+   },
+   "tableHeaderSingular": "Singular",
+   "@tableHeaderSingular": {
+     "description": "Header for the Singular column in tables"
+   },
+   "tableHeaderPlural": "Plural",
+   "@tableHeaderPlural": {
+     "description": "Header for the Plural column in tables"
+   },
+   "tableHeaderPerson": "Person",
+   "@tableHeaderPerson": {
+     "description": "Header for the Person column in conjugation tables"
+   },
+   "caseNominative": "Nominative",
+   "@caseNominative": {
+     "description": "Nominative case name"
+   },
+   "caseGenitive": "Genitive",
+   "@caseGenitive": {
+     "description": "Genitive case name"
+   },
+   "caseDative": "Dative",
+   "@caseDative": {
+     "description": "Dative case name"
+   },
+   "caseAccusative": "Accusative",
+   "@caseAccusative": {
+     "description": "Accusative case name"
+   },
+   "caseInstrumental": "Instrumental",
+   "@caseInstrumental": {
+     "description": "Instrumental case name"
+   },
+   "caseLocative": "Locative",
+   "@caseLocative": {
+     "description": "Locative case name"
+   },
+   "caseVocative": "Vocative",
+   "@caseVocative": {
+     "description": "Vocative case name"
+   },
+   "settingsContributors": "Contributors",
+   "@settingsContributors": {
+     "description": "Menu item text for Contributors"
+   },
+   "personLabelFirst": "1st (I/we)",
+   "@personLabelFirst": {
+     "description": "Label for the first person in conjugation tables"
+   },
+   "personLabelSecond": "2nd (you/you)",
+   "@personLabelSecond": {
+     "description": "Label for the second person in conjugation tables"
+   },
+   "personLabelThird": "3rd (he/she/it/they)",
+   "@personLabelThird": {
+     "description": "Label for the third person in conjugation tables"
+   },
+   "genderLabelM1": "Masc. Personal",
+   "@genderLabelM1": {
+     "description": "Label for masculine personal gender (m1)"
+   },
+   "genderLabelM2": "Masc. Animate",
+   "@genderLabelM2": {
+     "description": "Label for masculine animate gender (m2)"
+   },
+   "genderLabelM3": "Masc. Inanimate",
+   "@genderLabelM3": {
+     "description": "Label for masculine inanimate gender (m3)"
+   },
+   "genderLabelF": "Feminine",
+   "@genderLabelF": {
+     "description": "Label for feminine gender (f)"
+   },
+   "genderLabelN1": "Neuter 1",
+   "@genderLabelN1": {
+     "description": "Label for neuter gender type 1 (n1)"
+   },
+   "genderLabelN2": "Neuter 2",
+   "@genderLabelN2": {
+     "description": "Label for neuter gender type 2 (n2)"
+   },
+   "declensionTableTitle": "Declension for \"{lemma}\"",
+   "@declensionTableTitle": {
+     "description": "Title format for the declension table, includes lemma placeholder",
+     "placeholders": {
+       "lemma": {
+         "type": "String",
+         "example": "kot"
+       }
+     }
+   },
+   "conjugationTableTitle": "Conjugation for \"{lemma}\"",
+   "@conjugationTableTitle": {
+     "description": "Title format for the conjugation table, includes lemma placeholder",
+     "placeholders": {
+       "lemma": {
+         "type": "String",
+         "example": "robić"
+       }
+     }
+   },
+   "translationLabel": "Translation",
+   "suggestionDidYouMean": "Did you mean \"{suggestedWord}\"?",
+   "@suggestionDidYouMean": {
+     "description": "Suggestion message shown when the user might have misspelled a diacritic.",
+     "placeholders": {
+        "suggestedWord": {
+          "type": "String",
+          "example": "robić"
+        }
+     }
+   },
+   "suggestionErrorFallback": "Error displaying suggestion.",
+   "@suggestionErrorFallback": {
+     "description": "Error message shown when suggestion status is received but suggested word is missing."
+   }
 } 

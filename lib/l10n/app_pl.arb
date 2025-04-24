@@ -94,5 +94,117 @@
   "drawerClearButton": "Wyczyść",
   "drawerNoRecentSearches": "Brak ostatnich wyszukiwań.",
   "drawerFavorites": "Ulubione",
-  "drawerNoFavorites": "Nie dodano jeszcze ulubionych."
+  "drawerNoFavorites": "Nie dodano jeszcze ulubionych.",
+  "@caseVocative": {
+    "description": "Nazwa przypadka: Wołacz"
+  },
+  "settingsContributors": "Współtwórcy",
+  "@settingsContributors": {
+    "description": "Element menu dla Współtwórców"
+  },
+  "personLabelFirst": "1. os. (ja/my)",
+  "@personLabelFirst": {
+    "description": "Etykieta dla pierwszej osoby w tabelach koniugacji"
+  },
+  "personLabelSecond": "2. os. (ty/wy)",
+  "@personLabelSecond": {
+    "description": "Etykieta dla drugiej osoby w tabelach koniugacji"
+  },
+  "personLabelThird": "3. os. (on/ona/ono/oni/one)",
+  "@personLabelThird": {
+    "description": "Etykieta dla trzeciej osoby w tabelach koniugacji"
+  },
+  "genderLabelM1": "Męskoosobowy",
+  "@genderLabelM1": {
+    "description": "Etykieta dla rodzaju męskoosobowego (m1)"
+  },
+  "genderLabelM2": "Męskożywotny",
+  "@genderLabelM2": {
+    "description": "Etykieta dla rodzaju męskożywotnego (m2)"
+  },
+  "genderLabelM3": "Męskorzeczowy",
+  "@genderLabelM3": {
+    "description": "Etykieta dla rodzaju męskorzeczowego (m3)"
+  },
+  "genderLabelF": "Żeński",
+  "@genderLabelF": {
+    "description": "Etykieta dla rodzaju żeńskiego (f)"
+  },
+  "genderLabelN1": "Nijaki 1",
+  "@genderLabelN1": {
+    "description": "Etykieta dla rodzaju nijakiego typu 1 (n1)"
+  },
+  "genderLabelN2": "Nijaki 2",
+  "@genderLabelN2": {
+    "description": "Etykieta dla rodzaju nijakiego typu 2 (n2)"
+  },
+  "settingsThemeSystem": "Domyślny systemowy",
+  "@settingsThemeSystem": {
+    "description": "Etykieta opcji motywu systemowego"
+  },
+  "tableHeaderCase": "Przypadek",
+  "@tableHeaderCase": {
+    "description": "Nagłówek kolumny Przypadek w tabelach deklinacji/imiesłowów"
+  },
+  "tableHeaderSingular": "Liczba pojedyncza",
+  "@tableHeaderSingular": {
+    "description": "Nagłówek kolumny Liczba pojedyncza w tabelach"
+  },
+  "tableHeaderPlural": "Liczba mnoga",
+  "@tableHeaderPlural": {
+    "description": "Nagłówek kolumny Liczba mnoga w tabelach"
+  },
+  "tableHeaderPerson": "Osoba",
+  "@tableHeaderPerson": {
+    "description": "Nagłówek kolumny Osoba w tabelach koniugacji"
+  },
+  "caseNominative": "Mianownik",
+  "@caseNominative": {
+    "description": "Nazwa przypadka: Mianownik"
+  },
+  "caseGenitive": "Dopełniacz",
+  "@caseGenitive": {
+    "description": "Nazwa przypadka: Dopełniacz"
+  },
+  "caseDative": "Celownik",
+  "@caseDative": {
+    "description": "Nazwa przypadka: Celownik"
+  },
+  "caseAccusative": "Biernik",
+  "@caseAccusative": {
+    "description": "Nazwa przypadka: Biernik"
+  },
+  "caseInstrumental": "Narzędnik",
+  "@caseInstrumental": {
+    "description": "Nazwa przypadka: Narzędnik"
+  },
+  "caseLocative": "Miejscownik",
+  "@caseLocative": {
+    "description": "Nazwa przypadka: Miejscownik"
+  },
+  "caseVocative": "Wołacz",
+  "@caseVocative": {
+    "description": "Nazwa przypadka: Wołacz"
+  },
+  "declensionTableTitle": "Deklinacja dla \"{lemma}\"",
+  "@declensionTableTitle": {
+    "description": "Format tytułu tabeli deklinacji, zawiera placeholder {lemma}",
+    "placeholders": {
+      "lemma": {
+        "type": "String",
+        "example": "kot"
+      }
+    }
+  },
+  "conjugationTableTitle": "Koniugacja dla \"{lemma}\"",
+  "@conjugationTableTitle": {
+    "description": "Format tytułu tabeli koniugacji, zawiera placeholder {lemma}",
+    "placeholders": {
+      "lemma": {
+        "type": "String",
+        "example": "robić"
+      }
+    }
+  },
+  "translationLabel": "Tłumaczenie"
 } 

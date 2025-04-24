@@ -8,6 +8,7 @@ import 'package:intl/intl.dart' as intl;
 import 'app_localizations_en.dart';
 import 'app_localizations_ko.dart';
 import 'app_localizations_pl.dart';
+import 'app_localizations_ru.dart';
 
 // ignore_for_file: type=lint
 
@@ -67,8 +68,8 @@ abstract class AppLocalizations {
 
   final String localeName;
 
-  static AppLocalizations? of(BuildContext context) {
-    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+  static AppLocalizations of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
   static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
@@ -94,7 +95,8 @@ abstract class AppLocalizations {
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
     Locale('ko'),
-    Locale('pl')
+    Locale('pl'),
+    Locale('ru')
   ];
 
   /// No description provided for @appTitle.
@@ -666,6 +668,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No favorites added yet.'**
   String get drawerNoFavorites;
+
+  /// Label for the system theme option
+  ///
+  /// In en, this message translates to:
+  /// **'System Default'**
+  String get settingsThemeSystem;
+
+  /// Header for the Case column in declension/participle tables
+  ///
+  /// In en, this message translates to:
+  /// **'Case'**
+  String get tableHeaderCase;
+
+  /// Header for the Singular column in tables
+  ///
+  /// In en, this message translates to:
+  /// **'Singular'**
+  String get tableHeaderSingular;
+
+  /// Header for the Plural column in tables
+  ///
+  /// In en, this message translates to:
+  /// **'Plural'**
+  String get tableHeaderPlural;
+
+  /// Header for the Person column in conjugation tables
+  ///
+  /// In en, this message translates to:
+  /// **'Person'**
+  String get tableHeaderPerson;
+
+  /// Nominative case name
+  ///
+  /// In en, this message translates to:
+  /// **'Nominative'**
+  String get caseNominative;
+
+  /// Genitive case name
+  ///
+  /// In en, this message translates to:
+  /// **'Genitive'**
+  String get caseGenitive;
+
+  /// Dative case name
+  ///
+  /// In en, this message translates to:
+  /// **'Dative'**
+  String get caseDative;
+
+  /// Accusative case name
+  ///
+  /// In en, this message translates to:
+  /// **'Accusative'**
+  String get caseAccusative;
+
+  /// Instrumental case name
+  ///
+  /// In en, this message translates to:
+  /// **'Instrumental'**
+  String get caseInstrumental;
+
+  /// Locative case name
+  ///
+  /// In en, this message translates to:
+  /// **'Locative'**
+  String get caseLocative;
+
+  /// Vocative case name
+  ///
+  /// In en, this message translates to:
+  /// **'Vocative'**
+  String get caseVocative;
+
+  /// Menu item text for Contributors
+  ///
+  /// In en, this message translates to:
+  /// **'Contributors'**
+  String get settingsContributors;
+
+  /// Label for the first person in conjugation tables
+  ///
+  /// In en, this message translates to:
+  /// **'1st (I/we)'**
+  String get personLabelFirst;
+
+  /// Label for the second person in conjugation tables
+  ///
+  /// In en, this message translates to:
+  /// **'2nd (you/you)'**
+  String get personLabelSecond;
+
+  /// Label for the third person in conjugation tables
+  ///
+  /// In en, this message translates to:
+  /// **'3rd (he/she/it/they)'**
+  String get personLabelThird;
+
+  /// Label for masculine personal gender (m1)
+  ///
+  /// In en, this message translates to:
+  /// **'Masc. Personal'**
+  String get genderLabelM1;
+
+  /// Label for masculine animate gender (m2)
+  ///
+  /// In en, this message translates to:
+  /// **'Masc. Animate'**
+  String get genderLabelM2;
+
+  /// Label for masculine inanimate gender (m3)
+  ///
+  /// In en, this message translates to:
+  /// **'Masc. Inanimate'**
+  String get genderLabelM3;
+
+  /// Label for feminine gender (f)
+  ///
+  /// In en, this message translates to:
+  /// **'Feminine'**
+  String get genderLabelF;
+
+  /// Label for neuter gender type 1 (n1)
+  ///
+  /// In en, this message translates to:
+  /// **'Neuter 1'**
+  String get genderLabelN1;
+
+  /// Label for neuter gender type 2 (n2)
+  ///
+  /// In en, this message translates to:
+  /// **'Neuter 2'**
+  String get genderLabelN2;
+
+  /// Title format for the declension table, includes lemma placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Declension for \"{lemma}\"'**
+  String declensionTableTitle(String lemma);
+
+  /// Title format for the conjugation table, includes lemma placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Conjugation for \"{lemma}\"'**
+  String conjugationTableTitle(String lemma);
+
+  /// No description provided for @translationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation'**
+  String get translationLabel;
+
+  /// Suggestion message shown when the user might have misspelled a diacritic.
+  ///
+  /// In en, this message translates to:
+  /// **'Did you mean \"{suggestedWord}\"?'**
+  String suggestionDidYouMean(String suggestedWord);
+
+  /// Error message shown when suggestion status is received but suggested word is missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Error displaying suggestion.'**
+  String get suggestionErrorFallback;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
@@ -677,7 +841,7 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'ko', 'pl'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'ko', 'pl', 'ru'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -691,6 +855,7 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     case 'en': return AppLocalizationsEn();
     case 'ko': return AppLocalizationsKo();
     case 'pl': return AppLocalizationsPl();
+    case 'ru': return AppLocalizationsRu();
   }
 
   throw FlutterError(

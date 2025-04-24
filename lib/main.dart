@@ -79,6 +79,7 @@ class MyApp extends ConsumerWidget {
         Locale('en'), // English
         Locale('pl'), // Polish
         Locale('ko'), // Korean
+        Locale('ru'), // Add Russian
       ],
       home: const SearchScreen(), // Set SearchScreen as the home screen
       debugShowCheckedModeBanner: false,

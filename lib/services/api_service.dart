@@ -12,8 +12,18 @@ class ApiResponse<T> {
   final String status;
   final T? data; // Make data nullable
   final String? message;
+  final String? translation_en; // Add translation field
+  final String? suggested_word; // Field for suggestion status
+  final String? original_word; // Field for suggestion status
 
-  ApiResponse({required this.status, this.data, this.message});
+  ApiResponse({
+    required this.status,
+    this.data,
+    this.message,
+    this.translation_en,
+    this.suggested_word, // Add to constructor
+    this.original_word // Add to constructor
+  });
 }
 
 class ApiService {
@@ -21,8 +31,8 @@ class ApiService {
   // --- Updated Base URL Logic ---
   static String getBaseUrl() {
     if (kIsWeb) {
-      // Use the deployed Cloud Run URL for web
-      return 'https://polish-learning-backend-service-529152975346.asia-northeast3.run.app'; 
+      // Use localhost for LOCAL TESTING
+      return 'http://localhost:8080'; 
     } else if (Platform.isAndroid) {
       // Use 10.0.2.2 for Android emulators
       return 'http://10.0.2.2:8080';
@@ -82,23 +92,126 @@ class ApiService {
   }
 
   /// Fetches analysis results for a given word.
-  Future<ApiResponse<List<AnalysisResult>>> fetchAnalysis(String word) async {
+  Future<ApiResponse<List<AnalysisResult>>> fetchAnalysis(String word, String targetLang) async {
     final encodedWord = Uri.encodeComponent(word);
-    // Pass the fromJson factory of AnalysisResult
-    return await _getRequest('analyze/$encodedWord', AnalysisResult.fromJson);
+    final Uri url = Uri.parse('$_baseUrl/analyze/$encodedWord?target_lang=$targetLang');
+    print("[fetchAnalysis] Attempting to send GET request to: $url");
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> decodedJson = json.decode(utf8.decode(response.bodyBytes));
+        final String status = decodedJson['status'] as String? ?? 'error';
+        final String? message = decodedJson['message'] as String?;
+        final String? translationEn = decodedJson['translation_en'] as String?; 
+        final String? suggestedWord = decodedJson['suggested_word'] as String?;
+        final String? originalWord = decodedJson['original_word'] as String?;
+
+        if (status == 'success') {
+          final List<dynamic> dataList = decodedJson['data'] as List<dynamic>? ?? [];
+          final List<AnalysisResult> parsedData = dataList
+              .map((item) => AnalysisResult.fromJson(item as Map<String, dynamic>))
+              .toList();
+          return ApiResponse(
+              status: status, 
+              data: parsedData, 
+              message: message, 
+              translation_en: translationEn
+          );
+        } else if (status == 'suggestion') {
+             // Return suggestion response
+             return ApiResponse(
+               status: status, 
+               message: message, 
+               suggested_word: suggestedWord,
+               original_word: originalWord
+             );
+        } else { // Handle other statuses like 'error' or unexpected ones
+          return ApiResponse(status: status, message: message);
+        }
+      } else {
+        print('HTTP Error: ${response.statusCode} for endpoint analyze/$encodedWord?target_lang=$targetLang');
+        throw HttpException('Failed to load analysis: ${response.statusCode}');
+      }
+    } on SocketException {
+      print('Network Error: Failed to connect to $_baseUrl/analyze/$encodedWord?target_lang=$targetLang');
+      throw const SocketException('Could not connect to the server. Please check your network connection.');
+    } on HttpException catch (e) {
+      throw HttpException('An HTTP error occurred during analysis: ${e.message}');
+    } catch (e) {
+      print('Unknown Error fetching analysis for $word (lang: $targetLang): $e');
+      throw Exception('An unknown error occurred during analysis: $e');
+    }
   }
 
   /// Fetches conjugation forms for a given verb.
   Future<ApiResponse<List<ConjugationResult>>> fetchConjugations(String word) async {
     final encodedWord = Uri.encodeComponent(word);
-    // Pass the fromJson factory of ConjugationResult
-    return await _getRequest('conjugate/$encodedWord', ConjugationResult.fromJson);
+    final Uri url = Uri.parse('$_baseUrl/conjugate/$encodedWord');
+     print("[fetchConjugations] Attempting to send GET request to: $url");
+     try {
+       final response = await http.get(url);
+       if (response.statusCode == 200) {
+         final Map<String, dynamic> decodedJson = json.decode(utf8.decode(response.bodyBytes));
+         final String status = decodedJson['status'] as String? ?? 'error';
+         final String? message = decodedJson['message'] as String?;
+         if (status == 'success') {
+           final List<dynamic> dataList = decodedJson['data'] as List<dynamic>? ?? [];
+           final List<ConjugationResult> parsedData = dataList
+               .map((item) => ConjugationResult.fromJson(item as Map<String, dynamic>))
+               .toList();
+           return ApiResponse(status: status, data: parsedData, message: message);
+         } else {
+           return ApiResponse(status: status, message: message);
+         }
+       } else {
+          print('HTTP Error: ${response.statusCode} for endpoint conjugate/$encodedWord');
+          throw HttpException('Failed to load conjugations: ${response.statusCode}');
+       }
+     } on SocketException { // Add specific error handling for consistency
+        print('Network Error: Failed to connect to $_baseUrl/conjugate/$encodedWord');
+        throw const SocketException('Could not connect to the server. Please check your network connection.');
+     } on HttpException catch (e) {
+        throw HttpException('An HTTP error occurred during conjugation: ${e.message}');
+     } catch (e) {
+       print('Unknown Error fetching conjugations for $word: $e');
+       throw Exception('An unknown error occurred during conjugation: $e');
+     }
   }
 
   /// Fetches declension forms for a given noun/adjective.
   Future<ApiResponse<List<DeclensionResult>>> fetchDeclensions(String word) async {
     final encodedWord = Uri.encodeComponent(word);
-    // Pass the fromJson factory of DeclensionResult
-    return await _getRequest('decline/$encodedWord', DeclensionResult.fromJson);
+    final Uri url = Uri.parse('$_baseUrl/decline/$encodedWord');
+    print("[fetchDeclensions] Attempting to send GET request to: $url");
+    try {
+       final response = await http.get(url);
+       if (response.statusCode == 200) {
+         final Map<String, dynamic> decodedJson = json.decode(utf8.decode(response.bodyBytes));
+         final String status = decodedJson['status'] as String? ?? 'error';
+         final String? message = decodedJson['message'] as String?;
+         if (status == 'success') {
+           final List<dynamic> dataList = decodedJson['data'] as List<dynamic>? ?? [];
+           final List<DeclensionResult> parsedData = dataList
+               .map((item) => DeclensionResult.fromJson(item as Map<String, dynamic>))
+               .toList();
+           return ApiResponse(status: status, data: parsedData, message: message);
+         } else {
+           return ApiResponse(status: status, message: message);
+         }
+       } else {
+          print('HTTP Error: ${response.statusCode} for endpoint decline/$encodedWord');
+          throw HttpException('Failed to load declensions: ${response.statusCode}');
+       }
+     } on SocketException { // Add specific error handling for consistency
+        print('Network Error: Failed to connect to $_baseUrl/decline/$encodedWord');
+        throw const SocketException('Could not connect to the server. Please check your network connection.');
+     } on HttpException catch (e) {
+        throw HttpException('An HTTP error occurred during declension: ${e.message}');
+     } catch (e) {
+       print('Unknown Error fetching declensions for $word: $e');
+       throw Exception('An unknown error occurred during declension: $e');
+     }
   }
 } 
