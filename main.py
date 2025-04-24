@@ -398,6 +398,7 @@ def generate_and_format_forms(word, check_func):
 
     try:
         word = word.lower()
+        print(f"[디버그] 분석 시작 - 단어: '{word}', 함수: {check_func.__name__}")
         analysis_result = morf.analyse(word)
         if not analysis_result:
             return None, "Word not found or cannot be analyzed."
@@ -437,6 +438,15 @@ def generate_and_format_forms(word, check_func):
         infinitive_form = None
         past_forms = {} # To store praet forms: {'sg:m1': 'robił', 'sg:f': 'robiła', ...}
         past_impersonal_form = None
+        
+        # 디버깅: 동명사(Gerund) 추적
+        print(f"[디버그-동명사] 형태 생성 시작 - 기본형: '{primary_lemma}'")
+        gerund_forms_found = 0
+
+        # 디버깅: 미래시제 추적
+        future_forms_perf = 0
+        future_forms_imperf = 0
+        print(f"[디버그-미래시제] 미래시제 처리 - 미완료상: {is_primary_imperfective}")
 
         for form_tuple in generated_forms_raw:
             if len(form_tuple) < 3:
@@ -451,8 +461,25 @@ def generate_and_format_forms(word, check_func):
 
             if base_tag not in ALLOWED_TAGS:
                 continue
-            if base_tag == 'ger' and ':neg' in form_tag_full: # Filter negative gerunds
-                continue
+                
+            # 디버깅: 동명사 형태 확인
+            if base_tag == 'ger':
+                gerund_forms_found += 1
+                print(f"[디버그-동명사] 동명사 발견 #{gerund_forms_found}: '{form}', 태그: '{form_tag_full}'")
+                if ':neg' in form_tag_full:
+                    print(f"[디버그-동명사] 부정 동명사 필터링됨: '{form}'")
+                    continue  # 부정 동명사 필터링
+            
+            # 디버깅: 미래시제 형태 확인 (완료상)
+            if base_tag == 'fin' and 'perf' in form_tag_full.split(':'):
+                future_forms_perf += 1
+                print(f"[디버그-미래시제] 미래 완료형 발견 #{future_forms_perf}: '{form}', 태그: '{form_tag_full}'")
+                
+                # 인칭/수 정보 추출 디버깅
+                parts = form_tag_full.split(':')
+                number = next((p for p in parts if p in ['sg', 'pl']), 'unknown')
+                person = next((p for p in parts if p in ['pri', 'sec', 'ter']), 'unknown')
+                print(f"[디버그-미래시제] 태그 파싱 결과 - 수: {number}, 인칭: {person}")
 
             # --- Store infinitive ---
             if base_tag == 'inf':
@@ -503,6 +530,15 @@ def generate_and_format_forms(word, check_func):
             if category_key not in grouped_forms: grouped_forms[category_key] = []
             grouped_forms[category_key].append(form_data)
         # --- End processing loop ---
+        
+        # 디버깅: 동명사 결과 요약
+        print(f"[디버그-동명사] 동명사 처리 결과: 발견된 형태 {gerund_forms_found}개")
+        if 'conjugationCategoryVerbalNoun' in grouped_forms:
+            print(f"[디버그-동명사] 집계된 동명사 형태: {len(grouped_forms['conjugationCategoryVerbalNoun'])}개")
+            for idx, form_data in enumerate(grouped_forms['conjugationCategoryVerbalNoun']):
+                print(f"[디버그-동명사] #{idx+1}: 형태='{form_data['form']}', 태그='{form_data['tag']}'")
+        else:
+            print(f"[디버그-동명사] 최종 결과에 포함된 동명사 없음")
 
         # --- Generate Future Impersonal / Conditional Impersonal ---
         if past_impersonal_form:
@@ -524,13 +560,17 @@ def generate_and_format_forms(word, check_func):
             # 1. Future Imperfective (using infinitive)
             if infinitive_form:
                 future_key = 'conjugationCategoryFutureImperfectiveIndicative'
+                print(f"[디버그-미래시제] 미래 미완료형 생성 시작: infinitive='{infinitive_form}'")
                 if future_key not in grouped_forms: grouped_forms[future_key] = []
                 for num_pers, aux_form in BYC_FUTURE_FORMS.items():
                     num, pers = num_pers.split(':')
                     generated_form = f"{aux_form} {infinitive_form}"
                     generated_tag = f"fut:{num}:{pers}:imperf" # Construct a tag
                     print(f"      >> Generating Future Imperfective: {generated_form} ({generated_tag})")
+                    future_forms_imperf += 1
                     grouped_forms[future_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
+                
+                print(f"[디버그-미래시제] 미래 미완료형 생성 완료: {future_forms_imperf}개 생성됨")
             else:
                 print(f"      >> Cannot generate Future Imperfective: Infinitive form not found.")
 
@@ -622,6 +662,21 @@ def generate_and_format_forms(word, check_func):
             else:
                  print(f"      >> Cannot generate Conditional: Past tense forms not found.")
         # ---------------------------------------------------
+        
+        # 디버깅: 미래시제 결과 요약
+        print(f"[디버그-미래시제] 미래시제 처리 결과: 완료형 {future_forms_perf}개, 미완료형 {future_forms_imperf}개")
+        
+        # 미래 완료형 결과
+        if 'conjugationCategoryFuturePerfectiveIndicative' in grouped_forms:
+            print(f"[디버그-미래시제] 집계된 미래 완료형: {len(grouped_forms['conjugationCategoryFuturePerfectiveIndicative'])}개")
+            for idx, form_data in enumerate(grouped_forms['conjugationCategoryFuturePerfectiveIndicative']):
+                print(f"[디버그-미래시제] 완료형 #{idx+1}: 형태='{form_data['form']}', 태그='{form_data['tag']}'")
+        
+        # 미래 미완료형 결과
+        if 'conjugationCategoryFutureImperfectiveIndicative' in grouped_forms:
+            print(f"[디버그-미래시제] 집계된 미래 미완료형: {len(grouped_forms['conjugationCategoryFutureImperfectiveIndicative'])}개")
+            for idx, form_data in enumerate(grouped_forms['conjugationCategoryFutureImperfectiveIndicative']):
+                print(f"[디버그-미래시제] 미완료형 #{idx+1}: 형태='{form_data['form']}', 태그='{form_data['tag']}'")
 
         final_grouped_forms = grouped_forms # Return all grouped forms
 
