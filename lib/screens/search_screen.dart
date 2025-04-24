@@ -952,8 +952,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             'conjugationCategoryPastPassiveParticiple', // ppas
           ].contains(key);
 
-           bool usePastTenseTable = key == 'conjugationCategoryPastTense'; // praet
-
+          bool usePastTenseTable = key == 'conjugationCategoryPastTense'; // praet
+          
+          bool useSimpleList = [
+            'conjugationCategoryImperative',
+            'conjugationCategoryInfinitive',
+            'conjugationCategoryPresentAdverbialParticiple',
+            'conjugationCategoryAnteriorAdverbialParticiple',
+            'conjugationCategoryPresentImpersonal',
+            'conjugationCategoryPastImpersonal',
+            'conjugationCategoryFutureImpersonal',
+            'conjugationCategoryConditionalImpersonal',
+          ].contains(key);
 
           Widget content;
           if (useConjugationTable) {
@@ -966,11 +976,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
              content = _buildParticipleDeclensionTable(forms, l10n, key == 'conjugationCategoryPresentActiveParticiple');
           } else if (usePastTenseTable) {
              content = _buildPastTenseTable(forms, l10n);
+          } else if (useSimpleList) {
+            // 간단한 형태 목록은 한글 설명과 함께 표시
+            content = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: forms.map((form) => Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: _buildFormWithDescription(form, l10n),
+              )).toList(),
+            );
           } else {
             // Default simple list view for other categories
             content = Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: forms.map((form) => Text('${form.form} (${form.tag})', style: TextStyle(fontSize: Theme.of(context).textTheme.bodyMedium!.fontSize! * ref.watch(fontSizeFactorProvider)))).toList(),
+              children: forms.map((form) => Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: _buildFormWithDescription(form, l10n),
+              )).toList(),
             );
           }
 
@@ -1003,7 +1025,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                    padding: const EdgeInsets.all(8.0),
                    child: Column(
                      crossAxisAlignment: CrossAxisAlignment.start,
-                     children: forms.map((form) => Text('${form.form} (${form.tag})', style: TextStyle(fontSize: Theme.of(context).textTheme.bodyMedium!.fontSize! * ref.watch(fontSizeFactorProvider)))).toList(),
+                     children: forms.map((form) => Padding(
+                       padding: const EdgeInsets.only(bottom: 8.0),
+                       child: _buildFormWithDescription(form, l10n),
+                     )).toList(),
                    ),
                  ),
                ],
@@ -1012,7 +1037,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
            sections.add(const SizedBox(height: 8));
        }
     });
-
 
     if (sections.isEmpty) {
       return [Center(child: Text(l10n.noConjugationData))]; // Return List<Widget>
@@ -1375,6 +1399,69 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ],
           );
         }).toList(),
+      ],
+    );
+  }
+
+  // 명령법 및 다른 동사 형태에서 태그 표시를 한글로 변환하는 함수
+  String _getFormattedTagDescription(String tag, AppLocalizations l10n) {
+    final tagParts = tag.split(':');
+    final translatedParts = tagParts.map((part) => _translateGrammarTerm(part, l10n)).toList();
+    
+    // 여기서는 편의상 한국어 표시 순서에 맞게 조정 
+    // 예: '명령법 복수 1인칭 미완료' 형태로 변환
+    if (translatedParts.isNotEmpty) {
+      // 기본 형태 (품사)
+      String result = translatedParts[0];
+      
+      // 단/복수 추가
+      if (tagParts.contains('sg')) {
+        result += ' 단수';
+      } else if (tagParts.contains('pl')) {
+        result += ' 복수';
+      }
+      
+      // 인칭 추가
+      if (tagParts.contains('pri')) {
+        result += ' 1인칭';
+      } else if (tagParts.contains('sec')) {
+        result += ' 2인칭';
+      } else if (tagParts.contains('ter')) {
+        result += ' 3인칭';
+      }
+      
+      // 상 추가 (미완료/완료)
+      if (tagParts.contains('imperf')) {
+        result += ' 미완료';
+      } else if (tagParts.contains('perf')) {
+        result += ' 완료';
+      }
+      
+      return result;
+    }
+    
+    // 변환할 수 없는 경우 원래 태그 반환
+    return tagParts.join(':');
+  }
+
+  // 시제 정보를 포함한 형태소 태그 설명
+  String _getFormMorphDescription(ConjugationForm form, AppLocalizations l10n) {
+    // 동사 형태에 대한 한글 설명 생성
+    return _getFormattedTagDescription(form.tag, l10n);
+  }
+
+  // 기본 형태소를 표시하는 위젯
+  Widget _buildFormWithDescription(ConjugationForm form, AppLocalizations l10n) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(form.form, style: const TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 4),
+        Text(
+          _getFormMorphDescription(form, l10n),
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
+        ),
       ],
     );
   }
@@ -1775,17 +1862,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final base = tagMap['base'] ?? '';
     final aspect = tagMap['aspect'] ?? '';
     
-    // Basic description
-    if (aspect.isNotEmpty) {
-      if (aspect == 'imperf') return 'imperfective';
-      if (aspect == 'perf') return 'perfective';
+    // 먼저 한글 변환된 전체 태그 설명을 시도
+    final formattedDescription = _getFormattedTagDescription(tag, l10n);
+    if (formattedDescription != tag) {
+      return formattedDescription;
     }
     
-    // Try other common fields
-    if (tagMap.containsKey('mood')) return tagMap['mood']!;
+    // 기본 설명
+    if (aspect.isNotEmpty) {
+      if (aspect == 'imperf') return l10n.qualifier_imperf;
+      if (aspect == 'perf') return l10n.qualifier_perf;
+    }
+    
+    // 다른 일반적인 필드 시도
+    if (tagMap.containsKey('mood')) return _translateGrammarTerm(tagMap['mood']!, l10n);
     if (tagMap.containsKey('case')) return _getCaseName(tagMap['case'], l10n);
 
-    return tagMap['full_tag'] ?? tag; // Fallback to full tag
+    return tagMap['full_tag'] ?? tag; // 원래 태그로 폴백
   }
 
   // Helper function to format the analysis result with translated terms
