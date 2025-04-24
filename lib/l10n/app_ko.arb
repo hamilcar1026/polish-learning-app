@@ -42,6 +42,7 @@
   "tag_depr": "경멸 명사",
   "tag_adja": "형용사적 분사 (능동)",
   "tag_adjp": "형용사적 분사 (수동)",
+  "tag_cond": "조건법",
   "qualifier_sg": "단수",
   "qualifier_pl": "복수",
   "qualifier_nom": "주격",

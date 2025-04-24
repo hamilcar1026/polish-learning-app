@@ -58,6 +58,7 @@
    "tag_depr": "depreciative noun",
    "tag_adja": "adj participle (act)",
    "tag_adjp": "adj participle (pass)",
+   "tag_cond": "conditional",
    "qualifier_sg": "sg",
    "qualifier_pl": "pl",
    "qualifier_nom": "nom",
