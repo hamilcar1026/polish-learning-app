@@ -969,7 +969,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           if (useConjugationTable) {
             content = _buildConjugationTable(forms, l10n);
           } else if (useGerundTable) {
-            content = _buildGerundDeclensionTable(forms, l10n);
+            // Replaced with the improved function for verbal nouns
+            content = _buildVerbalNounTable(forms, l10n);
           } else if (useConditionalTable) {
             content = _buildConditionalTable(forms, l10n); // Use conditional builder
           } else if (useParticipleTable) {
@@ -1161,23 +1162,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  // --- NEW: Helper function to build Gerund Declension Table --- 
-  Widget _buildGerundDeclensionTable(List<ConjugationForm> forms, AppLocalizations l10n) {
+  // --- NEW: Helper function to build Verbal Noun Table ---
+  Widget _buildVerbalNounTable(List<ConjugationForm> forms, AppLocalizations l10n) {
     Map<String, Map<String, String>> declensionTable = {}; // {caseCode: {sg: form, pl: form}}
     final casesOrder = ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc']; 
 
-    // Find the lemma/base form for title (assuming all forms share the same base)
-    final String baseForm = forms.isNotEmpty ? forms.first.form : 'Gerund'; 
-    print("[_buildGerundDeclensionTable] Building table for: $baseForm");
+    print("[_buildVerbalNounTable] Building table for ${forms.length} gerund forms");
 
     for (var formInfo in forms) {
       final tagMap = _parseTag(formInfo.tag); 
-      // Get case and number from the parsed map (assuming 'case_person' holds case for gerund)
-      final casePart = tagMap['case_person']; // Gerund tags use case_person for case
+      print("[_buildVerbalNounTable] Processing: ${formInfo.form}, tag: ${formInfo.tag}, parsed: $tagMap");
+      
+      // Get case and number from the parsed map
+      final casePart = tagMap['case']; // Should now be correctly extracted
       final numberCode = tagMap['number'];
-      // Gender (tagMap['gender_tense_aspect']) exists but isn't typically shown distinctly in gerund declension tables
 
       if (casePart != null && numberCode != null) {
+        // Split combined cases like "nom.acc"
         final individualCases = casePart.split('.'); 
 
         for (var caseCode in individualCases) {
@@ -1188,15 +1189,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             // Assign the form to the singular or plural slot
             if (numberCode == 'sg') {
               declensionTable[caseCode]!['sg'] ??= formInfo.form; 
+              print("[_buildVerbalNounTable] Added sg form: ${formInfo.form} for case $caseCode");
             } else if (numberCode == 'pl') {
               declensionTable[caseCode]!['pl'] ??= formInfo.form;
+              print("[_buildVerbalNounTable] Added pl form: ${formInfo.form} for case $caseCode");
             }
           }
         }
       }
     }
 
-    // Build the Table widget (styling copied from other tables)
+    print("[_buildVerbalNounTable] Final table: $declensionTable");
+
+    // Build the Table widget
     return Table(
       border: TableBorder.all(color: Colors.grey.shade300),
       columnWidths: const {
@@ -1231,7 +1236,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(_getCaseName(caseCode, l10n)), // Use helper for localized case name
+                child: Text(_getCaseName(caseCode, l10n)), 
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -1248,7 +1253,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  // --- NEW: Helper function to build Past Tense Table (Refactored) ---
+  // --- NEW: Helper function to build Past Tense Table (Completely revised) ---
   Widget _buildPastTenseTable(List<ConjugationForm> forms, AppLocalizations l10n) {
     // Table data structure: {person: {number: {genderKey: form}}}
     // person keys: 'pri', 'sec', 'ter'
@@ -1263,13 +1268,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     // Person order for rows
     const personOrder = ['pri', 'sec', 'ter'];
 
+    print("[_buildPastTenseTable] Building table with ${forms.length} forms");
+
     for (var formInfo in forms) {
       if (formInfo.tag.startsWith('praet')) { // Process only past tense forms
         final tagMap = _parseTag(formInfo.tag);
         final person = tagMap['person']; // Should be populated by _parseTag for praet now
         final number = tagMap['number'];
-        final gender = tagMap['gender']; // Gender from praet tag (e.g., 'f', 'm1.m2.m3', 'm2.m3.f.n')
+        final gender = tagMap['gender']; // Gender from praet tag
         final form = formInfo.form;
+
+        print("[_buildPastTenseTable] Processing form: $form, tag: ${formInfo.tag}, parsed: $tagMap");
 
         // Ensure required fields are present
         if (person == null || number == null || gender == null) {
@@ -1280,30 +1289,33 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         // Determine the simplified gender key for table organization
         String displayGenderKey = '';
         if (number == 'sg') {
-          if (gender.contains('m')) displayGenderKey = 'm'; // Group m1, m2, m3 under 'm' for sg
-          else if (gender == 'f') displayGenderKey = 'f';
-          else if (gender.contains('n')) displayGenderKey = 'n'; // Group n1, n2 under 'n' for sg
+          if (gender.contains('m1') || gender.contains('m2') || gender.contains('m3') || gender == 'm') {
+            displayGenderKey = 'm'; // Group all masculine forms under 'm' for sg
+            print("[_buildPastTenseTable] Recognized masculine form: $form");
+          } else if (gender == 'f') {
+            displayGenderKey = 'f';
+          } else if (gender.contains('n')) {
+            displayGenderKey = 'n'; // Group n1, n2 under 'n' for sg
+          }
         } else if (number == 'pl') {
-          if (gender == 'm1') displayGenderKey = 'm1'; // Masc. Personal Plural
-          // Check for combined non-m1 genders explicitly
-          else if (gender.contains('m2') || gender.contains('m3') || gender.contains('f') || gender.contains('n')) {
-                displayGenderKey = 'non-m1'; // Other plurals (Non-Masc. Personal)
+          if (gender == 'm1' || gender.contains('m1')) {
+            displayGenderKey = 'm1'; // Masc. Personal Plural
           } else {
-               // Handle cases where 'pl' exists but gender isn't m1 or other expected non-m1 combos
-               // This might happen for rare forms or tag parsing issues. Default to non-m1 for now.
-               print("[_buildPastTenseTable] Unexpected plural gender combination '${gender}' for ${form}, defaulting to non-m1 key.");
-               displayGenderKey = 'non-m1'; 
+            displayGenderKey = 'non-m1'; // Other plurals (Non-Masc. Personal)
           }
         }
 
         // Populate the tableData, taking the first form found for each slot
         if (tableData.containsKey(person) && tableData[person]!.containsKey(number) && displayGenderKey.isNotEmpty) {
           tableData[person]![number]![displayGenderKey] ??= form;
+          print("[_buildPastTenseTable] Added form to table: tableData[$person][$number][$displayGenderKey] = $form");
         } else {
            print("[_buildPastTenseTable] Failed to place form in tableData structure: person='${person}', number='${number}', displayGenderKey='${displayGenderKey}', form='${form}'");
         }
       }
     }
+
+    print("[_buildPastTenseTable] Final table: $tableData");
 
     // Build the Table widget: Rows for Person, Columns for Number (sg/pl)
     return Table(
