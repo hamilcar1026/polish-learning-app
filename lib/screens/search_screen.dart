@@ -1270,6 +1270,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     print("[_buildPastTenseTable] Building table with ${forms.length} forms");
 
+    // First pass: collect base forms (3rd person forms that are clearly labeled)
     for (var formInfo in forms) {
       if (formInfo.tag.startsWith('praet')) { // Process only past tense forms
         final tagMap = _parseTag(formInfo.tag);
@@ -1315,7 +1316,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       }
     }
 
-    print("[_buildPastTenseTable] Final table: $tableData");
+    // Fill in missing 1st and 2nd person forms by checking forms that might have explicit Aglt suffix
+    // or by manually generating them from 3rd person forms
+    attemptToAddMissingPersonForms(tableData, forms);
+
+    print("[_buildPastTenseTable] Final table after processing: $tableData");
 
     // Build the Table widget: Rows for Person, Columns for Number (sg/pl)
     return Table(
@@ -1413,6 +1418,73 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         }).toList(),
       ],
     );
+  }
+
+  // Helper function to add missing 1st and 2nd person forms to the past tense table
+  void attemptToAddMissingPersonForms(Map<String, Map<String, Map<String, String>>> tableData, List<ConjugationForm> forms) {
+    // Skip if 3rd person forms aren't available as base forms
+    if (tableData['ter']?['sg']?['m'] == null) {
+      print("[attemptToAddMissingPersonForms] Cannot generate person forms: missing 3rd person masculine form");
+      return;
+    }
+
+    String mascSgBase = tableData['ter']!['sg']!['m']!;
+    
+    // Try to locate specific forms with endings or Aglt (auxiliary) that indicate 1st/2nd person
+    for (var form in forms) {
+      if (!form.tag.startsWith('praet')) continue;
+      
+      final String formText = form.form;
+      
+      // Check for common 1st/2nd person endings and suffixes
+      if (formText.endsWith('łem') || formText.endsWith('łam')) {
+        // Likely 1st person singular
+        if (formText.endsWith('łem')) tableData['pri']!['sg']!['m'] ??= formText;
+        if (formText.endsWith('łam')) tableData['pri']!['sg']!['f'] ??= formText;
+        print("[attemptToAddMissingPersonForms] Added 1st person form: $formText");
+      } else if (formText.endsWith('łeś') || formText.endsWith('łaś')) {
+        // Likely 2nd person singular
+        if (formText.endsWith('łeś')) tableData['sec']!['sg']!['m'] ??= formText;
+        if (formText.endsWith('łaś')) tableData['sec']!['sg']!['f'] ??= formText;
+        print("[attemptToAddMissingPersonForms] Added 2nd person form: $formText");
+      } else if (formText.endsWith('liśmy')) {
+        // Likely 1st person plural masculine
+        tableData['pri']!['pl']!['m1'] ??= formText;
+        print("[attemptToAddMissingPersonForms] Added 1st person plural m1 form: $formText");
+      } else if (formText.endsWith('łyśmy')) {
+        // Likely 1st person plural non-masculine
+        tableData['pri']!['pl']!['non-m1'] ??= formText;
+        print("[attemptToAddMissingPersonForms] Added 1st person plural non-m1 form: $formText");
+      } else if (formText.endsWith('liście')) {
+        // Likely 2nd person plural masculine
+        tableData['sec']!['pl']!['m1'] ??= formText;
+        print("[attemptToAddMissingPersonForms] Added 2nd person plural m1 form: $formText");
+      } else if (formText.endsWith('łyście')) {
+        // Likely 2nd person plural non-masculine
+        tableData['sec']!['pl']!['non-m1'] ??= formText;
+        print("[attemptToAddMissingPersonForms] Added 2nd person plural non-m1 form: $formText");
+      }
+    }
+    
+    // If still missing forms, try to generate them based on standard patterns
+    
+    // 1st person singular forms
+    if (tableData['pri']!['sg']!['m'] == null && mascSgBase.isNotEmpty) {
+      // Typically: 3rd sg masc + "em" ending
+      String suggestedForm = mascSgBase + "em";
+      tableData['pri']!['sg']!['m'] = suggestedForm;
+      print("[attemptToAddMissingPersonForms] Generated 1st person sg m form: $suggestedForm");
+    }
+    
+    // 2nd person singular forms
+    if (tableData['sec']!['sg']!['m'] == null && mascSgBase.isNotEmpty) {
+      // Typically: 3rd sg masc + "eś" ending
+      String suggestedForm = mascSgBase + "eś";
+      tableData['sec']!['sg']!['m'] = suggestedForm;
+      print("[attemptToAddMissingPersonForms] Generated 2nd person sg m form: $suggestedForm");
+    }
+    
+    // Other forms can be generated similarly if needed
   }
 
   // 명령법 및 다른 동사 형태에서 태그 표시를 한글로 변환하는 함수
