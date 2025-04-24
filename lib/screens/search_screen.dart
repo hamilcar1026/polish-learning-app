@@ -925,6 +925,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       'conjugationCategoryPastImpersonal',
       'conjugationCategoryFutureImpersonal', // Added for completeness
       'conjugationCategoryConditionalImpersonal', // Added for completeness
+      'conjugationCategoryImperativeImpersonal', // Added for impersonal imperative
       'conjugationCategoryOtherForms', // Keep other forms at the end
     ];
 
@@ -963,6 +964,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             'conjugationCategoryPastImpersonal',
             'conjugationCategoryFutureImpersonal',
             'conjugationCategoryConditionalImpersonal',
+            'conjugationCategoryImperativeImpersonal',
+          ].contains(key);
+
+          bool isImpersonalCategory = [
+            'conjugationCategoryPresentImpersonal',
+            'conjugationCategoryPastImpersonal',
+            'conjugationCategoryFutureImpersonal',
+            'conjugationCategoryConditionalImpersonal',
+            'conjugationCategoryImperativeImpersonal',
           ].contains(key);
 
           Widget content;
@@ -978,14 +988,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           } else if (usePastTenseTable) {
              content = _buildPastTenseTable(forms, l10n);
           } else if (useSimpleList) {
-            // 간단한 형태 목록은 한글 설명과 함께 표시
-            content = Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: forms.map((form) => Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: _buildFormWithDescription(form, l10n),
-              )).toList(),
-            );
+            // 비인칭 섹션인 경우 특별한 빌더 사용
+            if (isImpersonalCategory) {
+              content = _buildImpersonalSection(title, forms, l10n);
+            } else {
+              // 간단한 형태 목록은 한글 설명과 함께 표시
+              content = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: forms.map((form) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: _buildFormWithDescription(form, l10n),
+                )).toList(),
+              );
+            }
           } else {
             // Default simple list view for other categories
             content = Column(
@@ -1000,7 +1015,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           sections.add(
             ExpansionTile(
               key: PageStorageKey<String>(key), // Preserve state on scroll
-              title: Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: Theme.of(context).textTheme.titleMedium!.fontSize! * ref.watch(fontSizeFactorProvider))),
+              title: isImpersonalCategory ? 
+                Row(
+                  children: [
+                    Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: Theme.of(context).textTheme.titleMedium!.fontSize! * ref.watch(fontSizeFactorProvider))),
+                    const SizedBox(width: 8),
+                    Text(
+                      "(${l10n.impersonalAccuracyWarning})",
+                      style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ) : 
+                Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: Theme.of(context).textTheme.titleMedium!.fontSize! * ref.watch(fontSizeFactorProvider))),
               initiallyExpanded: isExpanded,
               onExpansionChanged: (expanding) => setState(() {
                 _expandedCategories[key] = expanding;
@@ -1065,6 +1091,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case 'conjugationCategoryPastImpersonal': return l10n.conjugationCategoryPastImpersonal;
       case 'conjugationCategoryFutureImpersonal': return l10n.conjugationCategoryFutureImpersonal; // Needs key in .arb
       case 'conjugationCategoryConditionalImpersonal': return l10n.conjugationCategoryConditionalImpersonal; // Needs key in .arb
+      case 'conjugationCategoryImperativeImpersonal': return l10n.conjugationCategoryImperativeImpersonal; // Added for impersonal imperative
       case 'conjugationCategoryOtherForms': return l10n.conjugationCategoryOtherForms;
       default: return key; // Fallback to the key itself
     }
@@ -1964,6 +1991,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         }
       // --- MODIFICATION END ---
       case 'cond': return 'conjugationCategoryConditional'; // 조건법
+      case 'conjugationCategoryImperativeImpersonal': return 'conjugationCategoryImperativeImpersonal'; // Added for impersonal imperative
       default: return 'conjugationCategoryOtherForms'; // Group others
     }
   }
@@ -2079,8 +2107,217 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       // --- ADDITIONS for Impersonal separation ---
       case 'conjugationCategoryPresentImpersonal': return l10n.conjugationCategoryPresentImpersonal;
       case 'conjugationCategoryPastImpersonal': return l10n.conjugationCategoryPastImpersonal;
+      case 'conjugationCategoryImperativeImpersonal': return l10n.conjugationCategoryImperativeImpersonal; // Added for impersonal imperative
       // --- END ADDITIONS ---
       default: return categoryKey; // Fallback to the key itself if unknown
     }
   }
+
+  // --- 향상된 비인칭 카테고리 분류 (업데이트됨) ---
+  if (is_impersonal) {
+    if (form.endsWith(('no', 'to')):
+        category_key = 'conjugationCategoryPastImpersonal'
+    elif base_tag == 'imps':
+        category_key = 'conjugationCategoryPresentImpersonal'
+    elif base_tag == 'impt' or 'impt' in form_tag_full:
+        category_key = 'conjugationCategoryImperativeImpersonal'
+  }
+  // -------------------------------------------------
+
+  // --- 비인칭 형태 섹션 빌더 함수 수정 ---
+  Widget _buildImpersonalSection(String title, List<ConjugationForm> forms, AppLocalizations l10n) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              title,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              "(${l10n.impersonalAccuracyWarning})",
+              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12, color: Colors.grey),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: forms.map((form) => Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: _buildFormWithDescription(form, l10n),
+          )).toList(),
+        ),
+      ],
+    );
+  }
+
+  // --- 비인칭 형태 관련 카테고리 빌더 수정 ---
+  List<Widget> _buildConjugationSections(BuildContext context, Map<String, List<ConjugationForm>> groupedForms, AppLocalizations l10n) {
+    // Define the desired order of sections
+    final displayOrder = [
+      'conjugationCategoryPresentIndicative',
+      'conjugationCategoryFuturePerfectiveIndicative', // Added for completeness
+      'conjugationCategoryFutureImperfectiveIndicative', // ADDED
+      'conjugationCategoryPastTense',
+      'conjugationCategoryConditional', // ADDED
+      'conjugationCategoryImperative',
+      'conjugationCategoryInfinitive',
+      'conjugationCategoryPresentAdverbialParticiple',
+      'conjugationCategoryAnteriorAdverbialParticiple',
+      'conjugationCategoryPresentActiveParticiple',
+      'conjugationCategoryPastPassiveParticiple',
+      'conjugationCategoryVerbalNoun',
+      'conjugationCategoryPresentImpersonal',
+      'conjugationCategoryPastImpersonal',
+      'conjugationCategoryFutureImpersonal', // Added for completeness
+      'conjugationCategoryConditionalImpersonal', // Added for completeness
+      'conjugationCategoryImperativeImpersonal', // Added for impersonal imperative
+      'conjugationCategoryOtherForms', // Keep other forms at the end
+    ];
+
+    List<Widget> sections = [];
+
+    for (var key in displayOrder) {
+      if (groupedForms.containsKey(key)) {
+        final forms = groupedForms[key]!;
+        if (forms.isNotEmpty) {
+          final title = _getConjugationCategoryTitle(key, l10n);
+          bool isExpanded = _expandedCategories[key] ?? true; // Default to expanded
+
+          // Determine which builder to use based on the key
+          bool useConjugationTable = [
+            'conjugationCategoryPresentIndicative',
+            'conjugationCategoryFuturePerfectiveIndicative', // fin:perf
+            'conjugationCategoryFutureImperfectiveIndicative', // fut:... (będzie)
+          ].contains(key);
+
+          bool useGerundTable = key == 'conjugationCategoryVerbalNoun'; // ger:...
+          bool useConditionalTable = key == 'conjugationCategoryConditional'; // cond:...
+
+          bool useParticipleTable = [
+            'conjugationCategoryPresentActiveParticiple', // pact
+            'conjugationCategoryPastPassiveParticiple', // ppas
+          ].contains(key);
+
+          bool usePastTenseTable = key == 'conjugationCategoryPastTense'; // praet
+          
+          bool useSimpleList = [
+            'conjugationCategoryImperative',
+            'conjugationCategoryInfinitive',
+            'conjugationCategoryPresentAdverbialParticiple',
+            'conjugationCategoryAnteriorAdverbialParticiple',
+            'conjugationCategoryPresentImpersonal',
+            'conjugationCategoryPastImpersonal',
+            'conjugationCategoryFutureImpersonal',
+            'conjugationCategoryConditionalImpersonal',
+            'conjugationCategoryImperativeImpersonal',
+          ].contains(key);
+
+          bool isImpersonalCategory = [
+            'conjugationCategoryPresentImpersonal',
+            'conjugationCategoryPastImpersonal',
+            'conjugationCategoryFutureImpersonal',
+            'conjugationCategoryConditionalImpersonal',
+            'conjugationCategoryImperativeImpersonal',
+          ].contains(key);
+
+          Widget content;
+          if (useConjugationTable) {
+            content = _buildConjugationTable(forms, l10n);
+          } else if (useGerundTable) {
+            // Replaced with the improved function for verbal nouns
+            content = _buildVerbalNounTable(forms, l10n);
+          } else if (useConditionalTable) {
+            content = _buildConditionalTable(forms, l10n); // Use conditional builder
+          } else if (useParticipleTable) {
+             content = _buildParticipleDeclensionTable(forms, l10n, key == 'conjugationCategoryPresentActiveParticiple');
+          } else if (usePastTenseTable) {
+             content = _buildPastTenseTable(forms, l10n);
+          } else if (useSimpleList) {
+            // 비인칭 섹션인 경우 특별한 빌더 사용
+            if (isImpersonalCategory) {
+              content = _buildImpersonalSection(title, forms, l10n);
+            } else {
+              // 간단한 형태 목록은 한글 설명과 함께 표시
+              content = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: forms.map((form) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: _buildFormWithDescription(form, l10n),
+                )).toList(),
+              );
+            }
+          } else {
+            // Default simple list view for other categories
+            content = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: forms.map((form) => Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: _buildFormWithDescription(form, l10n),
+              )).toList(),
+            );
+          }
+
+          sections.add(
+            ExpansionTile(
+              key: PageStorageKey<String>(key), // Preserve state on scroll
+              title: isImpersonalCategory ? 
+                Row(
+                  children: [
+                    Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: Theme.of(context).textTheme.titleMedium!.fontSize! * ref.watch(fontSizeFactorProvider))),
+                    const SizedBox(width: 8),
+                    Text(
+                      "(${l10n.impersonalAccuracyWarning})",
+                      style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ) : 
+                Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: Theme.of(context).textTheme.titleMedium!.fontSize! * ref.watch(fontSizeFactorProvider))),
+              initiallyExpanded: isExpanded,
+              onExpansionChanged: (expanding) => setState(() {
+                _expandedCategories[key] = expanding;
+              }),
+              children: [Padding(padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0), child: content)],
+            )
+          );
+          sections.add(const SizedBox(height: 8)); // Spacing between sections
+        }
+      }
+    }
+    // Add any remaining categories not in displayOrder (should ideally be empty or just 'other')
+    groupedForms.forEach((key, forms) {
+       if (!displayOrder.contains(key) && forms.isNotEmpty) {
+          final title = _getConjugationCategoryTitle(key, l10n);
+           sections.add(
+             ExpansionTile(
+               key: PageStorageKey<String>(key),
+               title: Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: Theme.of(context).textTheme.titleMedium!.fontSize! * ref.watch(fontSizeFactorProvider))),
+               initiallyExpanded: true,
+               children: [
+                 Padding(
+                   padding: const EdgeInsets.all(8.0),
+                   child: Column(
+                     crossAxisAlignment: CrossAxisAlignment.start,
+                     children: forms.map((form) => Padding(
+                       padding: const EdgeInsets.only(bottom: 8.0),
+                       child: _buildFormWithDescription(form, l10n),
+                     )).toList(),
+                   ),
+                 ),
+               ],
+             ),
+           );
+           sections.add(const SizedBox(height: 8));
+       }
+    });
+
+    if (sections.isEmpty) {
+      return [Center(child: Text(l10n.noConjugationData))]; // Return List<Widget>
+    } else {
+      return sections; // Return List<Widget>
+    }
+  } // End of _buildConjugationSections function
 } 

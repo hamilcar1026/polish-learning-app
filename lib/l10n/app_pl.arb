@@ -94,6 +94,12 @@
   "@conjugationCategoryConditionalImpersonal": {
     "description": "Tytuł kategorii dla formy bezosobowej trybu przypuszczającego"
   },
+  "conjugationCategoryPresentImpersonal": "Bezosobowa teraźniejsza",
+  "conjugationCategoryPastImpersonal": "Bezosobowa przeszła",
+  "conjugationCategoryFutureImpersonal": "Bezosobowa przyszła",
+  "conjugationCategoryConditionalImpersonal": "Bezosobowa trybu warunkowego",
+  "conjugationCategoryImperativeImpersonal": "Tryb rozkazujący nieosobowy",
+  "conjugationCategoryOtherForms": "Inne formy",
   "drawerRecentSearches": "Ostatnie wyszukiwania",
   "drawerClearRecentSearchesTooltip": "Wyczyść ostatnie wyszukiwania",
   "drawerClearRecentSearchesDialogTitle": "Wyczyścić ostatnie wyszukiwania?",
@@ -214,5 +220,6 @@
       }
     }
   },
-  "translationLabel": "Tłumaczenie"
+  "translationLabel": "Tłumaczenie",
+  "impersonalAccuracyWarning": "Może nie być dokładne"
 } 

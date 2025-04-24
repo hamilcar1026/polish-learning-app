@@ -541,19 +541,45 @@ def generate_and_format_forms(word, check_func):
             if base_tag == 'praet':
                 parts = form_tag_full.split(':')
                 num_gen_key = None
-                # Construct keys like 'sg:m1', 'sg:f', 'sg:n', 'pl:m1', 'pl:m2.m3.f.n'
+                # 과거시제 형태 저장 개선 - 보다 세부적인 성별 구분 지원
                 if 'sg' in parts:
                     num = 'sg'
-                    gen = next((p for p in parts if p in ['m1', 'm2', 'm3', 'f', 'n']), None)
-                    if gen: num_gen_key = f"{num}:{gen}"
+                    # 단수형에서 더 세부적인 성별 처리 (m1, m2, m3, f, n1, n2, n 등 모든 가능한 성별 포함)
+                    for gen in parts:
+                        if gen in ['m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2']:
+                            num_gen_key = f"{num}:{gen}"
+                            if num_gen_key:
+                                past_forms[num_gen_key] = form
+                                print(f"      >> Found past form for {num_gen_key}: {form}")
                 elif 'pl' in parts:
                     num = 'pl'
-                    gen = next((p for p in parts if p in ['m1', 'm2.m3.f.n']), None) # pl uses m1 or m2.m3.f.n typically
-                    if gen: num_gen_key = f"{num}:{gen}"
-
-                if num_gen_key:
-                    past_forms[num_gen_key] = form
-                    print(f"      >> Found past form for {num_gen_key}: {form}")
+                    # 복수형에서 더 세부적인 처리 (m1, non-m1, m2.m3.f.n 등 가능한 모든 조합)
+                    for gen in parts:
+                        if gen in ['m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2', 'non-m1', 'm2.m3.f.n']:
+                            num_gen_key = f"{num}:{gen}"
+                            if num_gen_key:
+                                past_forms[num_gen_key] = form
+                                print(f"      >> Found past form for {num_gen_key}: {form}")
+                
+                # 추가: 인칭 정보 명시적으로 처리
+                person = None
+                # 태그에서 인칭 정보 직접 확인
+                for part in parts:
+                    if part in ['pri', 'sec', 'ter']:
+                        person = part
+                        break
+                
+                # 태그에 인칭 정보가 없을 경우 형태에서 추론
+                if person is None:
+                    if form.endswith(('łem', 'łam')): person = 'pri'
+                    elif form.endswith(('łeś', 'łaś')): person = 'sec'
+                    elif form.endswith(('ł', 'ła', 'ło')): person = 'ter'
+                    elif form.endswith(('liśmy', 'łyśmy')): person = 'pri'
+                    elif form.endswith(('liście', 'łyście')): person = 'sec'
+                    elif form.endswith(('li', 'ły')): person = 'ter'
+                
+                if person:
+                    form_tag_full += f':{person}' # Append inferred person
             # --------------------------------------------------
 
             # --- 과거 비인칭 형태 저장 (no/to 형태) ---
@@ -561,20 +587,6 @@ def generate_and_format_forms(word, check_func):
                 past_impersonal_form = form
                 print(f"      >> Found past impersonal form: {past_impersonal_form}")
             # --------------------------------------------------
-
-            # --- Infer person for past tense tags (already stored) ---
-            person = None
-            if base_tag == 'praet':
-                 # Your existing person inference logic...
-                if form.endswith(('łem', 'łam')): person = 'pri'
-                elif form.endswith(('łeś', 'łaś')): person = 'sec'
-                elif form.endswith(('ł', 'ła', 'ło')): person = 'ter'
-                elif form.endswith(('liśmy', 'łyśmy')): person = 'pri'
-                elif form.endswith(('liście', 'łyście')): person = 'sec'
-                elif form.endswith(('li', 'ły')): person = 'ter'
-                if person:
-                     form_tag_full += f':{person}' # Append inferred person
-            # ------------------------------------------------------
 
             category_key = get_conjugation_category_key(base_tag, form_tag_full)
 
@@ -715,92 +727,135 @@ def generate_and_format_forms(word, check_func):
                 print(f"      >> Cannot generate Future Imperfective: Infinitive form not found.")
 
             # 2. Conditional (using past forms)
+            # 중요: 알고리즘 추측을 최소화하고 morf에서 직접 가져온 형태 우선 사용
             conditional_key = 'conjugationCategoryConditional'
             if conditional_key not in grouped_forms: grouped_forms[conditional_key] = []
-            if past_forms:
-                for num_pers, particle in BY_CONDITIONAL_PARTICLES.items():
-                    num, pers = num_pers.split(':')
-                    # Find corresponding past forms based on number and gender
-                    if num == 'sg':
-                        # 수정: 모든 필요한 단수 성별을 명시적으로 처리
-                        genders_to_try = []
+            
+            # 2-1. Morfeusz에서 직접 조건법 형태 찾기
+            direct_conditional_forms = []
+            for form_tuple in generated_forms_raw:
+                if len(form_tuple) < 3:
+                    continue
+                form = form_tuple[0]
+                form_tag_full = form_tuple[2]
+                if form_tag_full.startswith('cond:'):
+                    print(f"      >> Found direct conditional form: {form}, tag: {form_tag_full}")
+                    direct_conditional_forms.append(form_tuple)
+                    # 바로 그룹에 추가
+                    base_tag = form_tag_full.split(':', 1)[0]
+                    qualifiers = list(form_tuple[3:]) if len(form_tuple) > 3 else []
+                    form_data = {"form": form, "tag": form_tag_full, "qualifiers": qualifiers}
+                    grouped_forms[conditional_key].append(form_data)
+            
+            print(f"[디버그-조건법] Morfeusz에서 직접 찾은 조건법 형태 수: {len(direct_conditional_forms)}")
+            
+            # 2-2. 직접 찾은 형태가 충분하지 않은 경우에만 생성
+            if len(direct_conditional_forms) < 6:  # 최소한 몇 개의 기본 형태가 있어야 함
+                print(f"[디버그-조건법] 직접 찾은 조건법 형태가 부족하여 필요한 형태 생성 시도")
+                if past_forms:
+                    for num_pers, particle in BY_CONDITIONAL_PARTICLES.items():
+                        num, pers = num_pers.split(':')
+                        # 이미 해당 인칭/수에 대한 형태가 있는지 확인
+                        has_existing_form = any(
+                            form["tag"].startswith(f"cond:{num}:") and f":{pers}:" in form["tag"]
+                            for form in grouped_forms[conditional_key]
+                        )
                         
-                        # 남성 단수 형태들 - m1, m2, m3 중 있는 것 사용
-                        if 'sg:m1' in past_forms: 
-                            genders_to_try.append('m1')
-                            past_key = 'sg:m1'
-                            if past_key in past_forms:
-                                base_past = past_forms[past_key]
-                                generated_form = f"{base_past}{particle}" # Attach particle
-                                generated_tag = f"cond:{num}:m1:{pers}:imperf"
-                                print(f"      >> Generating Conditional (남성 인격): {generated_form} ({generated_tag})")
-                                grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
+                        if has_existing_form:
+                            print(f"      >> Skipping generation for {num}:{pers} - already exists in direct forms")
+                            continue
                         
-                        if 'sg:m2' in past_forms:
-                            genders_to_try.append('m2')
-                            past_key = 'sg:m2'
-                            if past_key in past_forms:
-                                base_past = past_forms[past_key]
-                                generated_form = f"{base_past}{particle}" # Attach particle
-                                generated_tag = f"cond:{num}:m2:{pers}:imperf"
-                                print(f"      >> Generating Conditional (남성 동물): {generated_form} ({generated_tag})")
-                                grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
-                                
-                        if 'sg:m3' in past_forms:
-                            genders_to_try.append('m3')
-                            past_key = 'sg:m3'
-                            if past_key in past_forms:
-                                base_past = past_forms[past_key]
-                                generated_form = f"{base_past}{particle}" # Attach particle
-                                generated_tag = f"cond:{num}:m3:{pers}:imperf"
-                                print(f"      >> Generating Conditional (남성 사물): {generated_form} ({generated_tag})")
-                                grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
-                        
-                        # 만약 sg:m, sg:m1, sg:m2, sg:m3 중 어느 것도 없다면 m1.m2.m3 키를 확인
-                        if 'sg:m1.m2.m3' in past_forms and not (set(genders_to_try) & set(['m1', 'm2', 'm3'])):
-                            past_key = 'sg:m1.m2.m3'
-                            if past_key in past_forms:
-                                base_past = past_forms[past_key]
-                                # 남성 전체 형태를 각각의 세부 성별로 복제 (m1, m2, m3)
-                                for m_gender in ['m1', 'm2', 'm3']:
+                        # Find corresponding past forms based on number and gender
+                        if num == 'sg':
+                            # 수정: 모든 필요한 단수 성별을 명시적으로 처리 (중성 포함)
+                            genders_to_try = []
+                            
+                            # 남성 단수 형태들 - m1, m2, m3 중 있는 것 사용
+                            if 'sg:m1' in past_forms: 
+                                genders_to_try.append('m1')
+                                past_key = 'sg:m1'
+                                if past_key in past_forms:
+                                    base_past = past_forms[past_key]
                                     generated_form = f"{base_past}{particle}" # Attach particle
-                                    generated_tag = f"cond:{num}:{m_gender}:{pers}:imperf"
-                                    print(f"      >> Generating Conditional (남성 통합): {generated_form} ({generated_tag})")
+                                    generated_tag = f"cond:{num}:m1:{pers}:imperf"
+                                    print(f"      >> Generating Conditional (남성 인격): {generated_form} ({generated_tag})")
                                     grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
-                        
-                        # 여성 단수 형태
-                        if 'sg:f' in past_forms:
-                            past_key = 'sg:f'
-                            if past_key in past_forms:
-                                base_past = past_forms[past_key]
-                                generated_form = f"{base_past}{particle}" # Attach particle
-                                generated_tag = f"cond:{num}:f:{pers}:imperf"
-                                print(f"      >> Generating Conditional (여성): {generated_form} ({generated_tag})")
-                                grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
-                        
-                        # 중성 단수 형태
-                        if 'sg:n' in past_forms:
-                            past_key = 'sg:n'
-                            if past_key in past_forms:
-                                base_past = past_forms[past_key]
-                                generated_form = f"{base_past}{particle}" # Attach particle
-                                generated_tag = f"cond:{num}:n:{pers}:imperf"
-                                print(f"      >> Generating Conditional (중성): {generated_form} ({generated_tag})")
-                                grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
+                            
+                            if 'sg:m2' in past_forms:
+                                genders_to_try.append('m2')
+                                past_key = 'sg:m2'
+                                if past_key in past_forms:
+                                    base_past = past_forms[past_key]
+                                    generated_form = f"{base_past}{particle}" # Attach particle
+                                    generated_tag = f"cond:{num}:m2:{pers}:imperf"
+                                    print(f"      >> Generating Conditional (남성 동물): {generated_form} ({generated_tag})")
+                                    grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
+                                    
+                            if 'sg:m3' in past_forms:
+                                genders_to_try.append('m3')
+                                past_key = 'sg:m3'
+                                if past_key in past_forms:
+                                    base_past = past_forms[past_key]
+                                    generated_form = f"{base_past}{particle}" # Attach particle
+                                    generated_tag = f"cond:{num}:m3:{pers}:imperf"
+                                    print(f"      >> Generating Conditional (남성 사물): {generated_form} ({generated_tag})")
+                                    grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
+                            
+                            # 만약 sg:m, sg:m1, sg:m2, sg:m3 중 어느 것도 없다면 m1.m2.m3 키를 확인
+                            if 'sg:m1.m2.m3' in past_forms and not (set(genders_to_try) & set(['m1', 'm2', 'm3'])):
+                                past_key = 'sg:m1.m2.m3'
+                                if past_key in past_forms:
+                                    base_past = past_forms[past_key]
+                                    # 남성 전체 형태를 각각의 세부 성별로 복제 (m1, m2, m3)
+                                    for m_gender in ['m1', 'm2', 'm3']:
+                                        generated_form = f"{base_past}{particle}" # Attach particle
+                                        generated_tag = f"cond:{num}:{m_gender}:{pers}:imperf"
+                                        print(f"      >> Generating Conditional (남성 통합): {generated_form} ({generated_tag})")
+                                        grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
+                            
+                            # 여성 단수 형태
+                            if 'sg:f' in past_forms:
+                                past_key = 'sg:f'
+                                if past_key in past_forms:
+                                    base_past = past_forms[past_key]
+                                    generated_form = f"{base_past}{particle}" # Attach particle
+                                    generated_tag = f"cond:{num}:f:{pers}:imperf"
+                                    print(f"      >> Generating Conditional (여성): {generated_form} ({generated_tag})")
+                                    grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
+                            
+                            # 중성 단수 형태 - 이 부분을 누락하지 않도록 명시적으로 처리
+                            if 'sg:n' in past_forms:
+                                past_key = 'sg:n'
+                                if past_key in past_forms:
+                                    base_past = past_forms[past_key]
+                                    generated_form = f"{base_past}{particle}" # Attach particle
+                                    generated_tag = f"cond:{num}:n:{pers}:imperf"
+                                    print(f"      >> Generating Conditional (중성): {generated_form} ({generated_tag})")
+                                    grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
+                            elif 'sg:n1' in past_forms or 'sg:n2' in past_forms:
+                                # n1, n2 등의 세부 구분이 있는 경우
+                                for n_type in ['n1', 'n2']:
+                                    past_key = f'sg:{n_type}'
+                                    if past_key in past_forms:
+                                        base_past = past_forms[past_key]
+                                        generated_form = f"{base_past}{particle}" # Attach particle
+                                        generated_tag = f"cond:{num}:{n_type}:{pers}:imperf"
+                                        print(f"      >> Generating Conditional (중성 세부): {generated_form} ({generated_tag})")
+                                        grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
 
-                    elif num == 'pl':
-                        # Plural needs m1 (personal masculine) and m2.m3.f.n (other)
-                        genders_to_try = ['m1', 'm2.m3.f.n']
-                        for gender in genders_to_try:
-                             past_key = f"pl:{gender}"
-                             if past_key in past_forms:
-                                 base_past = past_forms[past_key]
-                                 generated_form = f"{base_past}{particle}" # Attach particle
-                                 generated_tag = f"cond:{num}:{gender}:{pers}:imperf" # Use simplified gender tag
-                                 print(f"      >> Generating Conditional: {generated_form} ({generated_tag})")
-                                 grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
-            else:
-                 print(f"      >> Cannot generate Conditional: Past tense forms not found.")
+                        elif num == 'pl':
+                            # 복수 형태도 더 세부적으로 처리 - m1(남성 인격) 외에도 non-m1 형태도 포함
+                            genders_to_try = ['m1', 'm2.m3.f.n', 'non-m1']
+                            for gender in genders_to_try:
+                                past_key = f"pl:{gender}"
+                                if past_key in past_forms:
+                                    base_past = past_forms[past_key]
+                                    generated_form = f"{base_past}{particle}" # Attach particle
+                                    generated_tag = f"cond:{num}:{gender}:{pers}:imperf" # Use simplified gender tag
+                                    print(f"      >> Generating Conditional: {generated_form} ({generated_tag})")
+                                    grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
+                else:
+                     print(f"      >> Cannot generate Conditional: Past tense forms not found.")
         # ---------------------------------------------------
         
         # 디버깅: 미래시제 결과 요약

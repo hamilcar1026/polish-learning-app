@@ -101,12 +101,15 @@
   "conjugationCategoryPresentActiveParticiple": "Действительное причастие настоящего времени",
   "conjugationCategoryPastPassiveParticiple": "Страдательное причастие прошедшего времени",
   "conjugationCategoryFiniteVerb": "Личный глагол",
-  "conjugationCategoryOtherForms": "Другие формы",
+  "conjugationCategoryPresentImpersonal": "Настоящее безличное",
+  "conjugationCategoryPastImpersonal": "Прошедшее безличное",
   "conjugationCategoryFutureImpersonal": "Будущее безличное",
+  "conjugationCategoryConditionalImpersonal": "Условное безличное",
+  "conjugationCategoryImperativeImpersonal": "Повелительное безличное наклонение",
+  "conjugationCategoryOtherForms": "Другие формы",
   "@conjugationCategoryFutureImpersonal": {
     "description": "Заголовок категории для безличной формы будущего времени"
   },
-  "conjugationCategoryConditionalImpersonal": "Условное безличное",
   "@conjugationCategoryConditionalImpersonal": {
     "description": "Заголовок категории для безличной формы условного наклонения"
   },
@@ -227,5 +230,6 @@
       }
     }
   },
-  "translationLabel": "Перевод"
+  "translationLabel": "Перевод",
+  "impersonalAccuracyWarning": "Может быть неточным"
 } 

@@ -115,6 +115,7 @@
    "@conjugationCategoryConditionalImpersonal": {
      "description": "Title for the Conditional Impersonal verb form category"
    },
+   "conjugationCategoryImperativeImpersonal": "Impersonal Imperative",
    "drawerRecentSearches": "Recent Searches",
    "drawerClearRecentSearchesTooltip": "Clear Recent Searches",
    "drawerClearRecentSearchesDialogTitle": "Clear Recent Searches?",
@@ -246,5 +247,6 @@
    "suggestionErrorFallback": "Error displaying suggestion.",
    "@suggestionErrorFallback": {
      "description": "Error message shown when suggestion status is received but suggested word is missing."
-   }
+   },
+   "impersonalAccuracyWarning": "May not be accurate"
 } 
