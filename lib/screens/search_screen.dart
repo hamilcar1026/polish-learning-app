@@ -868,6 +868,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case 'depr': return l10n.tag_depr;
       case 'adja': return l10n.tag_adja;
       case 'adjp': return l10n.tag_adjp;
+      case 'cond': return l10n.tag_cond;
       // --- Qualifiers ---
       case 'sg': return l10n.qualifier_sg;
       case 'pl': return l10n.qualifier_pl;
@@ -910,10 +911,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     // Define the desired order of sections
     final displayOrder = [
       'conjugationCategoryPresentIndicative',
-      'conjugationCategoryFuturePerfectiveIndicative', // Added for completeness
-      'conjugationCategoryFutureImperfectiveIndicative', // ADDED
+      'conjugationCategoryFuturePerfectiveIndicative',
+      'conjugationCategoryFutureImperfectiveIndicative',
       'conjugationCategoryPastTense',
-      'conjugationCategoryConditional', // ADDED
+      'conjugationCategoryConditional',
       'conjugationCategoryImperative',
       'conjugationCategoryInfinitive',
       'conjugationCategoryPresentAdverbialParticiple',
@@ -923,10 +924,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       'conjugationCategoryVerbalNoun',
       'conjugationCategoryPresentImpersonal',
       'conjugationCategoryPastImpersonal',
-      'conjugationCategoryFutureImpersonal', // Added for completeness
-      'conjugationCategoryConditionalImpersonal', // Added for completeness
-      'conjugationCategoryImperativeImpersonal', // Added for impersonal imperative
-      'conjugationCategoryOtherForms', // Keep other forms at the end
+      'conjugationCategoryFutureImpersonal',
+      'conjugationCategoryConditionalImpersonal',
+      'conjugationCategoryImperativeImpersonal',
+      'conjugationCategoryOtherForms',
     ];
 
     List<Widget> sections = [];
@@ -935,25 +936,25 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       if (groupedForms.containsKey(key)) {
         final forms = groupedForms[key]!;
         if (forms.isNotEmpty) {
-          final title = _getConjugationCategoryTitle(key, l10n);
+          final title = _getLocalizedConjugationCategoryTitle(key, l10n);
           bool isExpanded = _expandedCategories[key] ?? true; // Default to expanded
 
           // Determine which builder to use based on the key
           bool useConjugationTable = [
             'conjugationCategoryPresentIndicative',
-            'conjugationCategoryFuturePerfectiveIndicative', // fin:perf
-            'conjugationCategoryFutureImperfectiveIndicative', // fut:... (będzie)
+            'conjugationCategoryFuturePerfectiveIndicative',
+            'conjugationCategoryFutureImperfectiveIndicative',
           ].contains(key);
 
-          bool useGerundTable = key == 'conjugationCategoryVerbalNoun'; // ger:...
-          bool useConditionalTable = key == 'conjugationCategoryConditional'; // cond:...
+          bool useGerundTable = key == 'conjugationCategoryVerbalNoun';
+          bool useConditionalTable = key == 'conjugationCategoryConditional';
 
           bool useParticipleTable = [
-            'conjugationCategoryPresentActiveParticiple', // pact
-            'conjugationCategoryPastPassiveParticiple', // ppas
+            'conjugationCategoryPresentActiveParticiple',
+            'conjugationCategoryPastPassiveParticiple',
           ].contains(key);
 
-          bool usePastTenseTable = key == 'conjugationCategoryPastTense'; // praet
+          bool usePastTenseTable = key == 'conjugationCategoryPastTense';
           
           bool useSimpleList = [
             'conjugationCategoryImperative',
@@ -979,20 +980,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           if (useConjugationTable) {
             content = _buildConjugationTable(forms, l10n);
           } else if (useGerundTable) {
-            // Replaced with the improved function for verbal nouns
             content = _buildVerbalNounTable(forms, l10n);
           } else if (useConditionalTable) {
-            content = _buildConditionalTable(forms, l10n); // Use conditional builder
+            content = _buildConditionalTable(forms, l10n);
           } else if (useParticipleTable) {
              content = _buildParticipleDeclensionTable(forms, l10n, key == 'conjugationCategoryPresentActiveParticiple');
           } else if (usePastTenseTable) {
              content = _buildPastTenseTable(forms, l10n);
           } else if (useSimpleList) {
-            // 비인칭 섹션인 경우 특별한 빌더 사용
             if (isImpersonalCategory) {
               content = _buildImpersonalSection(title, forms, l10n);
             } else {
-              // 간단한 형태 목록은 한글 설명과 함께 표시
               content = Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: forms.map((form) => Padding(
@@ -1014,7 +1012,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
           sections.add(
             ExpansionTile(
-              key: PageStorageKey<String>(key), // Preserve state on scroll
+              key: PageStorageKey<String>(key),
               title: isImpersonalCategory ? 
                 Row(
                   children: [
@@ -1034,14 +1032,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               children: [Padding(padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0), child: content)],
             )
           );
-          sections.add(const SizedBox(height: 8)); // Spacing between sections
+          sections.add(const SizedBox(height: 8));
         }
       }
     }
-    // Add any remaining categories not in displayOrder (should ideally be empty or just 'other')
+    
+    // Add any remaining categories not in displayOrder
     groupedForms.forEach((key, forms) {
        if (!displayOrder.contains(key) && forms.isNotEmpty) {
-          final title = _getConjugationCategoryTitle(key, l10n);
+          final title = _getLocalizedConjugationCategoryTitle(key, l10n);
            sections.add(
              ExpansionTile(
                key: PageStorageKey<String>(key),
@@ -1066,14 +1065,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     });
 
     if (sections.isEmpty) {
-      return [Center(child: Text(l10n.noConjugationData))]; // Return List<Widget>
+      return [Center(child: Text(l10n.noConjugationData))];
     } else {
-      return sections; // Return List<Widget>
+      return sections;
     }
-  } // End of _buildConjugationSections function
+  }
 
   String _getConjugationCategoryTitle(String key, AppLocalizations l10n) {
-    // Map backend keys to localization keys
     switch (key) {
       case 'conjugationCategoryPresentIndicative': return l10n.conjugationCategoryPresentIndicative;
       case 'conjugationCategoryFuturePerfectiveIndicative': return l10n.conjugationCategoryFuturePerfectiveIndicative;
@@ -1089,9 +1087,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case 'conjugationCategoryVerbalNoun': return l10n.conjugationCategoryVerbalNoun;
       case 'conjugationCategoryPresentImpersonal': return l10n.conjugationCategoryPresentImpersonal;
       case 'conjugationCategoryPastImpersonal': return l10n.conjugationCategoryPastImpersonal;
-      case 'conjugationCategoryFutureImpersonal': return l10n.conjugationCategoryFutureImpersonal; // Needs key in .arb
-      case 'conjugationCategoryConditionalImpersonal': return l10n.conjugationCategoryConditionalImpersonal; // Needs key in .arb
-      case 'conjugationCategoryImperativeImpersonal': return l10n.conjugationCategoryImperativeImpersonal; // Added for impersonal imperative
+      case 'conjugationCategoryFutureImpersonal': return l10n.conjugationCategoryFutureImpersonal;
+      case 'conjugationCategoryConditionalImpersonal': return l10n.conjugationCategoryConditionalImpersonal;
+      case 'conjugationCategoryImperativeImpersonal': return l10n.conjugationCategoryImperativeImpersonal;
       case 'conjugationCategoryOtherForms': return l10n.conjugationCategoryOtherForms;
       default: return key; // Fallback to the key itself
     }
@@ -1194,11 +1192,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     Map<String, Map<String, String>> declensionTable = {}; // {caseCode: {sg: form, pl: form}}
     final casesOrder = ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc']; 
 
-    print("[_buildVerbalNounTable] Building table for ${forms.length} gerund forms");
-
     for (var formInfo in forms) {
       final tagMap = _parseTag(formInfo.tag); 
-      print("[_buildVerbalNounTable] Processing: ${formInfo.form}, tag: ${formInfo.tag}, parsed: $tagMap");
       
       // Get case and number from the parsed map
       final casePart = tagMap['case']; // Should now be correctly extracted
@@ -1216,17 +1211,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             // Assign the form to the singular or plural slot
             if (numberCode == 'sg') {
               declensionTable[caseCode]!['sg'] ??= formInfo.form; 
-              print("[_buildVerbalNounTable] Added sg form: ${formInfo.form} for case $caseCode");
             } else if (numberCode == 'pl') {
               declensionTable[caseCode]!['pl'] ??= formInfo.form;
-              print("[_buildVerbalNounTable] Added pl form: ${formInfo.form} for case $caseCode");
             }
           }
         }
       }
     }
-
-    print("[_buildVerbalNounTable] Final table: $declensionTable");
 
     // Build the Table widget
     return Table(
@@ -1280,7 +1271,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  // --- NEW: Helper function to build Past Tense Table (Completely revised) ---
+  // --- 과거 시제 테이블 구성 함수 ---
   Widget _buildPastTenseTable(List<ConjugationForm> forms, AppLocalizations l10n) {
     // Table data structure: {person: {number: {genderKey: form}}}
     // person keys: 'pri', 'sec', 'ter'
@@ -1295,61 +1286,49 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     // Person order for rows
     const personOrder = ['pri', 'sec', 'ter'];
 
-    print("[_buildPastTenseTable] Building table with ${forms.length} forms");
-
-    // First pass: collect base forms (3rd person forms that are clearly labeled)
+    // 1단계: 기본 형태 수집 (명시적으로 레이블이 지정된 3인칭 형태)
     for (var formInfo in forms) {
-      if (formInfo.tag.startsWith('praet')) { // Process only past tense forms
+      if (formInfo.tag.startsWith('praet')) { // 과거 시제 형태만 처리
         final tagMap = _parseTag(formInfo.tag);
-        final person = tagMap['person']; // Should be populated by _parseTag for praet now
+        final person = tagMap['person'];
         final number = tagMap['number'];
-        final gender = tagMap['gender']; // Gender from praet tag
+        final gender = tagMap['gender'];
         final form = formInfo.form;
 
-        print("[_buildPastTenseTable] Processing form: $form, tag: ${formInfo.tag}, parsed: $tagMap");
-
-        // Ensure required fields are present
+        // 필수 필드가 존재하는지 확인
         if (person == null || number == null || gender == null) {
-          print("[_buildPastTenseTable] Skipping form due to missing tag info: ${formInfo.tag}");
           continue;
         }
 
-        // Determine the simplified gender key for table organization
+        // 테이블 구성을 위한 간소화된 성별 키 결정
         String displayGenderKey = '';
         if (number == 'sg') {
           if (gender.contains('m1') || gender.contains('m2') || gender.contains('m3') || gender == 'm') {
-            displayGenderKey = 'm'; // Group all masculine forms under 'm' for sg
-            print("[_buildPastTenseTable] Recognized masculine form: $form");
+            displayGenderKey = 'm'; // 단수에서 모든 남성 형태를 'm'으로 그룹화
           } else if (gender == 'f') {
             displayGenderKey = 'f';
           } else if (gender.contains('n')) {
-            displayGenderKey = 'n'; // Group n1, n2 under 'n' for sg
+            displayGenderKey = 'n'; // 단수에서 n1, n2를 'n'으로 그룹화
           }
         } else if (number == 'pl') {
           if (gender == 'm1' || gender.contains('m1')) {
-            displayGenderKey = 'm1'; // Masc. Personal Plural
+            displayGenderKey = 'm1'; // 복수 인격 남성
           } else {
-            displayGenderKey = 'non-m1'; // Other plurals (Non-Masc. Personal)
+            displayGenderKey = 'non-m1'; // 기타 복수(비인격 남성)
           }
         }
 
-        // Populate the tableData, taking the first form found for each slot
+        // tableData 채우기, 각 슬롯에 대해 찾은 첫 번째 형태를 취함
         if (tableData.containsKey(person) && tableData[person]!.containsKey(number) && displayGenderKey.isNotEmpty) {
           tableData[person]![number]![displayGenderKey] ??= form;
-          print("[_buildPastTenseTable] Added form to table: tableData[$person][$number][$displayGenderKey] = $form");
-        } else {
-           print("[_buildPastTenseTable] Failed to place form in tableData structure: person='${person}', number='${number}', displayGenderKey='${displayGenderKey}', form='${form}'");
         }
       }
     }
 
-    // Fill in missing 1st and 2nd person forms by checking forms that might have explicit Aglt suffix
-    // or by manually generating them from 3rd person forms
+    // 2단계: 누락된 1인칭 및 2인칭 형태 채우기
     attemptToAddMissingPersonForms(tableData, forms);
 
-    print("[_buildPastTenseTable] Final table after processing: $tableData");
-
-    // Build the Table widget: Rows for Person, Columns for Number (sg/pl)
+    // 테이블 위젯 구성: 인칭별 행, 수(단수/복수)별 열
     return Table(
       border: TableBorder.all(color: Colors.grey.shade300),
       columnWidths: const {
@@ -1357,9 +1336,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         1: IntrinsicColumnWidth(), // Singular column
         2: IntrinsicColumnWidth(), // Plural column
       },
-      defaultVerticalAlignment: TableCellVerticalAlignment.top, // Align content top for multi-line cells
+      defaultVerticalAlignment: TableCellVerticalAlignment.top, // 다중 행 셀에 대해 상단 정렬
       children: [
-        // Header row
+        // 헤더 행
         TableRow(
           decoration: BoxDecoration(color: Colors.grey.shade100),
           children: [
@@ -1377,12 +1356,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
           ],
         ),
-        // Data rows (Iterate through person order)
+        // 데이터 행 (인칭 순서대로 반복)
         ...personOrder.map((personCode) {
           final sgForms = tableData[personCode]?['sg'] ?? {};
           final plForms = tableData[personCode]?['pl'] ?? {};
 
-          // Format cell content with gender labels - using Column widget for proper line breaks
+          // 성별 레이블로 셀 내용 형식 지정 - 적절한 줄 바꿈을 위해 Column 위젯 사용
           Widget buildSingularCell() {
             List<Widget> contentWidgets = [];
             
@@ -1430,7 +1409,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(_getPersonLabel(personCode, l10n)), // Person label column
+                child: Text(_getPersonLabel(personCode, l10n)), // 인칭 레이블 열
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -1447,65 +1426,55 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  // Helper function to add missing 1st and 2nd person forms to the past tense table
+  // 과거 시제 테이블에 누락된 1인칭 및 2인칭 형태를 추가하는 보조 함수
   void attemptToAddMissingPersonForms(Map<String, Map<String, Map<String, String>>> tableData, List<ConjugationForm> forms) {
-    // Skip if 3rd person forms aren't available as base forms
+    // 기본 형태로 3인칭 형태를 사용할 수 없는 경우 건너뜁니다
     if (tableData['ter']?['sg']?['m'] == null) {
-      print("[attemptToAddMissingPersonForms] Cannot generate person forms: missing 3rd person masculine form");
       return;
     }
 
-    // Get base forms for generation if needed
+    // 필요한 경우 생성에 사용할 기본 형태 가져오기
     String mascSgBase = tableData['ter']!['sg']!['m']!;
     
-    // Get plural base forms if available
+    // 사용 가능한 경우 복수 기본 형태 가져오기
     String? mascPlBaseM1 = tableData['ter']?['pl']?['m1'];
     String? mascPlBaseNonM1 = tableData['ter']?['pl']?['non-m1'];
     
-    print("[attemptToAddMissingPersonForms] Using base forms: mascSgBase=$mascSgBase, mascPlBaseM1=$mascPlBaseM1, mascPlBaseNonM1=$mascPlBaseNonM1");
-    
-    // Try to locate specific forms with endings or Aglt (auxiliary) that indicate 1st/2nd person
+    // 1인칭/2인칭을 나타내는 끝이나 Aglt(보조)가 있는 특정 형태 찾기
     for (var form in forms) {
       if (!form.tag.startsWith('praet')) continue;
       
       final String formText = form.form;
-      print("[attemptToAddMissingPersonForms] Examining form: $formText, tag: ${form.tag}");
       
-      // Check for common 1st/2nd person endings and suffixes
+      // 공통적인 1인칭/2인칭 어미 및 접미사 확인
       if (formText.endsWith('łem') || formText.endsWith('łam')) {
-        // Likely 1st person singular
+        // 1인칭 단수일 가능성이 높음
         if (formText.endsWith('łem')) tableData['pri']!['sg']!['m'] ??= formText;
         if (formText.endsWith('łam')) tableData['pri']!['sg']!['f'] ??= formText;
-        print("[attemptToAddMissingPersonForms] Added 1st person form: $formText");
       } else if (formText.endsWith('łeś') || formText.endsWith('łaś')) {
-        // Likely 2nd person singular
+        // 2인칭 단수일 가능성이 높음
         if (formText.endsWith('łeś')) tableData['sec']!['sg']!['m'] ??= formText;
         if (formText.endsWith('łaś')) tableData['sec']!['sg']!['f'] ??= formText;
-        print("[attemptToAddMissingPersonForms] Added 2nd person form: $formText");
       } else if (formText.endsWith('liśmy') || formText.endsWith('łiśmy')) {
-        // Likely 1st person plural masculine
+        // 1인칭 복수 남성일 가능성이 높음
         tableData['pri']!['pl']!['m1'] ??= formText;
-        print("[attemptToAddMissingPersonForms] Added 1st person plural m1 form: $formText");
       } else if (formText.endsWith('łyśmy')) {
-        // Likely 1st person plural non-masculine
+        // 1인칭 복수 비남성일 가능성이 높음
         tableData['pri']!['pl']!['non-m1'] ??= formText;
-        print("[attemptToAddMissingPersonForms] Added 1st person plural non-m1 form: $formText");
       } else if (formText.endsWith('liście') || formText.endsWith('łiście')) {
-        // Likely 2nd person plural masculine
+        // 2인칭 복수 남성일 가능성이 높음
         tableData['sec']!['pl']!['m1'] ??= formText;
-        print("[attemptToAddMissingPersonForms] Added 2nd person plural m1 form: $formText");
       } else if (formText.endsWith('łyście')) {
-        // Likely 2nd person plural non-masculine
+        // 2인칭 복수 비남성일 가능성이 높음
         tableData['sec']!['pl']!['non-m1'] ??= formText;
-        print("[attemptToAddMissingPersonForms] Added 2nd person plural non-m1 form: $formText");
       }
     }
     
-    // If still missing forms, try to generate them based on standard patterns
+    // 여전히 형태가 누락된 경우 표준 패턴을 기반으로 생성 시도
     
-    // 1st person singular forms
+    // 1인칭 단수 형태
     if (tableData['pri']!['sg']!['m'] == null && mascSgBase.isNotEmpty) {
-      // Check for common mascSgBase endings to determine the proper suffix
+      // 적절한 접미사를 결정하기 위해 일반적인 mascSgBase 어미 확인
       String suggestedForm;
       if (mascSgBase.endsWith('ł')) {
         suggestedForm = mascSgBase + "em";
@@ -1513,12 +1482,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         suggestedForm = mascSgBase + "em";
       }
       tableData['pri']!['sg']!['m'] = suggestedForm;
-      print("[attemptToAddMissingPersonForms] Generated 1st person sg m form: $suggestedForm");
     }
     
-    // 2nd person singular forms
+    // 2인칭 단수 형태
     if (tableData['sec']!['sg']!['m'] == null && mascSgBase.isNotEmpty) {
-      // Check for common mascSgBase endings to determine the proper suffix
+      // 적절한 접미사를 결정하기 위해 일반적인 mascSgBase 어미 확인
       String suggestedForm;
       if (mascSgBase.endsWith('ł')) {
         suggestedForm = mascSgBase + "eś";
@@ -1526,65 +1494,60 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         suggestedForm = mascSgBase + "eś";
       }
       tableData['sec']!['sg']!['m'] = suggestedForm;
-      print("[attemptToAddMissingPersonForms] Generated 2nd person sg m form: $suggestedForm");
     }
     
-    // Generate plural forms if missing
+    // 누락된 복수 형태 생성
     
-    // 1st person plural masculine form
+    // 1인칭 복수 남성 형태
     if (tableData['pri']!['pl']!['m1'] == null && mascPlBaseM1 != null && mascPlBaseM1.isNotEmpty) {
-      // The pattern is usually to replace 'li' ending with 'liśmy'
+      // 일반적으로 'li' 어미를 'liśmy'로 대체하는 패턴
       String suggestedForm;
       if (mascPlBaseM1.endsWith('li')) {
         suggestedForm = mascPlBaseM1.substring(0, mascPlBaseM1.length - 2) + "liśmy";
       } else {
-        // Fallback if the expected pattern isn't found
+        // 예상된 패턴이 발견되지 않은 경우 대체
         suggestedForm = mascPlBaseM1 + "śmy";
       }
       tableData['pri']!['pl']!['m1'] = suggestedForm;
-      print("[attemptToAddMissingPersonForms] Generated 1st person pl m1 form: $suggestedForm");
     }
     
-    // 1st person plural non-masculine form
+    // 1인칭 복수 비남성 형태
     if (tableData['pri']!['pl']!['non-m1'] == null && mascPlBaseNonM1 != null && mascPlBaseNonM1.isNotEmpty) {
-      // The pattern is usually to replace 'ły' ending with 'łyśmy'
+      // 일반적으로 'ły' 어미를 'łyśmy'로 대체하는 패턴
       String suggestedForm;
       if (mascPlBaseNonM1.endsWith('ły')) {
         suggestedForm = mascPlBaseNonM1.substring(0, mascPlBaseNonM1.length - 2) + "łyśmy";
       } else {
-        // Fallback if the expected pattern isn't found
+        // 예상된 패턴이 발견되지 않은 경우 대체
         suggestedForm = mascPlBaseNonM1 + "śmy";
       }
       tableData['pri']!['pl']!['non-m1'] = suggestedForm;
-      print("[attemptToAddMissingPersonForms] Generated 1st person pl non-m1 form: $suggestedForm");
     }
     
-    // 2nd person plural masculine form
+    // 2인칭 복수 남성 형태
     if (tableData['sec']!['pl']!['m1'] == null && mascPlBaseM1 != null && mascPlBaseM1.isNotEmpty) {
-      // The pattern is usually to replace 'li' ending with 'liście'
+      // 일반적으로 'li' 어미를 'liście'로 대체하는 패턴
       String suggestedForm;
       if (mascPlBaseM1.endsWith('li')) {
         suggestedForm = mascPlBaseM1.substring(0, mascPlBaseM1.length - 2) + "liście";
       } else {
-        // Fallback if the expected pattern isn't found
+        // 예상된 패턴이 발견되지 않은 경우 대체
         suggestedForm = mascPlBaseM1 + "ście";
       }
       tableData['sec']!['pl']!['m1'] = suggestedForm;
-      print("[attemptToAddMissingPersonForms] Generated 2nd person pl m1 form: $suggestedForm");
     }
     
-    // 2nd person plural non-masculine form
+    // 2인칭 복수 비남성 형태
     if (tableData['sec']!['pl']!['non-m1'] == null && mascPlBaseNonM1 != null && mascPlBaseNonM1.isNotEmpty) {
-      // The pattern is usually to replace 'ły' ending with 'łyście'
+      // 일반적으로 'ły' 어미를 'łyście'로 대체하는 패턴
       String suggestedForm;
       if (mascPlBaseNonM1.endsWith('ły')) {
         suggestedForm = mascPlBaseNonM1.substring(0, mascPlBaseNonM1.length - 2) + "łyście";
       } else {
-        // Fallback if the expected pattern isn't found
+        // 예상된 패턴이 발견되지 않은 경우 대체
         suggestedForm = mascPlBaseNonM1 + "ście";
       }
       tableData['sec']!['pl']!['non-m1'] = suggestedForm;
-      print("[attemptToAddMissingPersonForms] Generated 2nd person pl non-m1 form: $suggestedForm");
     }
   }
 
@@ -2113,17 +2076,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
-  // --- 향상된 비인칭 카테고리 분류 (업데이트됨) ---
-  if (is_impersonal) {
-    if (form.endsWith(('no', 'to')):
-        category_key = 'conjugationCategoryPastImpersonal'
-    elif base_tag == 'imps':
-        category_key = 'conjugationCategoryPresentImpersonal'
-    elif base_tag == 'impt' or 'impt' in form_tag_full:
-        category_key = 'conjugationCategoryImperativeImpersonal'
-  }
-  // -------------------------------------------------
-
   // --- 비인칭 형태 섹션 빌더 함수 수정 ---
   Widget _buildImpersonalSection(String title, List<ConjugationForm> forms, AppLocalizations l10n) {
     return Column(
@@ -2153,171 +2105,4 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       ],
     );
   }
-
-  // --- 비인칭 형태 관련 카테고리 빌더 수정 ---
-  List<Widget> _buildConjugationSections(BuildContext context, Map<String, List<ConjugationForm>> groupedForms, AppLocalizations l10n) {
-    // Define the desired order of sections
-    final displayOrder = [
-      'conjugationCategoryPresentIndicative',
-      'conjugationCategoryFuturePerfectiveIndicative', // Added for completeness
-      'conjugationCategoryFutureImperfectiveIndicative', // ADDED
-      'conjugationCategoryPastTense',
-      'conjugationCategoryConditional', // ADDED
-      'conjugationCategoryImperative',
-      'conjugationCategoryInfinitive',
-      'conjugationCategoryPresentAdverbialParticiple',
-      'conjugationCategoryAnteriorAdverbialParticiple',
-      'conjugationCategoryPresentActiveParticiple',
-      'conjugationCategoryPastPassiveParticiple',
-      'conjugationCategoryVerbalNoun',
-      'conjugationCategoryPresentImpersonal',
-      'conjugationCategoryPastImpersonal',
-      'conjugationCategoryFutureImpersonal', // Added for completeness
-      'conjugationCategoryConditionalImpersonal', // Added for completeness
-      'conjugationCategoryImperativeImpersonal', // Added for impersonal imperative
-      'conjugationCategoryOtherForms', // Keep other forms at the end
-    ];
-
-    List<Widget> sections = [];
-
-    for (var key in displayOrder) {
-      if (groupedForms.containsKey(key)) {
-        final forms = groupedForms[key]!;
-        if (forms.isNotEmpty) {
-          final title = _getConjugationCategoryTitle(key, l10n);
-          bool isExpanded = _expandedCategories[key] ?? true; // Default to expanded
-
-          // Determine which builder to use based on the key
-          bool useConjugationTable = [
-            'conjugationCategoryPresentIndicative',
-            'conjugationCategoryFuturePerfectiveIndicative', // fin:perf
-            'conjugationCategoryFutureImperfectiveIndicative', // fut:... (będzie)
-          ].contains(key);
-
-          bool useGerundTable = key == 'conjugationCategoryVerbalNoun'; // ger:...
-          bool useConditionalTable = key == 'conjugationCategoryConditional'; // cond:...
-
-          bool useParticipleTable = [
-            'conjugationCategoryPresentActiveParticiple', // pact
-            'conjugationCategoryPastPassiveParticiple', // ppas
-          ].contains(key);
-
-          bool usePastTenseTable = key == 'conjugationCategoryPastTense'; // praet
-          
-          bool useSimpleList = [
-            'conjugationCategoryImperative',
-            'conjugationCategoryInfinitive',
-            'conjugationCategoryPresentAdverbialParticiple',
-            'conjugationCategoryAnteriorAdverbialParticiple',
-            'conjugationCategoryPresentImpersonal',
-            'conjugationCategoryPastImpersonal',
-            'conjugationCategoryFutureImpersonal',
-            'conjugationCategoryConditionalImpersonal',
-            'conjugationCategoryImperativeImpersonal',
-          ].contains(key);
-
-          bool isImpersonalCategory = [
-            'conjugationCategoryPresentImpersonal',
-            'conjugationCategoryPastImpersonal',
-            'conjugationCategoryFutureImpersonal',
-            'conjugationCategoryConditionalImpersonal',
-            'conjugationCategoryImperativeImpersonal',
-          ].contains(key);
-
-          Widget content;
-          if (useConjugationTable) {
-            content = _buildConjugationTable(forms, l10n);
-          } else if (useGerundTable) {
-            // Replaced with the improved function for verbal nouns
-            content = _buildVerbalNounTable(forms, l10n);
-          } else if (useConditionalTable) {
-            content = _buildConditionalTable(forms, l10n); // Use conditional builder
-          } else if (useParticipleTable) {
-             content = _buildParticipleDeclensionTable(forms, l10n, key == 'conjugationCategoryPresentActiveParticiple');
-          } else if (usePastTenseTable) {
-             content = _buildPastTenseTable(forms, l10n);
-          } else if (useSimpleList) {
-            // 비인칭 섹션인 경우 특별한 빌더 사용
-            if (isImpersonalCategory) {
-              content = _buildImpersonalSection(title, forms, l10n);
-            } else {
-              // 간단한 형태 목록은 한글 설명과 함께 표시
-              content = Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: forms.map((form) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: _buildFormWithDescription(form, l10n),
-                )).toList(),
-              );
-            }
-          } else {
-            // Default simple list view for other categories
-            content = Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: forms.map((form) => Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: _buildFormWithDescription(form, l10n),
-              )).toList(),
-            );
-          }
-
-          sections.add(
-            ExpansionTile(
-              key: PageStorageKey<String>(key), // Preserve state on scroll
-              title: isImpersonalCategory ? 
-                Row(
-                  children: [
-                    Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: Theme.of(context).textTheme.titleMedium!.fontSize! * ref.watch(fontSizeFactorProvider))),
-                    const SizedBox(width: 8),
-                    Text(
-                      "(${l10n.impersonalAccuracyWarning})",
-                      style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12, color: Colors.grey),
-                    ),
-                  ],
-                ) : 
-                Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: Theme.of(context).textTheme.titleMedium!.fontSize! * ref.watch(fontSizeFactorProvider))),
-              initiallyExpanded: isExpanded,
-              onExpansionChanged: (expanding) => setState(() {
-                _expandedCategories[key] = expanding;
-              }),
-              children: [Padding(padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0), child: content)],
-            )
-          );
-          sections.add(const SizedBox(height: 8)); // Spacing between sections
-        }
-      }
-    }
-    // Add any remaining categories not in displayOrder (should ideally be empty or just 'other')
-    groupedForms.forEach((key, forms) {
-       if (!displayOrder.contains(key) && forms.isNotEmpty) {
-          final title = _getConjugationCategoryTitle(key, l10n);
-           sections.add(
-             ExpansionTile(
-               key: PageStorageKey<String>(key),
-               title: Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: Theme.of(context).textTheme.titleMedium!.fontSize! * ref.watch(fontSizeFactorProvider))),
-               initiallyExpanded: true,
-               children: [
-                 Padding(
-                   padding: const EdgeInsets.all(8.0),
-                   child: Column(
-                     crossAxisAlignment: CrossAxisAlignment.start,
-                     children: forms.map((form) => Padding(
-                       padding: const EdgeInsets.only(bottom: 8.0),
-                       child: _buildFormWithDescription(form, l10n),
-                     )).toList(),
-                   ),
-                 ),
-               ],
-             ),
-           );
-           sections.add(const SizedBox(height: 8));
-       }
-    });
-
-    if (sections.isEmpty) {
-      return [Center(child: Text(l10n.noConjugationData))]; // Return List<Widget>
-    } else {
-      return sections; // Return List<Widget>
-    }
-  } // End of _buildConjugationSections function
 } 
