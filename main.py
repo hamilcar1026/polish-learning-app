@@ -86,22 +86,41 @@ def is_declinable(tag):
     # Add more declinable tags if needed
     return tag in ['subst', 'depr', 'adj', 'adja', 'adjp']
 
-# Helper function to extract the primary gender/animacy tag (m1, m2, m3, f, n1, n2)
+# Helper function to extract the primary gender/animacy tag (MODIFIED)
 def get_primary_analysis_tag(analysis_result):
     if not analysis_result:
         return None
-    # Assume the first analysis result is the most likely one
-    first_result = analysis_result[0]
-    if len(first_result) >= 3 and isinstance(first_result[2], tuple) and len(first_result[2]) >= 3:
-        tag_with_qualifiers = first_result[2][2] # e.g., 'subst:sg:nom:m2'
-        parts = tag_with_qualifiers.split(':')
-        # Find the gender/animacy tag (usually the 4th part for subst)
-        for part in parts:
-            if part in ['m1', 'm2', 'm3', 'f', 'n1', 'n2']:
-                print(f"[Debug] Primary tag identified: {part}")
-                return part
-    print("[Debug] Could not identify primary tag from first analysis.")
-    return None
+
+    primary_tag = None
+    # Look through the first few analysis results
+    for result_tuple in analysis_result[:3]: # Check top 3 results
+        if len(result_tuple) >= 3 and isinstance(result_tuple[2], tuple) and len(result_tuple[2]) >= 3:
+            tag_with_qualifiers = result_tuple[2][2]
+            parts = tag_with_qualifiers.split(':')
+            current_tag = None
+            for part in parts:
+                if part in ['m1', 'm2', 'm3', 'f', 'n1', 'n2']:
+                    current_tag = part
+                    break # Found the gender tag for this analysis
+
+            if current_tag:
+                # Prioritize non-m1 tags (m2/m3) if found first for common nouns/animals potentially
+                # If the absolute first result is m1, keep it for now,
+                # but if we find m2/m3 later among top results, prefer that.
+                # This heuristic might need refinement based on Morfeusz behavior.
+                if primary_tag is None: # First valid tag found
+                     primary_tag = current_tag
+                elif primary_tag == 'm1' and current_tag in ['m2', 'm3']: # Prefer m2/m3 over m1 if found later
+                     primary_tag = current_tag
+                     break # Found a likely better tag, stop searching
+                elif current_tag != 'm1' and primary_tag == 'm1': # Current is non-m1, prev was m1, prefer current
+                     primary_tag = current_tag
+                     break
+                # If primary is already m2/m3/f/n, don't switch back to m1 unless it's the only option.
+                # Let's stick with the first reasonable tag found or prefer m2/m3.
+
+    print(f"[Debug] Final primary tag identified: {primary_tag}")
+    return primary_tag
 
 # Helper function to extract the gender/animacy tag from a generated form's tag
 def get_form_tag_gender_animacy(form_tag_full):
@@ -123,93 +142,118 @@ def generate_and_format_forms(word, check_func):
         if not analysis_result:
             return jsonify({"status": "success", "word": word, "data": [], "message": "Word not found or cannot be analyzed."}), 200
 
-        # --- Get the primary tag of the input word ---
-        primary_tag_gender = get_primary_analysis_tag(analysis_result)
-        # --------------------------------------------
+        # --- Determine the primary lemma and its tag ---
+        primary_lemma = None
+        primary_tag_full = None # Will store the full tag like 'subst:sg:nom:m2'
+        primary_base_tag = None # Will store the base tag like 'subst'
+        primary_tag_gender = None # Will store gender tag like 'm2'
 
-        generated_data = []
-        processed_lemmas = set()
+        # Find the first analysis result that matches the check_func (is_verb or is_declinable)
+        # and determine its primary gender tag using the existing helper.
+        # This selects the most likely relevant analysis to generate forms for.
+        temp_primary_gender = get_primary_analysis_tag(analysis_result) # Get preferred gender first
 
         for r in analysis_result:
-            lemma = None
-            tag = None
-            # Based on debug logs, the structure seems to be:
-            # analysis_tuple = (lemma, surface_form, tag_and_qualifiers_str, extra_qualifiers_list, ...)
-            if len(r) >= 3 and isinstance(r[2], tuple) and len(r[2]) >= 3: # Need at least 3 elements in inner tuple
+            if len(r) >= 3 and isinstance(r[2], tuple) and len(r[2]) >= 3:
                 analysis_tuple = r[2]
-                lemma = analysis_tuple[1]
-                tag_with_qualifiers = analysis_tuple[2] # e.g., 'subst:sg:nom:m3'
-                tag = tag_with_qualifiers.split(':', 1)[0] # Get base tag like 'subst'
+                current_lemma = analysis_tuple[1]
+                current_tag_full = analysis_tuple[2]
+                current_base_tag = current_tag_full.split(':', 1)[0]
+                current_gender = get_form_tag_gender_animacy(current_tag_full)
+
+                # Check if this analysis is of the correct type (verb/declinable)
+                # AND if its gender matches the preferred gender (or if preferred gender couldn't be determined)
+                if check_func(current_base_tag):
+                    if temp_primary_gender is None or current_gender == temp_primary_gender:
+                         primary_lemma = current_lemma
+                         primary_tag_full = current_tag_full
+                         primary_base_tag = current_base_tag
+                         primary_tag_gender = current_gender # Use the gender from this chosen tag
+                         print(f"[generate_and_format_forms] Selected primary analysis: lemma='{primary_lemma}', tag='{primary_tag_full}'")
+                         break # Found the primary analysis, stop searching
+                    # If no exact gender match, keep searching but store the first valid type as fallback
+                    elif primary_lemma is None:
+                         primary_lemma = current_lemma
+                         primary_tag_full = current_tag_full
+                         primary_base_tag = current_base_tag
+                         primary_tag_gender = current_gender
+                         print(f"[generate_and_format_forms] Selected fallback primary analysis (gender mismatch): lemma='{primary_lemma}', tag='{primary_tag_full}'")
+                         # Continue searching for a gender match
+
             else:
-                 print(f"[generate_and_format_forms] Skipping unexpected analysis tuple format: {r}")
-                 continue # Skip to next analysis result
+                 print(f"[generate_and_format_forms] Skipping unexpected analysis tuple format in primary search: {r}")
 
-            if tag and check_func(tag) and lemma not in processed_lemmas:
-                processed_lemmas.add(lemma)
-                generated_forms_raw = morf.generate(lemma)
-                print(f"  -> Raw generated forms for lemma '{lemma}': {generated_forms_raw}") # DEBUG
+        # If no suitable primary lemma found after checking all analyses
+        if primary_lemma is None:
+             print(f"[generate_and_format_forms] No primary lemma matching check_func found for '{word}'.")
+             return jsonify({"status": "success", "word": word, "data": [], "message": f"No analysis matching the required type (verb/declinable) found for '{word}'."}), 200
 
-                formatted_forms = []
-                for form_tuple in generated_forms_raw:
-                    print(f"    >> Processing generated tuple: {form_tuple}") # DEBUG
-                    if len(form_tuple) >= 3:
-                        form = form_tuple[0]
-                        form_lemma_full = form_tuple[1]
-                        form_tag_full = form_tuple[2]
 
-                        base_form_lemma = form_lemma_full.split(':', 1)[0]
-                        base_tag = form_tag_full.split(':', 1)[0]
-                        form_gender_animacy = get_form_tag_gender_animacy(form_tag_full)
-                        is_plural = ':pl:' in form_tag_full # Check if it's a plural form
+        # --- Generate forms ONLY for the primary lemma ---
+        generated_forms_raw = morf.generate(primary_lemma)
+        print(f"  -> Raw generated forms for primary lemma '{primary_lemma}': {generated_forms_raw}") # DEBUG
 
-                        print(f"      Extracted: form='{form}', base_lemma='{base_form_lemma}', base_tag='{base_tag}', form_gender='{form_gender_animacy}', is_plural={is_plural}, full_tag='{form_tag_full}'") # DEBUG
+        formatted_forms = []
+        for form_tuple in generated_forms_raw:
+            print(f"    >> Processing generated tuple: {form_tuple}") # DEBUG
+            if len(form_tuple) >= 3:
+                form = form_tuple[0]
+                form_lemma_full = form_tuple[1] # e.g., kot:Sm2
+                form_tag_full = form_tuple[2]   # e.g., subst:pl:nom:m2
 
-                        # --- Filtering Logic ---
-                        passes_check_func = check_func(base_tag)
-                        passes_gender_filter = True # Assume passes by default
+                # We primarily filter based on the characteristics of the GENERATED form's tag,
+                # compared against the PRIMARY analysis gender tag determined earlier.
+                base_tag = form_tag_full.split(':', 1)[0]
+                form_gender_animacy = get_form_tag_gender_animacy(form_tag_full)
+                is_plural = ':pl:' in form_tag_full # Check if it's a plural form
 
-                        if primary_tag_gender and form_gender_animacy:
-                            # Rule 1: If primary is m1, only accept m1 forms (for plurals mostly)
-                            if primary_tag_gender == 'm1' and form_gender_animacy != 'm1' and is_plural:
-                                passes_gender_filter = False
-                            # Rule 2: If primary is m2/m3, EXCLUDE m1 forms (for plurals)
-                            elif primary_tag_gender in ['m2', 'm3'] and form_gender_animacy == 'm1' and is_plural:
-                                passes_gender_filter = False
-                            # Rule 3: If primary is f/n1/n2, ensure form matches (less critical for m1 exclusion)
-                            elif primary_tag_gender in ['f', 'n1', 'n2'] and form_gender_animacy != primary_tag_gender:
-                                # This might be too strict, could allow some cross-gender forms? Revisit if needed.
-                                # For now, let's keep it simpler and focus on m1/m2/m3 issue.
-                                # We could relax this later if needed.
-                                pass # Let's not filter based on f/n for now, focus on m1/m2/m3
+                print(f"      Extracted: form='{form}', base_tag='{base_tag}', form_gender='{form_gender_animacy}', is_plural={is_plural}, full_tag='{form_tag_full}'") # DEBUG
 
-                        print(f"      Filters: check_func({base_tag}) -> {passes_check_func}, gender_filter -> {passes_gender_filter} (primary: {primary_tag_gender}, form: {form_gender_animacy}, plural: {is_plural})") # DEBUG
+                # --- Filtering Logic (Applied to generated forms) ---
+                passes_check_func = check_func(base_tag) # Check if the generated form tag type is correct
+                passes_gender_filter = True # Assume passes by default
 
-                        if passes_check_func and passes_gender_filter:
-                            print(f"      >>>>> Filter PASSED for form '{form}' <<<<<" ) # DEBUG
-                            formatted_forms.append({
-                                "form": form,
-                                "tag": form_tag_full,
-                                "qualifiers": list(form_tuple[3:])
-                            })
-                        else:
-                            print(f"      >>>>> Filter FAILED for form '{form}' <<<<<" ) # DEBUG
-                    else:
-                         print(f"    >> Skipping unexpected generated tuple format: {form_tuple}")
+                # Use the primary_tag_gender determined from the initial analysis for filtering
+                if primary_tag_gender and form_gender_animacy:
+                    # Rule 1: If primary word tag is m1, only accept m1 forms (for plurals mostly)
+                    if primary_tag_gender == 'm1' and form_gender_animacy != 'm1' and is_plural:
+                        passes_gender_filter = False
+                    # Rule 2: If primary word tag is m2/m3, EXCLUDE m1 forms (for plurals)
+                    elif primary_tag_gender in ['m2', 'm3'] and form_gender_animacy == 'm1' and is_plural:
+                        passes_gender_filter = False
+                    # Rule 3: Relaxed f/n check
 
-                print(f"  -> Filtered forms count for lemma '{lemma}': {len(formatted_forms)}") # DEBUG
-                if formatted_forms:
-                     generated_data.append({
-                        "lemma": lemma,
-                        "forms": formatted_forms
+                print(f"      Filters: check_func({base_tag}) -> {passes_check_func}, gender_filter -> {passes_gender_filter} (primary_word_gender: {primary_tag_gender}, form_gender: {form_gender_animacy}, plural: {is_plural})") # DEBUG
+
+                if passes_check_func and passes_gender_filter:
+                    print(f"      >>>>> Filter PASSED for form '{form}' <<<<<" ) # DEBUG
+                    formatted_forms.append({
+                        "form": form,
+                        "tag": form_tag_full,
+                        "qualifiers": list(form_tuple[3:]) # Qualifiers might still be useful
                     })
-            elif lemma is not None: # Only print if lemma was parsed
-                 print(f"[generate_and_format_forms] Skipping generation for lemma '{lemma}': tag='{tag}', check_func result={check_func(tag)}, already processed={lemma in processed_lemmas}")
+                else:
+                    print(f"      >>>>> Filter FAILED for form '{form}' <<<<<" ) # DEBUG
+            else:
+                 print(f"    >> Skipping unexpected generated tuple format: {form_tuple}")
 
-        if not generated_data:
-             # Return success but indicate no forms match the criteria
+
+        # --- Structure the final output ---
+        # Return a list containing zero or one result dictionary
+        final_data = []
+        if formatted_forms:
+             print(f"  -> Final filtered forms count for primary lemma '{primary_lemma}': {len(formatted_forms)}") # DEBUG
+             final_data.append({
+                "lemma": primary_lemma, # Return the primary lemma
+                "forms": formatted_forms
+            })
+        else:
+             print(f"  -> No forms passed filters for primary lemma '{primary_lemma}'.")
+             # Return success status but empty data list
              return jsonify({"status": "success", "word": word, "data": [], "message": f"No relevant forms found matching the primary analysis for '{word}'. Check the word or its category."}), 200
 
-        return jsonify({"status": "success", "word": word, "data": generated_data})
+        # Always return status: success if processing completed without internal errors
+        return jsonify({"status": "success", "word": word, "data": final_data})
 
     except Exception as e:
         print(f"Error during generation for '{word}': {e}")
