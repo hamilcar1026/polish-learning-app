@@ -29,6 +29,30 @@ except Exception as e:
     print(f"Error initializing Morfeusz2: {e}")
     morf = None # Handle initialization failure gracefully
 
+# Add these constants near the top of the file, perhaps after imports
+# Auxiliary forms for future imperfective (być)
+BYC_FUTURE_FORMS = {
+    "sg:pri": "będę",
+    "sg:sec": "będziesz",
+    "sg:ter": "będzie",
+    "pl:pri": "będziemy",
+    "pl:sec": "będziecie",
+    "pl:ter": "będą",
+}
+
+# Conditional particles/endings 'by'
+BY_CONDITIONAL_PARTICLES = {
+    "sg:pri": "bym",
+    "sg:sec": "byś",
+    "sg:ter": "by",
+    "pl:pri": "byśmy",
+    "pl:sec": "byście",
+    "pl:ter": "by", # 3rd pl uses the same base particle
+}
+
+# Allowed tags (Ensure all needed tags are included)
+ALLOWED_TAGS = {'fin', 'impt', 'imps', 'inf', 'pact', 'pant', 'pcon', 'ppas', 'praet', 'bedzie', 'ger', 'cond', 'impt_periph', 'fut_imps', 'cond_imps'} # Add cond
+
 # --- Lingvanex Translation Function ---
 def translate_text_lingvanex(text, target_language):
     if not LINGVANEX_API_KEY:
@@ -367,134 +391,277 @@ def get_form_tag_gender_animacy(form_tag_full):
              return part
      return None
 
-# Helper function to generate forms and format them (MODIFIED)
+# Helper function to generate forms and format them (REFACTORED)
 def generate_and_format_forms(word, check_func):
     if morf is None:
-        # 오류 처리 수정: 함수는 직접 jsonify를 반환하는 대신 처리 결과를 반환해야 함
         return None, "Morfeusz2 analyzer not available."
 
     try:
         word = word.lower()
         analysis_result = morf.analyse(word)
         if not analysis_result:
-             return [], "Word not found or cannot be analyzed." # 데이터는 빈 리스트, 메시지 반환
+            return None, "Word not found or cannot be analyzed."
 
+        # --- Find the primary lemma and its full tag ---
         primary_lemma = None
         primary_tag_full = None
         primary_base_tag = None
-        primary_tag_gender = None
-        temp_primary_gender = get_primary_analysis_tag(analysis_result)
+        is_primary_imperfective = False # Flag for imperfective aspect
 
+        # Heuristic to find the most likely primary verb/declinable lemma
         for r in analysis_result:
             if len(r) >= 3 and isinstance(r[2], tuple) and len(r[2]) >= 3:
                 analysis_tuple = r[2]
                 current_lemma = analysis_tuple[1]
                 current_tag_full = analysis_tuple[2]
                 current_base_tag = current_tag_full.split(':', 1)[0]
-                current_gender = get_form_tag_gender_animacy(current_tag_full)
-                if check_func(current_base_tag):
-                    if temp_primary_gender is None or current_gender == temp_primary_gender:
-                         primary_lemma = current_lemma
-                         primary_tag_full = current_tag_full
-                         primary_base_tag = current_base_tag
-                         primary_tag_gender = current_gender
-                         print(f"[generate_and_format_forms] Selected primary analysis: lemma='{primary_lemma}', tag='{primary_tag_full}'")
-                         break
-                    elif primary_lemma is None:
-                         primary_lemma = current_lemma
-                         primary_tag_full = current_tag_full
-                         primary_base_tag = current_base_tag
-                         primary_tag_gender = current_gender
-                         print(f"[generate_and_format_forms] Selected fallback primary analysis (gender mismatch): lemma='{primary_lemma}', tag='{primary_tag_full}'")
-            else:
-                 print(f"[generate_and_format_forms] Skipping unexpected analysis tuple format in primary search: {r}")
+                if check_func(current_base_tag): # Check if it's the desired type (verb/declinable)
+                    primary_lemma = current_lemma
+                    primary_tag_full = current_tag_full
+                    primary_base_tag = current_base_tag
+                    if 'imperf' in current_tag_full.split(':'):
+                        is_primary_imperfective = True
+                    print(f"[generate_and_format_forms] Selected primary analysis: lemma='{primary_lemma}', tag='{primary_tag_full}', is_imperfective={is_primary_imperfective}")
+                    break # Found the first matching analysis
 
         if primary_lemma is None:
-             print(f"[generate_and_format_forms] No primary lemma matching check_func found for '{word}'.")
-             # 오류 처리 수정: 빈 리스트와 메시지 반환
-             return [], f"No analysis matching the required type (verb/declinable) found for '{word}'."
+            print(f"[generate_and_format_forms] No primary lemma matching check_func found for '{word}'.")
+            return None, f"No analysis matching the required type (verb/declinable) found for '{word}'."
+        # -------------------------------------------------
 
         generated_forms_raw = morf.generate(primary_lemma)
-        print(f"  -> Raw generated forms for primary lemma '{primary_lemma}': {generated_forms_raw}") # DEBUG
+        print(f"  -> Raw generated forms for primary lemma '{primary_lemma}': {generated_forms_raw}")
 
-        formatted_forms = []
-        present_3sg = None
-        present_3pl = None
+        # --- Process generated forms and store needed ones ---
+        grouped_forms = {}
+        infinitive_form = None
+        past_forms = {} # To store praet forms: {'sg:m1': 'robił', 'sg:f': 'robiła', ...}
+        past_impersonal_form = None
 
         for form_tuple in generated_forms_raw:
-            print(f"    >> Processing generated tuple: {form_tuple}") # DEBUG
-            if len(form_tuple) >= 3:
-                form = form_tuple[0]
-                form_lemma_full = form_tuple[1]
-                form_tag_full = form_tuple[2]
-                base_tag = form_tag_full.split(':', 1)[0]
-                form_gender_animacy = get_form_tag_gender_animacy(form_tag_full)
-                is_plural = ':pl:' in form_tag_full
-                is_singular = ':sg:' in form_tag_full
-                is_3rd_person = ':ter:' in form_tag_full
-                print(f"      Extracted: form='{form}', base_tag='{base_tag}', form_gender='{form_gender_animacy}', is_plural={is_plural}, full_tag='{form_tag_full}'") # DEBUG
+            if len(form_tuple) < 3:
+                print(f"    >> Skipping malformed generated tuple: {form_tuple}")
+                continue
 
-                if base_tag == 'fin' and is_3rd_person:
-                    if is_singular:
-                        present_3sg = {"form": form, "tag": form_tag_full, "qualifiers": list(form_tuple[3:])}
-                        print(f"      >> Stored present_3sg: {present_3sg}")
-                    elif is_plural:
-                        present_3pl = {"form": form, "tag": form_tag_full, "qualifiers": list(form_tuple[3:])}
-                        print(f"      >> Stored present_3pl: {present_3pl}")
+            form = form_tuple[0]
+            form_lemma_full = form_tuple[1]
+            form_tag_full = form_tuple[2]
+            qualifiers = list(form_tuple[3:]) if len(form_tuple) > 3 else []
+            base_tag = form_tag_full.split(':', 1)[0]
 
-                passes_check_func = check_func(base_tag)
-                passes_gender_filter = True
-                if primary_tag_gender and form_gender_animacy:
-                    if primary_tag_gender == 'm1' and form_gender_animacy != 'm1' and is_plural:
-                        passes_gender_filter = False
-                    elif primary_tag_gender in ['m2', 'm3'] and form_gender_animacy == 'm1' and is_plural:
-                        passes_gender_filter = False
-                print(f"      Filters: check_func({base_tag}) -> {passes_check_func}, gender_filter -> {passes_gender_filter} (primary_word_gender: {primary_tag_gender}, form_gender: {form_gender_animacy}, plural: {is_plural})") # DEBUG
+            if base_tag not in ALLOWED_TAGS:
+                continue
+            if base_tag == 'ger' and ':neg' in form_tag_full: # Filter negative gerunds
+                continue
 
-                if passes_check_func and passes_gender_filter:
-                    print(f"      >>>>> Filter PASSED for form '{form}' <<<<<" ) # DEBUG
-                    formatted_forms.append({
-                        "form": form,
-                        "tag": form_tag_full,
-                        "qualifiers": list(form_tuple[3:])
-                    })
-                else:
-                     print(f"      >>>>> Filter FAILED for form '{form}' <<<<<") # DEBUG
+            # --- Store infinitive ---
+            if base_tag == 'inf':
+                infinitive_form = form
+                print(f"      >> Found infinitive: {infinitive_form}")
+            # -----------------------
 
-        # --- Add 'niech' forms for Imperative ---
-        if check_func == is_verb and present_3sg and present_3pl:
-            # Create 3rd person singular imperative with 'niech'
-            niech_3sg = f"niech {present_3sg['form']}"
-            # Tag needs adjustment - maybe 'impt_periph:sg:ter' or similar?
-            # For now, just use original tag with a note or custom tag
-            impt_tag_sg = 'impt_periph:sg:ter'
-            print(f"      >> Generating 'niech' form (sg): {niech_3sg} with tag {impt_tag_sg}")
-            formatted_forms.append({"form": niech_3sg, "tag": impt_tag_sg, "qualifiers": present_3sg['qualifiers']})
+            # --- Store past tense forms needed for conditional ---
+            if base_tag == 'praet':
+                parts = form_tag_full.split(':')
+                num_gen_key = None
+                # Construct keys like 'sg:m1', 'sg:f', 'sg:n', 'pl:m1', 'pl:m2.m3.f.n'
+                if 'sg' in parts:
+                    num = 'sg'
+                    gen = next((p for p in parts if p in ['m1', 'm2', 'm3', 'f', 'n']), None)
+                    if gen: num_gen_key = f"{num}:{gen}"
+                elif 'pl' in parts:
+                    num = 'pl'
+                    gen = next((p for p in parts if p in ['m1', 'm2.m3.f.n']), None) # pl uses m1 or m2.m3.f.n typically
+                    if gen: num_gen_key = f"{num}:{gen}"
 
-            # Create 3rd person plural imperative with 'niech'
-            niech_3pl = f"niech {present_3pl['form']}"
-            impt_tag_pl = 'impt_periph:pl:ter'
-            print(f"      >> Generating 'niech' form (pl): {niech_3pl} with tag {impt_tag_pl}")
-            formatted_forms.append({"form": niech_3pl, "tag": impt_tag_pl, "qualifiers": present_3pl['qualifiers']})
-        # ---------------------------------------
+                if num_gen_key:
+                    past_forms[num_gen_key] = form
+                    print(f"      >> Found past form for {num_gen_key}: {form}")
+            # --------------------------------------------------
 
-        print(f"  -> Final formatted forms count for lemma '{primary_lemma}': {len(formatted_forms)}") # DEBUG
-        # Return lemma and forms separately
-        return [{"lemma": primary_lemma, "forms": formatted_forms}], None # Return data and no error message
+            # --- Infer person for past tense tags (already stored) ---
+            person = None
+            if base_tag == 'praet':
+                 # Your existing person inference logic...
+                if form.endswith(('łem', 'łam')): person = 'pri'
+                elif form.endswith(('łeś', 'łaś')): person = 'sec'
+                elif form.endswith(('ł', 'ła', 'ło')): person = 'ter'
+                elif form.endswith(('liśmy', 'łyśmy')): person = 'pri'
+                elif form.endswith(('liście', 'łyście')): person = 'sec'
+                elif form.endswith(('li', 'ły')): person = 'ter'
+                if person:
+                     form_tag_full += f':{person}' # Append inferred person
+            # ------------------------------------------------------
+
+            category_key = get_conjugation_category_key(base_tag, form_tag_full)
+
+            if category_key == 'conjugationCategoryPastImpersonal' and (form.endswith('no') or form.endswith('to')):
+                past_impersonal_form = form
+                print(f"      >> Found past impersonal form: {past_impersonal_form}")
+
+            form_data = {"form": form, "tag": form_tag_full, "qualifiers": qualifiers}
+            if category_key not in grouped_forms: grouped_forms[category_key] = []
+            grouped_forms[category_key].append(form_data)
+        # --- End processing loop ---
+
+        # --- Generate Future Impersonal / Conditional Impersonal ---
+        if past_impersonal_form:
+            # Future Impersonal
+            future_imps_form = f"będzie się {past_impersonal_form}"
+            future_imps_key = 'conjugationCategoryFutureImpersonal'
+            if future_imps_key not in grouped_forms: grouped_forms[future_imps_key] = []
+            grouped_forms[future_imps_key].append({"form": future_imps_form, "tag": "fut_imps", "qualifiers": []})
+
+            # Conditional Impersonal
+            cond_imps_form = f"by {past_impersonal_form}" # Simple version
+            cond_imps_key = 'conjugationCategoryConditionalImpersonal'
+            if cond_imps_key not in grouped_forms: grouped_forms[cond_imps_key] = []
+            grouped_forms[cond_imps_key].append({"form": cond_imps_form, "tag": "cond_imps", "qualifiers": []})
+        # --------------------------------------------------------
+
+        # --- Generate Future Imperfective / Conditional ---
+        if is_primary_imperfective:
+            # 1. Future Imperfective (using infinitive)
+            if infinitive_form:
+                future_key = 'conjugationCategoryFutureImperfectiveIndicative'
+                if future_key not in grouped_forms: grouped_forms[future_key] = []
+                for num_pers, aux_form in BYC_FUTURE_FORMS.items():
+                    num, pers = num_pers.split(':')
+                    generated_form = f"{aux_form} {infinitive_form}"
+                    generated_tag = f"fut:{num}:{pers}:imperf" # Construct a tag
+                    print(f"      >> Generating Future Imperfective: {generated_form} ({generated_tag})")
+                    grouped_forms[future_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
+            else:
+                print(f"      >> Cannot generate Future Imperfective: Infinitive form not found.")
+
+            # 2. Conditional (using past forms)
+            conditional_key = 'conjugationCategoryConditional'
+            if conditional_key not in grouped_forms: grouped_forms[conditional_key] = []
+            if past_forms:
+                for num_pers, particle in BY_CONDITIONAL_PARTICLES.items():
+                    num, pers = num_pers.split(':')
+                    # Find corresponding past forms based on number and gender
+                    if num == 'sg':
+                        genders_to_try = ['m1', 'f', 'n'] # Need m1/m2/m3 distinction if available
+                        if 'sg:m2' in past_forms: genders_to_try.append('m2')
+                        if 'sg:m3' in past_forms: genders_to_try.append('m3')
+                        genders_to_try = list(set(genders_to_try)) # Unique
+
+                        for gender in genders_to_try:
+                            past_key = f"sg:{gender}"
+                            if past_key in past_forms:
+                                base_past = past_forms[past_key]
+                                generated_form = f"{base_past}{particle}" # Attach particle
+                                generated_tag = f"cond:{num}:{gender}:{pers}:imperf"
+                                print(f"      >> Generating Conditional: {generated_form} ({generated_tag})")
+                                grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
+
+                    elif num == 'pl':
+                        # Plural needs m1 (personal masculine) and m2.m3.f.n (other)
+                        genders_to_try = ['m1', 'm2.m3.f.n']
+                        for gender in genders_to_try:
+                             past_key = f"pl:{gender}"
+                             if past_key in past_forms:
+                                 base_past = past_forms[past_key]
+                                 generated_form = f"{base_past}{particle}" # Attach particle
+                                 generated_tag = f"cond:{num}:{gender}:{pers}:imperf" # Use simplified gender tag
+                                 print(f"      >> Generating Conditional: {generated_form} ({generated_tag})")
+                                 grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
+            else:
+                 print(f"      >> Cannot generate Conditional: Past tense forms not found.")
+        # ---------------------------------------------------
+
+        final_grouped_forms = grouped_forms # Return all grouped forms
+
+        print(f"  -> Final grouped forms categories: {list(final_grouped_forms.keys())}")
+        return {"lemma": primary_lemma, "grouped_forms": final_grouped_forms}, None
 
     except Exception as e:
         print(f"Error during form generation for '{word}': {e}")
-        # Return None and error message
+        import traceback
+        traceback.print_exc() # Print full traceback for debugging
         return None, f"An error occurred during form generation: {e}"
+
+# --- NEW Helper function to get category key (similar to frontend) ---
+# Maps Morfeusz base tags (and sometimes qualifiers) to frontend category keys
+def get_conjugation_category_key(base_tag, full_tag):
+    aspect = None
+    tense_aspect = None
+    mood = None # Not reliably extracted from standard tags
+
+    parts = full_tag.split(':')
+    # Basic positional guessing (can be refined)
+    if len(parts) > 1: number = parts[1]
+    if len(parts) > 2: case_person_gender = parts[2]
+    if len(parts) > 3: gender_aspect_etc = parts[3]
+
+    # Try to find aspect more reliably
+    for part in parts:
+        if part == 'perf': aspect = 'perf'; break
+        if part == 'imperf': aspect = 'imperf'; break
+
+    # Assign tense_aspect based on base tag and aspect
+    if base_tag == 'fin' and aspect: tense_aspect = aspect
+    if base_tag == 'praet' and aspect: tense_aspect = aspect # Past uses aspect
+    # Add more specific tense_aspect logic if needed
+
+    # Mimic frontend logic
+    if base_tag == 'fin':
+        if tense_aspect == 'imperf': return 'conjugationCategoryPresentIndicative'
+        if tense_aspect == 'perf': return 'conjugationCategoryFuturePerfectiveIndicative'
+        return 'conjugationCategoryFiniteVerb' # Fallback
+    elif base_tag == 'bedzie': return 'conjugationCategoryFutureImperfectiveIndicative'
+    elif base_tag == 'praet': return 'conjugationCategoryPastTense'
+    elif base_tag == 'impt': return 'conjugationCategoryImperative'
+    elif base_tag == 'impt_periph': return 'conjugationCategoryImperative' # Group with impt
+    elif base_tag == 'inf': return 'conjugationCategoryInfinitive'
+    elif base_tag == 'pcon': return 'conjugationCategoryPresentAdverbialParticiple'
+    elif base_tag == 'pant': return 'conjugationCategoryAnteriorAdverbialParticiple'
+    elif base_tag == 'pact': return 'conjugationCategoryPresentActiveParticiple'
+    elif base_tag == 'ppas': return 'conjugationCategoryPastPassiveParticiple'
+    elif base_tag == 'ger': return 'conjugationCategoryVerbalNoun'
+    elif base_tag == 'imps':
+        # Differentiate impersonal based on aspect (assuming aspect is present)
+        if aspect == 'perf':
+             return 'conjugationCategoryPastImpersonal' # Assume perf = past impersonal (-no, -to)
+        else: # Assume imperf or no aspect = present impersonal
+             return 'conjugationCategoryPresentImpersonal'
+    elif base_tag == 'cond': return 'conjugationCategoryConditional'
+    # No specific keys for future/conditional impersonal yet, handled manually later
+    elif base_tag == 'fut_imps': return 'conjugationCategoryFutureImpersonal' # Manual tag
+    elif base_tag == 'cond_imps': return 'conjugationCategoryConditionalImpersonal' # Manual tag
+
+    else: return 'conjugationCategoryOtherForms' # Group others
+# -------------------------------------------------------------
 
 @app.route('/conjugate/<word>', methods=['GET'])
 def conjugate_word(word):
-    data, error_message = generate_and_format_forms(word, is_verb)
+    # generate_and_format_forms now returns a dict {"lemma": ..., "grouped_forms": ...} or None
+    result_data, error_message = generate_and_format_forms(word, is_verb)
+
     if error_message:
+        # If error occurred during generation
         return jsonify({"status": "error", "message": error_message}), 500
-    if data is None or not data: # Check if data is None or empty list
-         return jsonify({"status": "success", "word": word, "data": [], "message": f"No conjugation data found for '{word}' or word type mismatch."}), 200
-    return jsonify({"status": "success", "word": word, "data": data})
+
+    if result_data is None or not result_data.get("grouped_forms"):
+        # If generation succeeded but found no matching forms or lemma
+        return jsonify({
+            "status": "success",
+            "word": word,
+            "data": [], # Keep data as empty list for consistency
+            "message": f"No conjugation data found for '{word}' or word type mismatch."
+        }), 200
+
+    # Success: return the structured data
+    # The frontend expects data to be a list containing one item (the lemma object)
+    # So we wrap result_data in a list.
+    response_payload = {
+        "status": "success",
+        "word": word,
+        "data": [result_data] # Wrap the dict in a list
+    }
+    print(f"[/conjugate] Returning successful data structure for '{word}': {response_payload}")
+    return jsonify(response_payload)
 
 @app.route('/decline/<word>', methods=['GET'])
 def decline_word(word):
