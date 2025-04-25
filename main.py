@@ -440,8 +440,11 @@ def generate_and_format_forms(word, check_func):
             if len(result_tuple) >= 3 and isinstance(result_tuple[2], tuple) and len(result_tuple[2]) >= 3:
                 tag_full = result_tuple[2][2]
                 base_tag = tag_full.split(':', 1)[0]
-                if base_tag == 'subst' and (':sm2' in tag_full or ':m2' in tag_full):
+                tag_parts = tag_full.split(':')
+                print(f"[sm2/m2 탐색] tag_full={tag_full}, tag_parts={tag_parts}")
+                if base_tag == 'subst' and ('sm2' in tag_parts or 'm2' in tag_parts):
                     found_sm2 = result_tuple
+                    print(f"[sm2/m2 탐색] FOUND: {tag_full}")
                     break
         if found_sm2:
             primary_lemma = found_sm2[2][1]
