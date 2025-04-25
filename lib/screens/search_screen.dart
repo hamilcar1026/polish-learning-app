@@ -1847,6 +1847,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
           // Format cell content with gender labels - using Column widget for proper line breaks
           Widget buildSingularCell() {
+            print("==== [DEBUG][COND] sgForms keys: "+sgForms.keys.toString());
+            print("==== [DEBUG][COND] sgForms: "+sgForms.toString());
             List<Widget> contentWidgets = [];
             // 남성 단수: m, m1, m2, m3, m1.m2.m3, m1.m2, m2.m3 등 모든 조합을 커버
             final mascKeys = ['m', 'm1', 'm2', 'm3', 'm1.m2.m3', 'm1.m2', 'm2.m3'];
