@@ -415,6 +415,7 @@ def is_impersonal_form(form, tag_full):
         return True
     # się가 포함된 특정 패턴 (일부 reflexive 동사는 예외)
     if ' się ' in form or form.endswith(' się') or form.startswith('się '):
+        return True
 
 # Helper function to generate forms and format them (REFACTORED)
 def generate_and_format_forms(word, check_func):
