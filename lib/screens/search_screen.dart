@@ -350,7 +350,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
                             if (isDeclinable) {
                               tabs.add(Tab(text: l10n.declensionTitle));
-                              tabViews.add(_buildDeclensionTab(submittedWord, l10n));
+                              tabViews.add(_buildDeclensionTab(submittedWord, l10n)); // Declension 탭 추가
                             }
                              if (isVerb) {
                               tabs.add(Tab(text: l10n.conjugationTitle));
@@ -526,9 +526,66 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   // --- Builder for Conjugation Tab ---
-  Widget _buildConjugationTab(String word, AppLocalizations l10n) {
+// --- Declension(굴절) 탭 빌더 추가 ---
+Widget _buildDeclensionTab(String word, AppLocalizations l10n) {
     return Consumer(
       builder: (context, ref, _) {
+        final declensionAsyncValue = ref.watch(declensionProvider(word));
+        return declensionAsyncValue.when(
+          data: (d) {
+            if (d.status == 'success' && d.data != null && d.data!.isNotEmpty) {
+              final lemmaData = d.data!.first;
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Card(
+                  elevation: 2.0,
+                  margin: EdgeInsets.zero,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          l10n.declensionTableTitle(lemmaData.lemma),
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 10),
+                        const Divider(),
+                        _buildDeclensionResults(lemmaData, l10n),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            } else {
+              return Center(child: Text(d.message ?? l10n.noDeclensionData));
+            }
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, s) => Center(child: Text(l10n.loadingError(e.toString()))),
+        );
+      },
+    );
+  }
+
+  /// TODO: Implement actual declension results table for the lemmaData.
+  /// Temporary placeholder to fix compilation error.
+  Widget _buildDeclensionResults(dynamic lemmaData, AppLocalizations l10n) {
+    return Center(
+      child: Text(
+        l10n.declensionTableTitle(lemmaData?.lemma ?? ''),
+        style: const TextStyle(color: Colors.red),
+      ),
+    );
+  }
+
+  // 동사 활용(Conjugation) 탭 빌더
+Widget _buildConjugationTab(String word, AppLocalizations l10n) {
+    return Consumer(
+      builder: (context, ref, _) {
+  return Consumer(
+    builder: (context, ref, _) {
         final conjugationAsyncValue = ref.watch(conjugationProvider(word));
         
         return conjugationAsyncValue.when(
@@ -1878,7 +1935,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         break;
        // Add other base tags as needed (num, pron, adv, prep, conj etc.)
        // ...
-    }
+    ;}
 
     // --- Refined extraction based on identified fields ---
     // Example: If 'case_person_gender' likely holds case based on base tag
