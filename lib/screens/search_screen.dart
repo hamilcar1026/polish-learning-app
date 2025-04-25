@@ -1744,7 +1744,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     print("===== 조건법 데이터 디버깅 종료 =====");
 
     // Genders to look for
-    const sgGenders = ['m1', 'm2', 'm3', 'f', 'n']; // Check for all possible singular genders
+    const sgGenders = ['m1', 'm2', 'm3', 'm1.m2.m3', 'f', 'n']; // 'm1.m2.m3' 추가
     const plGenders = ['m1', 'm2.m3.f.n']; // Typical plural gender tags
 
     for (var form in forms) {
@@ -1762,6 +1762,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         if (part == 'pri' || part == 'sec' || part == 'ter') person = part;
         // Find the specific gender tag
         if (sgGenders.contains(part) || plGenders.contains(part)) gender = part;
+        // 추가: m1.m2.m3 조합도 인식
+        if (part.contains('m1') && part.contains('m2') && part.contains('m3')) gender = 'm1.m2.m3';
       }
 
       if (number != null && person != null && gender != null) {
