@@ -464,7 +464,7 @@ def generate_and_format_forms(word, check_func):
         # -------------------------------------------------
 
         # Morfeusz2 generate 호출 시 expand_tags=True 옵션 사용 (복합 태그 자동 분리)
-        generated_forms_raw = morf.generate(primary_lemma, expand_tags=True)
+        generated_forms_raw = morf.generate(primary_lemma)
         print(f"  -> Raw generated forms for primary lemma '{primary_lemma}': {generated_forms_raw}")
 
         # --- Process generated forms and store needed ones ---
