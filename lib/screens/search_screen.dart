@@ -1367,6 +1367,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
           // 성별 레이블로 셀 내용 형식 지정 - 적절한 줄 바꿈을 위해 Column 위젯 사용
           Widget buildSingularCell() {
+            print("==== [DEBUG] sgForms keys: "+sgForms.keys.toString());
+            print("==== [DEBUG] sgForms: "+sgForms.toString());
             List<Widget> contentWidgets = [];
             
             if (sgForms['m'] != null) {
