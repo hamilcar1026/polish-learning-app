@@ -16,10 +16,6 @@
     "conjugationCategoryVerbalNoun",
     "conjugationCategoryConditional",
     "suggestionDidYouMean",
-    "suggestionErrorFallback",
-    "impersonalPresentForm",
-    "impersonalPastForm",
-    "impersonalFutureForm",
-    "impersonalConditionalForm"
+    "suggestionErrorFallback"
   ]
 }

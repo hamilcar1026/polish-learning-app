@@ -525,28 +525,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  // --- Builder for Declension Tab ---
-  Widget _buildDeclensionTab(String word, AppLocalizations l10n) {
-    return Consumer(
-      builder: (context, ref, _) {
-        final declensionAsyncValue = ref.watch(declensionProvider(word));
-        
-        return declensionAsyncValue.when(
-          data: (d) => d.status == 'success' && d.data != null && d.data!.isNotEmpty
-              ? SingleChildScrollView( // Ensure tab content is scrollable
-                  padding: const EdgeInsets.symmetric(vertical: 8.0), // Add padding within scroll view
-                  child: _buildDeclensionResults(d.data!.first, l10n),
-                )
-              : Center(
-                  child: Text(d.message ?? l10n.noDeclensionData),
-                ),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, s) => Center(child: Text(l10n.loadingError(e.toString()))),
-        );
-      },
-    );
-  }
-
   // --- Builder for Conjugation Tab ---
   Widget _buildConjugationTab(String word, AppLocalizations l10n) {
     return Consumer(
@@ -598,110 +576,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           error: (e, s) => Center(child: Text(l10n.loadingError(e.toString()))),
         );
       },
-    for (var formInfo in lemmaData.forms) {
-      final tagMap = _parseTag(formInfo.tag);
-      final casePart = tagMap['case'] ?? tagMap['case_person'];
-      final number = tagMap['number'];
-      final gender = tagMap['gender'];
-      if (casePart != null && number != null && gender != null) {
-        for (var caseCode in casePart.split('.')) {
-          if (!casesOrder.contains(caseCode)) continue;
-          adjTable.putIfAbsent(caseCode, () => {'sg': {}, 'pl': {}});
-          adjTable[caseCode]![number]![gender] = formInfo.form;
-        }
-      }
-    }
-    // Gender order for columns
-    final sgGenders = ['m', 'f', 'n'];
-    final plGenders = ['m1', 'non-m1']; // m1 = masc personal, non-m1 = others
-    // Table header row
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Builder(
-          builder: (context) {
-            final l10n = AppLocalizations.of(context)!;
-            String firstTagString = lemmaData.forms.isNotEmpty ? lemmaData.forms.first.tag : '';
-            String translatedTagString = '';
-            if (firstTagString.isNotEmpty) {
-              // Split the tag and translate each part using the existing helper
-              translatedTagString = firstTagString
-                  .split(':')
-                  .map((part) => _translateGrammarTerm(part, l10n)) // Translate each part
-                  .join(':'); // Join back with colons
-            }
-            
-            return Text(
-              // Append translated tag if available
-              '${l10n.declensionTableTitle(lemmaData.lemma)}${translatedTagString.isNotEmpty ? ' ($translatedTagString)' : ''}', 
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            );
-          }
-        ),
-        const SizedBox(height: 16),
-        
-        // Table display
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            // Center the Table widget horizontally
-            child: Center( 
-              child: Table(
-                border: TableBorder.all(color: Colors.grey.shade300),
-                columnWidths: const {
-                  0: IntrinsicColumnWidth(), // Case column
-                  1: IntrinsicColumnWidth(), // Singular column
-                  2: IntrinsicColumnWidth(), // Plural column
-                },
-                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                children: [
-                  // Header row
-                  TableRow(
-                    decoration: BoxDecoration(color: Colors.grey.shade100),
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(l10n.tableHeaderCase, style: TextStyle(fontWeight: FontWeight.bold)), 
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(l10n.tableHeaderSingular, style: TextStyle(fontWeight: FontWeight.bold)), 
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(l10n.tableHeaderPlural, style: TextStyle(fontWeight: FontWeight.bold)), 
-                      ),
-                    ],
-                  ),
-                  // Data rows
-                  ...casesOrder.map((caseCode) {
-                    final forms = declensionTable[caseCode] ?? {};
-                    return TableRow(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(_getCaseName(caseCode, l10n)), 
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(forms['sg'] ?? '-'), // Display '-' if null
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(forms['pl'] ?? '-'), // Display '-' if null
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
+
   }
 
   // --- Helper Widget to build the conjugation Table (replaced DataTable) ---
