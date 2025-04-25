@@ -523,16 +523,14 @@ def generate_and_format_forms(word, check_func):
                     # Check for multi-case tags like 'gen.acc', 'nom.voc', etc.
                     for case_tag, _ in CASES:
                         if part.startswith(case_tag):
-                            # Split by '.' to handle e.g. 'gen.acc', 'nom.voc'
+                            # Split by '.' to handle e.g. 'gen.acc', 'nom.voc', 'nom.acc.voc'
                             for subcase in part.split('.'):
-                                if subcase in [c[0] for c in CASES]:
+                                if subcase in [c for c, _ in CASES]:
                                     cases_found.append(subcase)
-                # Fill all found cases for this number
-                for case in cases_found:
-                    if number and decl_table.get(case) and decl_table[case].get(number):
-                        # Only fill if empty (keep first form)
-                        if decl_table[case][number] == "-":
-                            decl_table[case][number] = form
+                print(f"[곡용표 DEBUG] form={form}, number={number}, cases_found={cases_found}")
+                if number and cases_found:
+                    for case in cases_found:
+                        decl_table[case][number] = form
             result = {
                 "lemma": primary_lemma,
                 "grouped_forms": {},
