@@ -1793,12 +1793,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         }
 
          if (conditionalForms.containsKey(person) && conditionalForms[person]!.containsKey(number)) {
-           // Store the form using the possibly simplified gender key
-           // Use ??= to only assign if the key doesn't exist yet
-           conditionalForms[person]![number]![displayGenderKey] ??= form.form;
-           // 디버깅: 테이블에 추가된 항목 로깅
-           print("테이블에 추가: conditionalForms[$person][$number][$displayGenderKey] = ${form.form}");
-         }
+          if (conditionalForms[person]![number]![displayGenderKey] == null) {
+            conditionalForms[person]![number]![displayGenderKey] = form.form;
+            print("테이블에 추가: conditionalForms[$person][$number][$displayGenderKey] = ${form.form}");
+          } else {
+            print("[경고] 이미 값이 있음: conditionalForms[$person][$number][$displayGenderKey] = ${conditionalForms[person]![number]![displayGenderKey]} (새 값: ${form.form})");
+          }
+        }
       }
     }
 
