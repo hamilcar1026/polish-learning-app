@@ -1846,9 +1846,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           // Format cell content with gender labels - using Column widget for proper line breaks
           Widget buildSingularCell() {
             List<Widget> contentWidgets = [];
-            
-            if (sgForms['m'] != null) {
-              contentWidgets.add(Text("${sgForms['m']} (${l10n.genderLabelM1}/${l10n.genderLabelM2}/${l10n.genderLabelM3})"));
+            // 남성 단수: m1.m2.m3 → m
+            var masc = sgForms['m'] ?? sgForms['m1.m2.m3'];
+            if (masc != null) {
+              contentWidgets.add(Text("$masc (${l10n.genderLabelM1}/${l10n.genderLabelM2}/${l10n.genderLabelM3})"));
             }
             if (sgForms['f'] != null) {
               contentWidgets.add(Text("${sgForms['f']} (${l10n.genderLabelF})"));
@@ -1856,11 +1857,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             if (sgForms['n'] != null) {
               contentWidgets.add(Text("${sgForms['n']} (${l10n.genderLabelN1}/${l10n.genderLabelN2})"));
             }
-            
             if (contentWidgets.isEmpty) {
               return Text('-');
             }
-            
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: contentWidgets,
