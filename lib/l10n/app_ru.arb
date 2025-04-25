@@ -232,5 +232,21 @@
     }
   },
   "translationLabel": "Перевод",
-  "impersonalAccuracyWarning": "Может быть неточным"
+  "impersonalAccuracyWarning": "Может быть неточным",
+  "impersonalPresentForm": "Безличная форма настоящего времени (несов.)",
+  "@impersonalPresentForm": {
+    "description": "Описание для безличной формы настоящего времени"
+  },
+  "impersonalPastForm": "Безличная форма прошедшего времени (сов.)",
+  "@impersonalPastForm": {
+    "description": "Описание для безличной формы прошедшего времени"
+  },
+  "impersonalFutureForm": "Безличная форма будущего времени",
+  "@impersonalFutureForm": {
+    "description": "Описание для безличной формы будущего времени"
+  },
+  "impersonalConditionalForm": "Безличная форма условного наклонения",
+  "@impersonalConditionalForm": {
+    "description": "Описание для безличной формы условного наклонения"
+  }
 } 
