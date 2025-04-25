@@ -493,7 +493,9 @@ def generate_and_format_forms(word, check_func):
             ]
             NUMBERS = ["sg", "pl"]
             decl_table = {case: {num: "-" for num in NUMBERS} for case, _ in CASES}
-            generated_forms_raw = morf.generate(primary_lemma)
+            # Morfeusz2 문서에 따라 lemma에서 콜론(:) 이후를 제거해야 generate가 동작함
+            lemma_clean = primary_lemma.split(':')[0]
+            generated_forms_raw = morf.generate(lemma_clean)
             for form_tuple in generated_forms_raw:
                 if len(form_tuple) < 3:
                     continue
