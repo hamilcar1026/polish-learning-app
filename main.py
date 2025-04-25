@@ -434,40 +434,40 @@ def generate_and_format_forms(word, check_func):
         primary_base_tag = None
         is_primary_imperfective = False # Flag for imperfective aspect
 
-        # Heuristic to find the most likely primary verb/declinable lemma (now with sm2/m2 enforcement)
-        for r in analysis_result:
-            if len(r) >= 3 and isinstance(r[2], tuple) and len(r[2]) >= 3:
-                analysis_tuple = r[2]
-                current_lemma = analysis_tuple[1]
-                current_tag_full = analysis_tuple[2]
-                current_base_tag = current_tag_full.split(':', 1)[0]
-                if check_func(current_base_tag): # Check if it's the desired type (verb/declinable)
-                    # 동물명사 sm2/m2 강제 적용: subst일 때 sm2/m2가 있으면 무조건 그것만 primary로 삼음
-                    if current_base_tag == 'subst':
-                        found_sm2 = None
-                        for rr in analysis_result:
-                            if len(rr) >= 3 and isinstance(rr[2], tuple) and len(rr[2]) >= 3:
-                                tag_full = rr[2][2]
-                                if ':sm2' in tag_full or ':m2' in tag_full:
-                                    found_sm2 = rr
-                                    break
-                        if found_sm2:
-                            current_lemma = found_sm2[2][1]
-                            current_tag_full = found_sm2[2][2]
-                            current_base_tag = current_tag_full.split(':', 1)[0]
-                            print(f"[generate_and_format_forms] 동물명사 sm2/m2 강제 적용: lemma='{current_lemma}', tag='{current_tag_full}'")
-                    primary_lemma = current_lemma
-                    primary_tag_full = current_tag_full
-                    primary_base_tag = current_base_tag
-                    if 'imperf' in current_tag_full.split(':'):
-                        is_primary_imperfective = True
-                    # Check if this verb uses się naturally
-                    if ' się' in current_lemma or current_lemma.endswith('się'):
-                        has_reflexive_sie = True
-                        print(f"[generate_and_format_forms] Identified reflexive verb with się: {current_lemma}")
-                    print(f"[generate_and_format_forms] Selected primary analysis: lemma='{primary_lemma}', tag='{primary_tag_full}', is_imperfective={is_primary_imperfective}")
-                    break # Found the first matching analysis
-
+        # 1. 먼저 subst:sm2/m2가 있는지 전체에서 찾는다 (동물명사 강제 적용)
+        found_sm2 = None
+        for result_tuple in analysis_result:
+            if len(result_tuple) >= 3 and isinstance(result_tuple[2], tuple) and len(result_tuple[2]) >= 3:
+                tag_full = result_tuple[2][2]
+                base_tag = tag_full.split(':', 1)[0]
+                if base_tag == 'subst' and (':sm2' in tag_full or ':m2' in tag_full):
+                    found_sm2 = result_tuple
+                    break
+        if found_sm2:
+            primary_lemma = found_sm2[2][1]
+            primary_tag_full = found_sm2[2][2]
+            primary_base_tag = primary_tag_full.split(':', 1)[0]
+            print(f"[generate_and_format_forms] 동물명사 sm2/m2 강제 적용: lemma='{primary_lemma}', tag='{primary_tag_full}'")
+        else:
+            # 기존 heuristic: 첫 번째로 check_func(current_base_tag)가 True인 것 사용
+            for r in analysis_result:
+                if len(r) >= 3 and isinstance(r[2], tuple) and len(r[2]) >= 3:
+                    analysis_tuple = r[2]
+                    current_lemma = analysis_tuple[1]
+                    current_tag_full = analysis_tuple[2]
+                    current_base_tag = current_tag_full.split(':', 1)[0]
+                    if check_func(current_base_tag):
+                        primary_lemma = current_lemma
+                        primary_tag_full = current_tag_full
+                        primary_base_tag = current_base_tag
+                        if 'imperf' in current_tag_full.split(':'):
+                            is_primary_imperfective = True
+                        # Check if this verb uses się naturally
+                        if ' się' in current_lemma or current_lemma.endswith('się'):
+                            has_reflexive_sie = True
+                            print(f"[generate_and_format_forms] Identified reflexive verb with się: {current_lemma}")
+                        print(f"[generate_and_format_forms] Selected primary analysis: lemma='{primary_lemma}', tag='{primary_tag_full}', is_imperfective={is_primary_imperfective}")
+                        break
         print(f"[곡용표 생성] primary_lemma={primary_lemma}, primary_tag_full={primary_tag_full}")
 
         if primary_lemma is None:
