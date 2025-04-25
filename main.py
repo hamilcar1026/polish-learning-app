@@ -531,8 +531,18 @@ def generate_and_format_forms(word, check_func):
                 if number and cases_found:
                     for case in cases_found:
                         decl_table[case][number] = form
+            # decl_table을 forms 리스트로 변환 (DeclensionForm 모델 호환)
+            forms = []
+            for case, nums in decl_table.items():
+                for num, form in nums.items():
+                    forms.append({
+                        "form": form,
+                        "tag": f"{case}:{num}",
+                        "qualifiers": [case, num]
+                    })
             result = {
                 "lemma": primary_lemma.split(":")[0] if primary_lemma else "",
+                "forms": forms,
                 "grouped_forms": {},
                 "declension_table": decl_table
             }
