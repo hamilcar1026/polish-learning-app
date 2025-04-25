@@ -532,7 +532,7 @@ def generate_and_format_forms(word, check_func):
                     for case in cases_found:
                         decl_table[case][number] = form
             result = {
-                "lemma": primary_lemma,
+                "lemma": primary_lemma.split(":")[0] if primary_lemma else "",
                 "grouped_forms": {},
                 "declension_table": decl_table
             }
