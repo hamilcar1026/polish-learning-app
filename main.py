@@ -979,6 +979,9 @@ def decline_word(word):
         return jsonify({"status": "error", "message": error_message}), 500
     if data is None or not data: # Check if data is None or empty list
         return jsonify({"status": "success", "word": word, "data": [], "message": f"No declension data found for '{word}' or word type mismatch."}), 200
+    # Ensure 'data' is always a list for frontend compatibility
+    if isinstance(data, dict):
+        data = [data]
     return jsonify({"status": "success", "word": word, "data": data})
 
 # --- 간단한 테스트 경로 추가 ---
