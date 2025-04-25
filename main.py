@@ -494,8 +494,18 @@ def generate_and_format_forms(word, check_func):
             NUMBERS = ["sg", "pl"]
             decl_table = {case: {num: "-" for num in NUMBERS} for case, _ in CASES}
             # Morfeusz2 문서에 따라 lemma에서 콜론(:) 이후를 제거해야 generate가 동작함
-            lemma_clean = primary_lemma.split(':')[0]
+            lemma_clean = primary_lemma.split(':')[0] if primary_lemma else ""
             generated_forms_raw = morf.generate(lemma_clean)
+            print(f"[곡용표 DEBUG] lemma_clean={lemma_clean}")
+            print(f"[곡용표 DEBUG] generated_forms_raw: {generated_forms_raw}")
+            for form_tuple in generated_forms_raw:
+                print(f"[곡용표 DEBUG] form_tuple: {form_tuple}")
+                if len(form_tuple) < 3:
+                    continue
+                form = form_tuple[0]
+                tag_full = form_tuple[2]
+                tag_parts = tag_full.split(':')
+                print(f"[곡용표 DEBUG] form={form}, tag_full={tag_full}, tag_parts={tag_parts}")
             for form_tuple in generated_forms_raw:
                 if len(form_tuple) < 3:
                     continue
