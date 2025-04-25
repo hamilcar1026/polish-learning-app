@@ -495,16 +495,25 @@ def generate_and_format_forms(word, check_func):
                 tag_parts = tag_full.split(':')
                 if tag_parts[0] not in ['subst', 'depr', 'adj', 'adja', 'adjp']:
                     continue
-                # Find number and case
+                # Find number and case(s)
                 number = None
-                case = None
+                cases_found = []
                 for part in tag_parts:
                     if part in NUMBERS:
                         number = part
-                    if part in [c[0] for c in CASES]:
-                        case = part
-                if number and case and decl_table.get(case) and decl_table[case].get(number):
-                    decl_table[case][number] = form
+                    # Check for multi-case tags like 'gen.acc', 'nom.voc', etc.
+                    for case_tag, _ in CASES:
+                        if part.startswith(case_tag):
+                            # Split by '.' to handle e.g. 'gen.acc', 'nom.voc'
+                            for subcase in part.split('.'):
+                                if subcase in [c[0] for c in CASES]:
+                                    cases_found.append(subcase)
+                # Fill all found cases for this number
+                for case in cases_found:
+                    if number and decl_table.get(case) and decl_table[case].get(number):
+                        # Only fill if empty (keep first form)
+                        if decl_table[case][number] == "-":
+                            decl_table[case][number] = form
             result = {
                 "lemma": primary_lemma,
                 "grouped_forms": {},
