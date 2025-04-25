@@ -1787,9 +1787,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
              displayGenderKey = 'non-m1'; // Use a consistent key for non-personal plural
         }
         // Group m1/m2/m3 under 'm' for singular for simpler table display
-        if (number == 'sg' && ['m1', 'm2', 'm3'].contains(gender)) {
+        if (number == 'sg' && (gender == 'm1' || gender == 'm2' || gender == 'm3' || gender == 'm1.m2.m3')) {
             displayGenderKey = 'm';
-            // 디버깅: 남성 단수 형태가 변환되는 과정 로깅
             print("남성 단수 변환: 원래 gender=$gender -> displayGenderKey=$displayGenderKey");
         }
 
