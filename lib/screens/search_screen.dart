@@ -1928,6 +1928,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final parts = tagString.split(':');
     final Map<String, String> tagMap = {'base': parts.isNotEmpty ? parts[0] : ''}; // Ensure base always exists
 
+    // --- Patch for simple tags like "nom:sg" or "gen:pl" ---
+    if (parts.length == 2 &&
+        ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc'].contains(parts[0]) &&
+        ['sg', 'pl'].contains(parts[1])) {
+      tagMap['case'] = parts[0];
+      tagMap['number'] = parts[1];
+    }
+
     // --- Default positions (may be overwritten) ---
     if (parts.length > 1) tagMap['number'] = parts[1];
     if (parts.length > 2) tagMap['case_person_gender'] = parts[2]; // Combined field initially
