@@ -53,7 +53,7 @@ BY_CONDITIONAL_PARTICLES = {
 }
 
 # Allowed tags (Ensure all needed tags are included)
-ALLOWED_TAGS = {'fin', 'impt', 'imps', 'inf', 'pact', 'pant', 'pcon', 'ppas', 'praet', 'bedzie', 'ger', 'cond', 'impt_periph', 'fut_imps', 'cond_imps', 'impt_imps'} # Add all needed impersonal tags
+ALLOWED_TAGS = {'fin', 'impt', 'imps', 'inf', 'pact', 'pant', 'pcon', 'ppas', 'praet', 'bedzie', 'ger', 'cond', 'impt_periph', 'fut_imps', 'cond_imps', 'impt_imps', 'subst', 'depr', 'adj', 'adja', 'adjp'} # Add all needed tags including declinable word tags
 
 # --- 향상된 비인칭 처리를 위한 새로운 상수 추가 ---
 # 비인칭 동사의 się 위치 패턴 (동사에 따라 다를 수 있음)
@@ -415,9 +415,6 @@ def is_impersonal_form(form, tag_full):
         return True
     # się가 포함된 특정 패턴 (일부 reflexive 동사는 예외)
     if ' się ' in form or form.endswith(' się') or form.startswith('się '):
-        return True
-    return False
-# ---------------------------
 
 # Helper function to generate forms and format them (REFACTORED)
 def generate_and_format_forms(word, check_func):
@@ -446,6 +443,18 @@ def generate_and_format_forms(word, check_func):
                 current_tag_full = analysis_tuple[2]
                 current_base_tag = current_tag_full.split(':', 1)[0]
                 if check_func(current_base_tag): # Check if it's the desired type (verb/declinable)
+                    # 동물명사 sm2 강제 적용
+                    if current_base_tag == 'subst' and (':sm1' in current_tag_full or ':m1' in current_tag_full):
+                        # sm2이 존재하는지 확인하고, 있으면 그것만 사용
+                        for rr in analysis_result:
+                            if len(rr) >= 3 and isinstance(rr[2], tuple) and len(rr[2]) >= 3:
+                                tag_full = rr[2][2]
+                                if ':sm2' in tag_full or ':m2' in tag_full:
+                                    current_lemma = rr[2][1]
+                                    current_tag_full = tag_full
+                                    current_base_tag = current_tag_full.split(':', 1)[0]
+                                    print(f"[generate_and_format_forms] 동물명사 sm2 강제 적용: lemma='{current_lemma}', tag='{current_tag_full}'")
+                                    break
                     primary_lemma = current_lemma
                     primary_tag_full = current_tag_full
                     primary_base_tag = current_base_tag
@@ -462,6 +471,46 @@ def generate_and_format_forms(word, check_func):
             print(f"[generate_and_format_forms] No primary lemma matching check_func found for '{word}'.")
             return None, f"No analysis matching the required type (verb/declinable) found for '{word}'."
         # -------------------------------------------------
+
+        # 명사/형용사 곡용 표 생성 (is_declinable인 경우)
+        if check_func == is_declinable:
+            # Polish cases and their Morfeusz tags
+            CASES = [
+                ("nom", "Mianownik"),
+                ("gen", "Dopełniacz"),
+                ("dat", "Celownik"),
+                ("acc", "Biernik"),
+                ("inst", "Narzędnik"),
+                ("loc", "Miejscownik"),
+                ("voc", "Wołacz"),
+            ]
+            NUMBERS = ["sg", "pl"]
+            decl_table = {case: {num: "-" for num in NUMBERS} for case, _ in CASES}
+            generated_forms_raw = morf.generate(primary_lemma)
+            for form_tuple in generated_forms_raw:
+                if len(form_tuple) < 3:
+                    continue
+                form = form_tuple[0]
+                tag_full = form_tuple[2]
+                tag_parts = tag_full.split(':')
+                if tag_parts[0] not in ['subst', 'depr', 'adj', 'adja', 'adjp']:
+                    continue
+                # Find number and case
+                number = None
+                case = None
+                for part in tag_parts:
+                    if part in NUMBERS:
+                        number = part
+                    if part in [c[0] for c in CASES]:
+                        case = part
+                if number and case and decl_table.get(case) and decl_table[case].get(number):
+                    decl_table[case][number] = form
+            result = {
+                "lemma": primary_lemma,
+                "grouped_forms": {},
+                "declension_table": decl_table
+            }
+            return result, None
 
         # Morfeusz2 generate 호출 시 expand_tags=True 옵션 사용 (복합 태그 자동 분리)
         generated_forms_raw = morf.generate(primary_lemma)
