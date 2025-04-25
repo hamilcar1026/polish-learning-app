@@ -433,7 +433,33 @@ def generate_and_format_forms(word, check_func):
         primary_tag_full = None
         primary_base_tag = None
         is_primary_imperfective = False # Flag for imperfective aspect
-        has_reflexive_sie = False # Flag to check if verb is inherently reflexive (uses się)
+
+        # Pick the first valid analysis as primary by default
+        for result_tuple in analysis_result:
+            if len(result_tuple) >= 3 and isinstance(result_tuple[2], tuple) and len(result_tuple[2]) >= 3:
+                primary_lemma = result_tuple[2][1]
+                primary_tag_full = result_tuple[2][2]
+                primary_base_tag = primary_tag_full.split(':', 1)[0]
+                break
+
+        # --- 동물명사 sm2/m2 강제 적용 ---
+        # If subst and :sm2 or :m2 exists, force to use it as primary
+        if primary_base_tag == 'subst':
+            found_sm2 = None
+            for result_tuple in analysis_result:
+                if len(result_tuple) >= 3 and isinstance(result_tuple[2], tuple) and len(result_tuple[2]) >= 3:
+                    tag_full = result_tuple[2][2]
+                    if ':sm2' in tag_full or ':m2' in tag_full:
+                        found_sm2 = result_tuple
+                        break
+            if found_sm2:
+                primary_lemma = found_sm2[2][1]
+                primary_tag_full = found_sm2[2][2]
+                primary_base_tag = primary_tag_full.split(':', 1)[0]
+                print(f"[generate_and_format_forms] 동물명사 sm2/m2 강제 적용: lemma='{primary_lemma}', tag='{primary_tag_full}'")
+
+        print(f"[곡용표 생성] primary_lemma={primary_lemma}, primary_tag_full={primary_tag_full}")
+
 
         # Heuristic to find the most likely primary verb/declinable lemma
         for r in analysis_result:
