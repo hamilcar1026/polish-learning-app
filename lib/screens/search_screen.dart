@@ -598,61 +598,32 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           error: (e, s) => Center(child: Text(l10n.loadingError(e.toString()))),
         );
       },
-    );
-  }
-
-
-  // --- Builder for Declension Results --- 
-  Widget _buildDeclensionResults(DeclensionResult lemmaData, AppLocalizations l10n) {
-    print("[_buildDeclensionResults] Building declension widget for: ${lemmaData.lemma}");
-    
-    Map<String, Map<String, String>> declensionTable = {}; // {caseCode: {sg: form, pl: form}}
-    final casesOrder = ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc']; 
-
     for (var formInfo in lemmaData.forms) {
       final tagMap = _parseTag(formInfo.tag);
-      // Get potential combined cases (e.g., "gen.acc") or single case
-      final casePart = tagMap['case'] ?? tagMap['case_person']; 
-      final numberCode = tagMap['number'];
-
-      if (casePart != null && numberCode != null) {
-        // Split combined cases like "gen.acc" or "nom.acc.voc"
-        final individualCases = casePart.split('.'); 
-
-        for (var caseCode in individualCases) {
-           // Ensure the case is one we want to display in the table
-          if (casesOrder.contains(caseCode)) { 
-            if (!declensionTable.containsKey(caseCode)) {
-              declensionTable[caseCode] = {};
-            }
-
-            // Assign the form to the singular or plural slot for this case
-            // Avoid overwriting if multiple forms map to the same slot (e.g., different gender variations not shown here)
-            // For simplicity, we take the first one encountered.
-            if (numberCode == 'sg') {
-              declensionTable[caseCode]!['sg'] ??= formInfo.form; 
-            } else if (numberCode == 'pl') {
-              declensionTable[caseCode]!['pl'] ??= formInfo.form;
-            }
-          }
+      final casePart = tagMap['case'] ?? tagMap['case_person'];
+      final number = tagMap['number'];
+      final gender = tagMap['gender'];
+      if (casePart != null && number != null && gender != null) {
+        for (var caseCode in casePart.split('.')) {
+          if (!casesOrder.contains(caseCode)) continue;
+          adjTable.putIfAbsent(caseCode, () => {'sg': {}, 'pl': {}});
+          adjTable[caseCode]![number]![gender] = formInfo.form;
         }
       }
     }
-
-    // Display as a card with a table
-    // No Card needed here as the tab builder wraps it
+    // Gender order for columns
+    final sgGenders = ['m', 'f', 'n'];
+    final plGenders = ['m1', 'non-m1']; // m1 = masc personal, non-m1 = others
+    // Table header row
     return Column(
-      // Center the children horizontally
-      crossAxisAlignment: CrossAxisAlignment.center, 
-      mainAxisSize: MainAxisSize.min, 
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Builder( // Use Builder to get context for theme/l10n access
+        Builder(
           builder: (context) {
             final l10n = AppLocalizations.of(context)!;
-            // Get the first tag (assuming it's representative, handle potential emptiness)
             String firstTagString = lemmaData.forms.isNotEmpty ? lemmaData.forms.first.tag : '';
             String translatedTagString = '';
-
             if (firstTagString.isNotEmpty) {
               // Split the tag and translate each part using the existing helper
               translatedTagString = firstTagString
