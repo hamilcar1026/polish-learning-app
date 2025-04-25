@@ -1763,9 +1763,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       }
 
       if (number != null && person != null && gender != null) {
-        // 디버깅: 파싱된 요소들 로깅
-        print("파싱 결과: number=$number, person=$person, gender=$gender, form=${form.form}");
-        
+        // 복수에서 m2.m3.f.n 태그는 여성/중성 모두에 값 할당
+        if (number == 'pl' && gender == 'm2.m3.f.n') {
+          if (conditionalForms[person]![number]!['f'] == null) {
+            conditionalForms[person]![number]!['f'] = form.form;
+          }
+          if (conditionalForms[person]![number]!['n'] == null) {
+            conditionalForms[person]![number]!['n'] = form.form;
+          }
+          // 기존 non-m1도 fallback으로 남겨둠
+          if (conditionalForms[person]![number]!['non-m1'] == null) {
+            conditionalForms[person]![number]!['non-m1'] = form.form;
+          }
+          continue; // 아래 로직 중복 방지
+        }
+        // ... existing code ...
+
         // Normalize singular masculine genders for display grouping if desired
         String displayGenderKey = gender;
         if (number == 'pl' && gender == 'm2.m3.f.n') {

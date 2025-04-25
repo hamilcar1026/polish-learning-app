@@ -463,7 +463,8 @@ def generate_and_format_forms(word, check_func):
             return None, f"No analysis matching the required type (verb/declinable) found for '{word}'."
         # -------------------------------------------------
 
-        generated_forms_raw = morf.generate(primary_lemma)
+        # Morfeusz2 generate 호출 시 expand_tags=True 옵션 사용 (복합 태그 자동 분리)
+        generated_forms_raw = morf.generate(primary_lemma, expand_tags=True)
         print(f"  -> Raw generated forms for primary lemma '{primary_lemma}': {generated_forms_raw}")
 
         # --- Process generated forms and store needed ones ---
@@ -544,13 +545,20 @@ def generate_and_format_forms(word, check_func):
                 # 과거시제 형태 저장 개선 - 보다 세부적인 성별 구분 지원
                 if 'sg' in parts:
                     num = 'sg'
-                    # 단수형에서 더 세부적인 성별 처리 (m1, m2, m3, f, n1, n2, n 등 모든 가능한 성별 포함)
+                    # 단수형에서 더 세부적인 성별 처리 (m1, m2, m3, f, n1, n2, m1.m2.m3 등 모든 가능한 성별 포함)
                     for gen in parts:
+                        # 복합 태그(m1.m2.m3 등) 분리해서 각각 past_forms에 넣기
+                        if '.' in gen:
+                            for subgen in gen.split('.'):
+                                if subgen in ['m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2']:
+                                    num_gen_key = f"{num}:{subgen}"
+                                    past_forms[num_gen_key] = form
+                                    print(f"      >> Found past form for {num_gen_key} (from composite tag {gen}): {form}")
+                        # 기존 단일 태그 처리
                         if gen in ['m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2']:
                             num_gen_key = f"{num}:{gen}"
-                            if num_gen_key:
-                                past_forms[num_gen_key] = form
-                                print(f"      >> Found past form for {num_gen_key}: {form}")
+                            past_forms[num_gen_key] = form
+                            print(f"      >> Found past form for {num_gen_key}: {form}")
                 elif 'pl' in parts:
                     num = 'pl'
                     # 복수형에서 더 세부적인 처리 (m1, non-m1, m2.m3.f.n 등 가능한 모든 조합)
