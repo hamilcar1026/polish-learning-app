@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart'; // Import flutter_tts
-import 'package:flutter_gen/gen_l10n/app_localizations.dart'; // Import generated localizations
+import '../../../.dart_tool/flutter_gen/gen_l10n/app_localizations.dart'; // Import generated localizations
 import '../providers/api_providers.dart';
 import '../providers/recent_searches_provider.dart'; // Import recent searches provider
 import '../providers/settings_provider.dart'; // Import settings provider
@@ -147,7 +147,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final submittedWord = ref.watch(submittedWordProvider);
-    final l10n = AppLocalizations.of(context); // Get localizations instance
+    final l10n = AppLocalizations.of(context)!; // Get localizations instance
     print("[build] Current submittedWord: ${submittedWord == null ? "null" : "\"$submittedWord\""}");
     
     // Determine the number of tabs needed based on analysis (initial guess or based on state)
@@ -345,7 +345,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               tabViews.add(_buildDeclensionTab(submittedWord, l10n));
                             }
                              if (isVerb) {
-                              tabs.add(Tab(text: l10n.conjugationTitle));
+                              tabs.add(Tab(text: l10n.conjugationTableTitle(submittedWord)));
                               tabViews.add(_buildConjugationTab(submittedWord, l10n));
                             }
                              // REMOVE Grammar tab and view
@@ -640,7 +640,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       children: [
         Builder( // Use Builder to get context for theme/l10n access
           builder: (context) {
-            final l10n = AppLocalizations.of(context);
+            final l10n = AppLocalizations.of(context)!;
             // Get the first tag (assuming it's representative, handle potential emptiness)
             String firstTagString = lemmaData.forms.isNotEmpty ? lemmaData.forms.first.tag : '';
             String translatedTagString = '';

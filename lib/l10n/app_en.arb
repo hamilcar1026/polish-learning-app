@@ -215,6 +215,17 @@
      "description": "Label for neuter gender type 2 (n2)"
    },
    "declensionTableTitle": "Declension for \"{lemma}\"",
+
+  "conjugationTableTitle": "Conjugation for \"{lemma}\"",
+  "@conjugationTableTitle": {
+    "description": "Format for conjugation table title, includes lemma placeholder",
+    "placeholders": {
+      "lemma": {
+        "type": "String",
+        "example": "do"
+      }
+    }
+  },
    "numeralDeclensionTableTitle": "Numeral Declension for \"{lemma}\"",
    "conjugationTableTitle2": "Conjugation for \"{lemma}\"",
    "@conjugationTableTitle2": {

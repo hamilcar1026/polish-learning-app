@@ -393,6 +393,11 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String conjugationTableTitle(String lemma) {
+    return 'Conjugation for \"$lemma\"';
+  }
+
+  @override
   String numeralDeclensionTableTitle(String lemma) {
     return '수사 곡용 \"$lemma\"';
   }

@@ -223,16 +223,6 @@
   "@numeralDeclensionTableDescription": {
     "description": "수사 곡용 테이블에 대한 설명"
   },
-  "conjugationTableTitle2": "\"{lemma}\" 활용",
-  "@conjugationTableTitle2": {
-    "description": "활용 테이블 제목 형식, {lemma} 자리 표시자 포함",
-    "placeholders": {
-      "lemma": {
-        "type": "String",
-        "example": "하다"
-      }
-    }
-  },
   "translationLabel": "번역",
   "suggestionDidYouMean": "혹시 \"{suggestedWord}\"(을)를 찾으셨나요?",
   "@suggestionDidYouMean": {

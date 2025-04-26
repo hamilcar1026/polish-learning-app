@@ -212,9 +212,9 @@
     "description": "Метка для среднего рода типа 2 (n2)"
   },
   "declensionTableTitle": "Склонение для \"{lemma}\"",
-  "numeralDeclensionTableTitle": "Числительное склонение для \"{lemma}\"",
-  "conjugationTableTitle2": "Спряжение для \"{lemma}\"",
-  "@conjugationTableTitle2": {
+
+  "conjugationTableTitle": "Спряжение для \"{lemma}\"",
+  "@conjugationTableTitle": {
     "description": "Формат заголовка таблицы спряжения, включает плейсхолдер {lemma}",
     "placeholders": {
       "lemma": {
@@ -223,6 +223,7 @@
       }
     }
   },
+  "numeralDeclensionTableTitle": "Числительное склонение для \"{lemma}\"",
   "@numeralDeclensionTableTitle": {
     "description": "Формат заголовка таблицы склонения числительного, включает плейсхолдер {lemma}",
     "placeholders": {

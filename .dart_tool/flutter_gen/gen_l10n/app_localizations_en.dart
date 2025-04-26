@@ -393,6 +393,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String conjugationTableTitle(String lemma) {
+    return 'Conjugation for \"$lemma\"';
+  }
+
+  @override
   String numeralDeclensionTableTitle(String lemma) {
     return 'Numeral Declension for \"$lemma\"';
   }

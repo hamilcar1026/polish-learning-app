@@ -11,7 +11,7 @@ class AppDrawer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final recentSearches = ref.watch(recentSearchesProvider);
     final favorites = ref.watch(favoritesProvider);
     final recentSearchesNotifier = ref.read(recentSearchesProvider.notifier);

@@ -286,10 +286,10 @@ class AppLocalizationsPl extends AppLocalizations {
   String get conjugationCategoryPastImpersonal => 'Bezosobowa przeszła';
 
   @override
-  String get conjugationCategoryFutureImpersonal => 'Bezosobowa przyszła';
+  String get conjugationCategoryFutureImpersonal => 'Przyszły bezosobowy';
 
   @override
-  String get conjugationCategoryConditionalImpersonal => 'Bezosobowa trybu warunkowego';
+  String get conjugationCategoryConditionalImpersonal => 'Tryb przypuszczający bezosobowy';
 
   @override
   String get conjugationCategoryImperativeImpersonal => 'Tryb rozkazujący nieosobowy';
@@ -390,6 +390,11 @@ class AppLocalizationsPl extends AppLocalizations {
   @override
   String declensionTableTitle(Object lemma) {
     return 'Deklinacja dla \"$lemma\"';
+  }
+
+  @override
+  String conjugationTableTitle(String lemma) {
+    return 'Koniugacja dla \"$lemma\"';
   }
 
   @override

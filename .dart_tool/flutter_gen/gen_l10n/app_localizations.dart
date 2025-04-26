@@ -855,6 +855,12 @@ abstract class AppLocalizations {
   /// **'Declension for \"{lemma}\"'**
   String declensionTableTitle(Object lemma);
 
+  /// Format for conjugation table title, includes lemma placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Conjugation for \"{lemma}\"'**
+  String conjugationTableTitle(String lemma);
+
   /// Title format for the numeral declension table, includes lemma placeholder
   ///
   /// In en, this message translates to:

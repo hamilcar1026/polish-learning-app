@@ -97,10 +97,7 @@
   },
   "conjugationCategoryPresentImpersonal": "Bezosobowa teraźniejsza",
   "conjugationCategoryPastImpersonal": "Bezosobowa przeszła",
-  "conjugationCategoryFutureImpersonal": "Bezosobowa przyszła",
-  "conjugationCategoryConditionalImpersonal": "Bezosobowa trybu warunkowego",
   "conjugationCategoryImperativeImpersonal": "Tryb rozkazujący nieosobowy",
-  "conjugationCategoryOtherForms": "Inne formy",
   "drawerRecentSearches": "Ostatnie wyszukiwania",
   "drawerClearRecentSearchesTooltip": "Wyczyść ostatnie wyszukiwania",
   "drawerClearRecentSearchesDialogTitle": "Wyczyścić ostatnie wyszukiwania?",
@@ -110,9 +107,6 @@
   "drawerNoRecentSearches": "Brak ostatnich wyszukiwań.",
   "drawerFavorites": "Ulubione",
   "drawerNoFavorites": "Nie dodano jeszcze ulubionych.",
-  "@caseVocative": {
-    "description": "Nazwa przypadka: Wołacz"
-  },
   "settingsContributors": "Współtwórcy",
   "@settingsContributors": {
     "description": "Element menu dla Współtwórców"
@@ -202,6 +196,17 @@
     "description": "Nazwa przypadka: Wołacz"
   },
   "declensionTableTitle": "Deklinacja dla \"{lemma}\"",
+
+  "conjugationTableTitle": "Koniugacja dla \"{lemma}\"",
+  "@conjugationTableTitle": {
+    "description": "Format tytułu tabeli koniugacji, zawiera placeholder {lemma}",
+    "placeholders": {
+      "lemma": {
+        "type": "String",
+        "example": "robić"
+      }
+    }
+  },
 
   "conjugationTableTitle2": "Koniugacja dla \"{lemma}\"",
   "@conjugationTableTitle2": {
