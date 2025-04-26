@@ -394,7 +394,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String conjugationTableTitle(String lemma) {
-    return 'Conjugation for \"$lemma\"';
+    return '\"$lemma\" 활용';
   }
 
   @override

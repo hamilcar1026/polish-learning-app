@@ -271,13 +271,13 @@ class AppLocalizationsPl extends AppLocalizations {
   String get conjugationCategoryOtherForms => 'Inne formy';
 
   @override
-  String get conjugationCategoryImpersonal => 'Impersonal';
+  String get conjugationCategoryImpersonal => 'Bezosobowa';
 
   @override
-  String get conjugationCategoryVerbalNoun => 'Verbal Noun';
+  String get conjugationCategoryVerbalNoun => 'Rzeczownik odczasownikowy';
 
   @override
-  String get conjugationCategoryConditional => 'Conditional';
+  String get conjugationCategoryConditional => 'Tryb warunkowy';
 
   @override
   String get conjugationCategoryPresentImpersonal => 'Bezosobowa teraźniejsza';
@@ -412,24 +412,24 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String suggestionDidYouMean(String suggestedWord) {
-    return 'Did you mean \"$suggestedWord\"?';
+    return 'Czy chodziło Ci o \"$suggestedWord\"?';
   }
 
   @override
-  String get suggestionErrorFallback => 'Error displaying suggestion.';
+  String get suggestionErrorFallback => 'Wystąpił błąd podczas wyświetlania sugestii.';
 
   @override
   String get impersonalAccuracyWarning => 'Może nie być dokładne';
 
   @override
-  String get impersonalPresentForm => 'Impersonal present form (imperf)';
+  String get impersonalPresentForm => 'Forma bezosobowa czasu teraźniejszego (niedokonany)';
 
   @override
-  String get impersonalPastForm => 'Impersonal past form (perf)';
+  String get impersonalPastForm => 'Forma bezosobowa czasu przeszłego (dokonany)';
 
   @override
-  String get impersonalFutureForm => 'Impersonal future form';
+  String get impersonalFutureForm => 'Forma bezosobowa czasu przyszłego';
 
   @override
-  String get impersonalConditionalForm => 'Impersonal conditional form';
+  String get impersonalConditionalForm => 'Forma bezosobowa trybu warunkowego';
 }

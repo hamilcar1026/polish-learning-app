@@ -200,6 +200,16 @@
   },
   "declensionTableTitle": "\"{lemma}\" 곡용",
   "numeralDeclensionTableTitle": "수사 곡용 \"{lemma}\"",
+  "conjugationTableTitle": "\"{lemma}\" 활용",
+  "@conjugationTableTitle": {
+    "description": "활용 테이블 제목 형식, {lemma} 자리 표시자 포함",
+    "placeholders": {
+      "lemma": {
+        "type": "String",
+        "example": "하다"
+      }
+    }
+  },
   "conjugationTableTitle2": "\"{lemma}\" 활용",
   "@conjugationTableTitle2": {
     "description": "활용 테이블 제목 형식, {lemma} 자리 표시자 포함",

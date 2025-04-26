@@ -86,6 +86,9 @@
   "conjugationCategoryPresentActiveParticiple": "Imiesłów przymiotnikowy czynny",
   "conjugationCategoryPastPassiveParticiple": "Imiesłów przymiotnikowy bierny",
   "conjugationCategoryFiniteVerb": "Forma osobowa",
+  "conjugationCategoryImpersonal": "Bezosobowa",
+  "conjugationCategoryVerbalNoun": "Rzeczownik odczasownikowy",
+  "conjugationCategoryConditional": "Tryb warunkowy",
   "conjugationCategoryOtherForms": "Inne formy",
   "conjugationCategoryFutureImpersonal": "Przyszły bezosobowy",
   "@conjugationCategoryFutureImpersonal": {
@@ -106,6 +109,12 @@
   "drawerClearButton": "Wyczyść",
   "drawerNoRecentSearches": "Brak ostatnich wyszukiwań.",
   "drawerFavorites": "Ulubione",
+  "suggestionDidYouMean": "Czy chodziło Ci o \"{suggestedWord}\"?",
+  "suggestionErrorFallback": "Wystąpił błąd podczas wyświetlania sugestii.",
+  "impersonalPresentForm": "Forma bezosobowa czasu teraźniejszego (niedokonany)",
+  "impersonalPastForm": "Forma bezosobowa czasu przeszłego (dokonany)",
+  "impersonalFutureForm": "Forma bezosobowa czasu przyszłego",
+  "impersonalConditionalForm": "Forma bezosobowa trybu warunkowego",
   "drawerNoFavorites": "Nie dodano jeszcze ulubionych.",
   "settingsContributors": "Współtwórcy",
   "@settingsContributors": {

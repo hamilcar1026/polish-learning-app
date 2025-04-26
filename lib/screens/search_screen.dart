@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart'; // Import flutter_tts
-import '../../../.dart_tool/flutter_gen/gen_l10n/app_localizations.dart'; // Import generated localizations
+import 'package:flutter_gen/gen_l10n/app_localizations.dart'; // Import generated localizations
 import '../providers/api_providers.dart';
 import '../providers/recent_searches_provider.dart'; // Import recent searches provider
 import '../providers/settings_provider.dart'; // Import settings provider
