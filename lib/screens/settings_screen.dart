@@ -19,7 +19,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final settingsNotifier = ref.read(settingsProvider.notifier);
-    final l10n = AppLocalizations.of(context)!; // Get localizations instance
+    final l10n = AppLocalizations.of(context); // Get localizations instance
 
     return Scaffold(
       appBar: AppBar(

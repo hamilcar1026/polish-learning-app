@@ -35,14 +35,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   // Map to manage the expansion state of conjugation categories
   final Map<String, bool> _expandedCategories = {};
 
-  // Method to toggle the expansion state of a category
-  void _toggleCategoryExpansion(String category) {
-    setState(() {
-      // Default to false (collapsed) if not present, then toggle
-      _expandedCategories[category] = !(_expandedCategories[category] ?? false);
-    });
-  }
-
   // --- Helper functions to check POS based on analysis data ---
   // (These mimic the logic from the Python backend)
   bool _isVerbBasedOnAnalysis(List<AnalysisResult>? analysisData) {
@@ -155,7 +147,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final submittedWord = ref.watch(submittedWordProvider);
-    final l10n = AppLocalizations.of(context)!; // Get localizations instance
+    final l10n = AppLocalizations.of(context); // Get localizations instance
     print("[build] Current submittedWord: ${submittedWord == null ? "null" : "\"$submittedWord\""}");
     
     // Determine the number of tabs needed based on analysis (initial guess or based on state)
@@ -300,17 +292,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                               Flexible(
                                                 child: Text(
                                                   // Use submittedWord directly as analysisResponse.word doesn't exist
-                                                  '"${submittedWord ?? ''}" - ${l10n.analysisTitle}', 
+                                                  '"$submittedWord" - ${l10n.analysisTitle}', 
                                                   style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                                                   overflow: TextOverflow.ellipsis, 
                                                 ),
                                               ),
                                               // Only show TTS button if submittedWord is available
-                                              if (_isTtsInitialized && submittedWord != null)
+                                              if (_isTtsInitialized)
                                                 IconButton(
                                                   icon: const Icon(Icons.volume_up),
                                                   // Speak submittedWord
-                                                  onPressed: () => _speak(submittedWord!), 
+                                                  onPressed: () => _speak(submittedWord), 
                                                   tooltip: l10n.pronounceWordTooltip, 
                                                   iconSize: 20, 
                                                   padding: const EdgeInsets.only(left: 8),
@@ -336,7 +328,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                   // Display the specific failure message from the backend or the generic one
                                   Center(
                                     child: Text(
-                                      analysisResponse.message ?? l10n.noAnalysisFound(submittedWord ?? ''),
+                                      analysisResponse.message ?? l10n.noAnalysisFound(submittedWord),
                                       textAlign: TextAlign.center,
                                     )
                                   ),
@@ -648,7 +640,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       children: [
         Builder( // Use Builder to get context for theme/l10n access
           builder: (context) {
-            final l10n = AppLocalizations.of(context)!;
+            final l10n = AppLocalizations.of(context);
             // Get the first tag (assuming it's representative, handle potential emptiness)
             String firstTagString = lemmaData.forms.isNotEmpty ? lemmaData.forms.first.tag : '';
             String translatedTagString = '';
@@ -2065,64 +2057,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   // --- Helper functions for displaying human-readable labels ---
 
-  // Returns the localization KEY for the conjugation category
-  String _getConjugationCategoryKey(Map<String, String> tagMap) {
-    final String base = tagMap['base'] ?? '';
-
-    switch (base) {
-      case 'fin':
-        final String tenseAspect = tagMap['tense_aspect'] ?? '';
-        if (tenseAspect.contains('imperf')) return 'conjugationCategoryPresentIndicative';
-        if (tenseAspect.contains('perf')) return 'conjugationCategoryFuturePerfectiveIndicative';
-        return 'conjugationCategoryFiniteVerb'; // Fallback
-        
-      case 'bedzie': 
-        return 'conjugationCategoryFutureImperfectiveIndicative';
-        
-      case 'praet': 
-        return 'conjugationCategoryPastTense';
-        
-      case 'impt': 
-      case 'impt_periph': 
-        return 'conjugationCategoryImperative';
-        
-      case 'inf': 
-        return 'conjugationCategoryInfinitive';
-        
-      case 'pcon': 
-        return 'conjugationCategoryPresentAdverbialParticiple';
-        
-      case 'pant': 
-        return 'conjugationCategoryAnteriorAdverbialParticiple';
-        
-      case 'pact': 
-        return 'conjugationCategoryPresentActiveParticiple';
-        
-      case 'ppas': 
-        return 'conjugationCategoryPastPassiveParticiple';
-        
-      case 'ger': 
-        return 'conjugationCategoryVerbalNoun';
-        
-      case 'imps': {
-        final String aspect = tagMap['aspect'] ?? '';
-        if (aspect == 'perf' || aspect.contains('perf')) {
-          return 'conjugationCategoryPastImpersonal';
-        } 
-        return 'conjugationCategoryPresentImpersonal';
-      }
-        
-      case 'cond': 
-        return 'conjugationCategoryConditional';
-        
-      case 'conjugationCategoryImperativeImpersonal': 
-        return 'conjugationCategoryImperativeImpersonal';
-        
-      default: 
-        return 'conjugationCategoryOtherForms';
-    }
-  }
-
   String _getPersonLabel(String? personCode, AppLocalizations l10n) {
     switch (personCode) {
       case 'pri': return l10n.personLabelFirst;
@@ -2132,25 +2066,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
-  String _getNumberLabel(String? numberCode) {
-    // This function doesn't seem to be used anymore for table headers,
-    // but keep it for potential future use or other contexts.
-    // If it needs localization, add keys similar to person/gender.
-    const map = {'sg': 'Singular', 'pl': 'Plural'};
-    return map[numberCode] ?? numberCode ?? '-';
-  }
 
-  String _getGenderLabel(String? genderCode, AppLocalizations l10n) {
-    switch (genderCode) {
-      case 'm1': return l10n.genderLabelM1;
-      case 'm2': return l10n.genderLabelM2;
-      case 'm3': return l10n.genderLabelM3;
-      case 'f': return l10n.genderLabelF;
-      case 'n1': return l10n.genderLabelN1;
-      case 'n2': return l10n.genderLabelN2;
-      default: return genderCode ?? '-';
-    }
-  }
 
   String _getCaseName(String? caseCode, AppLocalizations l10n) {
     // Get the AppLocalizations instance from the context
@@ -2169,29 +2085,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   // Helper to get a short tag description for list items
-  String _getShortTagDescription(String tag, AppLocalizations l10n) {
-    final tagMap = _parseTag(tag);
-    final base = tagMap['base'] ?? '';
-    final aspect = tagMap['aspect'] ?? '';
-    
-    // 먼저 한글 변환된 전체 태그 설명을 시도
-    final formattedDescription = _getFormattedTagDescription(tag, l10n);
-    if (formattedDescription != tag) {
-      return formattedDescription;
-    }
-    
-    // 기본 설명
-    if (aspect.isNotEmpty) {
-      if (aspect == 'imperf') return l10n.qualifier_imperf;
-      if (aspect == 'perf') return l10n.qualifier_perf;
-    }
-    
-    // 다른 일반적인 필드 시도
-    if (tagMap.containsKey('mood')) return _translateGrammarTerm(tagMap['mood']!, l10n);
-    if (tagMap.containsKey('case')) return _getCaseName(tagMap['case'], l10n);
-
-    return tagMap['full_tag'] ?? tag; // 원래 태그로 폴백
-  }
 
   // Helper function to format the analysis result with translated terms
   String _getTranslatedAnalysisString(AnalysisResult result, AppLocalizations l10n) {
@@ -2270,6 +2163,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             final tagMap = _parseTag(form.tag);
             // Remove the potentially problematic local variable tagAspect
             // final String tagAspect = tagMap['aspect'] ?? '';
+// (removed unused variable 'base')
             
             // 비인칭 형태에 대한 현지화된 설명 텍스트 생성
             String description = '';

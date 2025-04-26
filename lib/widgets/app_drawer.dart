@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../providers/recent_searches_provider.dart';
 import '../providers/favorites_provider.dart';
-import '../providers/settings_provider.dart'; // For potential settings access
+
 import '../screens/search_screen.dart'; // To access submittedWordProvider
 
 class AppDrawer extends ConsumerWidget {
@@ -11,7 +11,7 @@ class AppDrawer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final recentSearches = ref.watch(recentSearchesProvider);
     final favorites = ref.watch(favoritesProvider);
     final recentSearchesNotifier = ref.read(recentSearchesProvider.notifier);
