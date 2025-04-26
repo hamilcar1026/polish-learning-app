@@ -30,9 +30,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get declensionTitle => '곡용';
 
   @override
-  String get conjugationTitle => '활용';
-
-  @override
   String get grammarTitle => '문법';
 
   @override
@@ -391,12 +388,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get genderLabelN2 => '중성 2';
 
   @override
-  String declensionTableTitle(String lemma) {
+  String declensionTableTitle(Object lemma) {
     return '\"$lemma\" 곡용';
   }
 
   @override
-  String conjugationTableTitle(String lemma) {
+  String numeralDeclensionTableTitle(String lemma) {
+    return '수사 곡용 \"$lemma\"';
+  }
+
+  @override
+  String conjugationTableTitle2(String lemma) {
     return '\"$lemma\" 활용';
   }
 

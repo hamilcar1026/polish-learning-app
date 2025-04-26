@@ -68,8 +68,8 @@ abstract class AppLocalizations {
 
   final String localeName;
 
-  static AppLocalizations of(BuildContext context) {
-    return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
+  static AppLocalizations? of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
   static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
@@ -140,12 +140,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Declension'**
   String get declensionTitle;
-
-  /// No description provided for @conjugationTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Conjugation'**
-  String get conjugationTitle;
 
   /// No description provided for @grammarTitle.
   ///
@@ -855,17 +849,23 @@ abstract class AppLocalizations {
   /// **'Neuter 2'**
   String get genderLabelN2;
 
-  /// Title format for the declension table, includes lemma placeholder
+  /// No description provided for @declensionTableTitle.
   ///
   /// In en, this message translates to:
   /// **'Declension for \"{lemma}\"'**
-  String declensionTableTitle(String lemma);
+  String declensionTableTitle(Object lemma);
 
-  /// Title format for the conjugation table, includes lemma placeholder
+  /// Title format for the numeral declension table, includes lemma placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Numeral Declension for \"{lemma}\"'**
+  String numeralDeclensionTableTitle(String lemma);
+
+  /// Format for conjugation table title, includes lemma placeholder
   ///
   /// In en, this message translates to:
   /// **'Conjugation for \"{lemma}\"'**
-  String conjugationTableTitle(String lemma);
+  String conjugationTableTitle2(String lemma);
 
   /// No description provided for @translationLabel.
   ///

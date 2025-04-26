@@ -32,6 +32,118 @@ except Exception as e:
     morf = None # Handle initialization failure gracefully
 
 # Add these constants near the top of the file, perhaps after imports
+
+# --- Polish Numeral Declension Tables (Hardcoded) ---
+# 격 코드: nom, gen, dat, acc, inst, loc, voc
+# 성 코드: m (남성), f (여성), n (중성)
+
+NUMERAL_DECLENSIONS = {
+    # jeden (1)
+    "jeden": {
+        "m": {  # 남성 단수
+            "nom": "jeden", "gen": "jednego", "dat": "jednemu", "acc": "jeden", "inst": "jednym", "loc": "jednym", "voc": "jeden"
+        },
+        "f": {  # 여성 단수
+            "nom": "jedna", "gen": "jednej", "dat": "jednej", "acc": "jedną", "inst": "jedną", "loc": "jednej", "voc": "jedna"
+        },
+        "n": {  # 중성 단수
+            "nom": "jedno", "gen": "jednego", "dat": "jednemu", "acc": "jedno", "inst": "jednym", "loc": "jednym", "voc": "jedno"
+        }
+    },
+    # dwa (2)
+    "dwa": {
+        "m": {  # 남성 인격
+            "nom": "dwaj", "gen": "dwóch", "dat": "dwóm", "acc": "dwóch", "inst": "dwoma", "loc": "dwóch", "voc": "dwaj"
+        },
+        "f": {  # 여성
+            "nom": "dwie", "gen": "dwóch", "dat": "dwóm", "acc": "dwie", "inst": "dwiema", "loc": "dwóch", "voc": "dwie"
+        },
+        "n": {  # 중성/남성 비인격
+            "nom": "dwa", "gen": "dwóch", "dat": "dwóm", "acc": "dwa", "inst": "dwoma", "loc": "dwóch", "voc": "dwa"
+        }
+    },
+    # trzy (3)
+    "trzy": {
+        "m": {"nom": "trzej", "gen": "trzech", "dat": "trzem", "acc": "trzech", "inst": "trzema", "loc": "trzech", "voc": "trzej"},
+        "f": {"nom": "trzy", "gen": "trzech", "dat": "trzem", "acc": "trzy", "inst": "trzema", "loc": "trzech", "voc": "trzy"},
+        "n": {"nom": "trzy", "gen": "trzech", "dat": "trzem", "acc": "trzy", "inst": "trzema", "loc": "trzech", "voc": "trzy"}
+    },
+    # cztery (4)
+    "cztery": {
+        "m": {"nom": "czterej", "gen": "czterech", "dat": "czterem", "acc": "czterech", "inst": "czterema", "loc": "czterech", "voc": "czterej"},
+        "f": {"nom": "cztery", "gen": "czterech", "dat": "czterem", "acc": "cztery", "inst": "czterema", "loc": "czterech", "voc": "cztery"},
+        "n": {"nom": "cztery", "gen": "czterech", "dat": "czterem", "acc": "cztery", "inst": "czterema", "loc": "czterech", "voc": "cztery"}
+    },
+}
+# 5~100: 성별 구분 없음, 형태 동일
+NUMERAL_DECLENSIONS_5PLUS = {
+    "pięć":    {"nom": "pięć",   "gen": "pięciu",   "dat": "pięciu",   "acc": "pięć",   "inst": "pięcioma",   "loc": "pięciu",   "voc": "pięć"},
+    "sześć":   {"nom": "sześć",  "gen": "sześciu",  "dat": "sześciu",  "acc": "sześć",  "inst": "sześcioma",  "loc": "sześciu",  "voc": "sześć"},
+    "siedem":  {"nom": "siedem", "gen": "siedmiu",  "dat": "siedmiu",  "acc": "siedem", "inst": "siedmioma", "loc": "siedmiu",  "voc": "siedem"},
+    "osiem":   {"nom": "osiem",  "gen": "ośmiu",    "dat": "ośmiu",    "acc": "osiem",  "inst": "ośmioma",   "loc": "ośmiu",    "voc": "osiem"},
+    "dziewięć":{"nom": "dziewięć","gen": "dziewięciu","dat": "dziewięciu","acc": "dziewięć","inst": "dziewięcioma","loc": "dziewięciu","voc": "dziewięć"},
+    "dziesięć":{"nom": "dziesięć","gen": "dziesięciu","dat": "dziesięciu","acc": "dziesięć","inst": "dziesięcioma","loc": "dziesięciu","voc": "dziesięć"},
+    "jedenaście":{"nom": "jedenaście","gen": "jedenastu","dat": "jedenastu","acc": "jedenaście","inst": "jedenastoma","loc": "jedenastu","voc": "jedenaście"},
+    "dwanaście":{"nom": "dwanaście","gen": "dwunastu","dat": "dwunastu","acc": "dwanaście","inst": "dwunastoma","loc": "dwunastu","voc": "dwanaście"},
+    "trzynaście":{"nom": "trzynaście","gen": "trzynastu","dat": "trzynastu","acc": "trzynaście","inst": "trzynastoma","loc": "trzynastu","voc": "trzynaście"},
+    "czternaście":{"nom": "czternaście","gen": "czternastu","dat": "czternastu","acc": "czternaście","inst": "czternastoma","loc": "czternastu","voc": "czternaście"},
+    "piętnaście":{"nom": "piętnaście","gen": "piętnastu","dat": "piętnastu","acc": "piętnaście","inst": "piętnastoma","loc": "piętnastu","voc": "piętnaście"},
+    "szesnaście":{"nom": "szesnaście","gen": "szesnastu","dat": "szesnastu","acc": "szesnaście","inst": "szesnastoma","loc": "szesnastu","voc": "szesnaście"},
+    "siedemnaście":{"nom": "siedemnaście","gen": "siedemnastu","dat": "siedemnastu","acc": "siedemnaście","inst": "siedemnastoma","loc": "siedemnastu","voc": "siedemnaście"},
+    "osiemnaście":{"nom": "osiemnaście","gen": "osiemnastu","dat": "osiemnastu","acc": "osiemnaście","inst": "osiemnastoma","loc": "osiemnastu","voc": "osiemnaście"},
+    "dziewiętnaście":{"nom": "dziewiętnaście","gen": "dziewiętnastu","dat": "dziewiętnastu","acc": "dziewiętnaście","inst": "dziewiętnastoma","loc": "dziewiętnastu","voc": "dziewiętnaście"},
+    "dwadzieścia":{"nom": "dwadzieścia","gen": "dwudziestu","dat": "dwudziestu","acc": "dwadzieścia","inst": "dwudziestoma","loc": "dwudziestu","voc": "dwadzieścia"},
+    "trzydzieści":{"nom": "trzydzieści","gen": "trzydziestu","dat": "trzydziestu","acc": "trzydzieści","inst": "trzydziestoma","loc": "trzydziestu","voc": "trzydzieści"},
+    "czterdzieści":{"nom": "czterdzieści","gen": "czterdziestu","dat": "czterdziestu","acc": "czterdzieści","inst": "czterdziestoma","loc": "czterdziestu","voc": "czterdzieści"},
+    "pięćdziesiąt":{"nom": "pięćdziesiąt","gen": "pięćdziesięciu","dat": "pięćdziesięciu","acc": "pięćdziesiąt","inst": "pięćdziesięcioma","loc": "pięćdziesięciu","voc": "pięćdziesiąt"},
+    "sześćdziesiąt":{"nom": "sześćdziesiąt","gen": "sześćdziesięciu","dat": "sześćdziesięciu","acc": "sześćdziesiąt","inst": "sześćdziesięcioma","loc": "sześćdziesięciu","voc": "sześćdziesiąt"},
+    "siedemdziesiąt":{"nom": "siedemdziesiąt","gen": "siedemdziesięciu","dat": "siedemdziesięciu","acc": "siedemdziesiąt","inst": "siedemdziesięcioma","loc": "siedemdziesięciu","voc": "siedemdziesiąt"},
+    "osiemdziesiąt":{"nom": "osiemdziesiąt","gen": "osiemdziesięciu","dat": "osiemdziesięciu","acc": "osiemdziesiąt","inst": "osiemdziesięcioma","loc": "osiemdziesięciu","voc": "osiemdziesiąt"},
+    "dziewięćdziesiąt":{"nom": "dziewięćdziesiąt","gen": "dziewięćdziesięciu","dat": "dziewięćdziesięciu","acc": "dziewięćdziesiąt","inst": "dziewięćdziesięcioma","loc": "dziewięćdziesięciu","voc": "dziewięćdziesiąt"},
+    "sto":{"nom": "sto","gen": "stu","dat": "stu","acc": "sto","inst": "stem","loc": "stu","voc": "sto"}
+}
+
+# 5~100에 해당하는 수사 리스트
+NUMERAL_5PLUS_WORDS = [
+    "pięć", "sześć", "siedem", "osiem", "dziewięć", "dziesięć", "jedenaście", "dwanaście", "trzynaście", "czternaście", "piętnaście", "szesnaście", "siedemnaście", "osiemnaście", "dziewiętnaście", "dwadzieścia", "trzydzieści", "czterdzieści", "pięćdziesiąt", "sześćdziesiąt", "siedemdziesiąt", "osiemdziesiąt", "dziewięćdziesiąt", "sto"
+]
+
+# --- Helper: Get hardcoded numeral declension ---
+def get_numeral_declension_forms(word, gender=None):
+    word = word.lower()
+    # --- 숫자 입력을 폴란드어 수사 단어로 변환 ---
+    DIGIT_TO_POLISH_NUMERAL = {
+        "1": "jeden", "2": "dwa", "3": "trzy", "4": "cztery", "5": "pięć", "6": "sześć", "7": "siedem", "8": "osiem", "9": "dziewięć", "10": "dziesięć",
+        "11": "jedenaście", "12": "dwanaście", "13": "trzynaście", "14": "czternaście", "15": "piętnaście", "16": "szesnaście", "17": "siedemnaście", "18": "osiemnaście", "19": "dziewiętnaście",
+        "20": "dwadzieścia", "21": "dwadzieścia jeden", "22": "dwadzieścia dwa", "23": "dwadzieścia trzy", "24": "dwadzieścia cztery", "25": "dwadzieścia pięć", "26": "dwadzieścia sześć", "27": "dwadzieścia siedem", "28": "dwadzieścia osiem", "29": "dwadzieścia dziewięć",
+        "30": "trzydzieści", "31": "trzydzieści jeden", "32": "trzydzieści dwa", "33": "trzydzieści trzy", "34": "trzydzieści cztery", "35": "trzydzieści pięć", "36": "trzydzieści sześć", "37": "trzydzieści siedem", "38": "trzydzieści osiem", "39": "trzydzieści dziewięć",
+        "40": "czterdzieści", "41": "czterdzieści jeden", "42": "czterdzieści dwa", "43": "czterdzieści trzy", "44": "czterdzieści cztery", "45": "czterdzieści pięć", "46": "czterdzieści sześć", "47": "czterdzieści siedem", "48": "czterdzieści osiem", "49": "czterdzieści dziewięć",
+        "50": "pięćdziesiąt", "51": "pięćdziesiąt jeden", "52": "pięćdziesiąt dwa", "53": "pięćdziesiąt trzy", "54": "pięćdziesiąt cztery", "55": "pięćdziesiąt pięć", "56": "pięćdziesiąt sześć", "57": "pięćdziesiąt siedem", "58": "pięćdziesiąt osiem", "59": "pięćdziesiąt dziewięć",
+        "60": "sześćdziesiąt", "61": "sześćdziesiąt jeden", "62": "sześćdziesiąt dwa", "63": "sześćdziesiąt trzy", "64": "sześćdziesiąt cztery", "65": "sześćdziesiąt pięć", "66": "sześćdziesiąt sześć", "67": "sześćdziesiąt siedem", "68": "sześćdziesiąt osiem", "69": "sześćdziesiąt dziewięć",
+        "70": "siedemdziesiąt", "71": "siedemdziesiąt jeden", "72": "siedemdziesiąt dwa", "73": "siedemdziesiąt trzy", "74": "siedemdziesiąt cztery", "75": "siedemdziesiąt pięć", "76": "siedemdziesiąt sześć", "77": "siedemdziesiąt siedem", "78": "siedemdziesiąt osiem", "79": "siedemdziesiąt dziewięć",
+        "80": "osiemdziesiąt", "81": "osiemdziesiąt jeden", "82": "osiemdziesiąt dwa", "83": "osiemdziesiąt trzy", "84": "osiemdziesiąt cztery", "85": "osiemdziesiąt pięć", "86": "osiemdziesiąt sześć", "87": "osiemdziesiąt siedem", "88": "osiemdziesiąt osiem", "89": "osiemdziesiąt dziewięć",
+        "90": "dziewięćdziesiąt", "91": "dziewięćdziesiąt jeden", "92": "dziewięćdziesiąt dwa", "93": "dziewięćdziesiąt trzy", "94": "dziewięćdziesiąt cztery", "95": "dziewięćdziesiąt pięć", "96": "dziewięćdziesiąt sześć", "97": "dziewięćdziesiąt siedem", "98": "dziewięćdziesiąt osiem", "99": "dziewięćdziesiąt dziewięć",
+        "100": "sto"
+    }
+    # 숫자 입력이면 폴란드어 단어로 변환
+    if word.isdigit() and word in DIGIT_TO_POLISH_NUMERAL:
+        word = DIGIT_TO_POLISH_NUMERAL[word]
+    # 1~4
+    if word in NUMERAL_DECLENSIONS:
+        if gender is None:
+            gender = "m"  # 기본값 남성
+        forms = NUMERAL_DECLENSIONS[word].get(gender)
+        if forms:
+            return forms
+        # 성별이 없을 때 아무거나 반환
+        return list(NUMERAL_DECLENSIONS[word].values())[0]
+    # 5~100
+    elif word in NUMERAL_5PLUS_WORDS:
+        forms = NUMERAL_DECLENSIONS_5PLUS.get(word)
+        if forms:
+            return forms
+    return None
+
 # Auxiliary forms for future imperfective (być)
 BYC_FUTURE_FORMS = {
     "sg:pri": "będę",
@@ -343,6 +455,13 @@ def _format_analysis_results(analysis_result):
     return formatted_results
 
 # --- Helper function to clean lemma (extracted logic) ---
+
+# --- 수사 하드코딩 예시 사용처 (예시) ---
+# declension 요청 시, 수사면 get_numeral_declension_forms(word)를 우선 적용
+# 예시: generate_and_format_forms 내부에서
+# forms = get_numeral_declension_forms(word, gender)
+# if forms is not None: ...
+
 def _clean_lemma(lemma):
     if lemma and ':' in lemma:
         cleaned = lemma.split(':', 1)[0]

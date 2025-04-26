@@ -199,22 +199,37 @@
     "description": "중성 2타입 성별(n2) 레이블"
   },
   "declensionTableTitle": "\"{lemma}\" 곡용",
-  "@declensionTableTitle": {
-    "description": "곡용 테이블 제목 형식, {lemma} 자리 표시자 포함",
-    "placeholders": {
-      "lemma": {
-        "type": "String",
-        "example": "kot"
-      }
-    }
-  },
-  "conjugationTableTitle": "\"{lemma}\" 활용",
-  "@conjugationTableTitle": {
+  "numeralDeclensionTableTitle": "수사 곡용 \"{lemma}\"",
+  "conjugationTableTitle2": "\"{lemma}\" 활용",
+  "@conjugationTableTitle2": {
     "description": "활용 테이블 제목 형식, {lemma} 자리 표시자 포함",
     "placeholders": {
       "lemma": {
         "type": "String",
-        "example": "robić"
+        "example": "하다"
+      }
+    }
+  },
+  "@numeralDeclensionTableTitle": {
+    "description": "수사 곡용 테이블 제목 형식, {lemma} 자리 표시자 포함",
+    "placeholders": {
+      "lemma": {
+        "type": "String",
+        "example": "pięć"
+      }
+    }
+  },
+  "numeralDeclensionTableDescription": "폴란드어 수사(숫자)의 격 변화(곡용) 표입니다.",
+  "@numeralDeclensionTableDescription": {
+    "description": "수사 곡용 테이블에 대한 설명"
+  },
+  "conjugationTableTitle2": "\"{lemma}\" 활용",
+  "@conjugationTableTitle2": {
+    "description": "활용 테이블 제목 형식, {lemma} 자리 표시자 포함",
+    "placeholders": {
+      "lemma": {
+        "type": "String",
+        "example": "하다"
       }
     }
   },

@@ -202,17 +202,9 @@
     "description": "Nazwa przypadka: Wołacz"
   },
   "declensionTableTitle": "Deklinacja dla \"{lemma}\"",
-  "@declensionTableTitle": {
-    "description": "Format tytułu tabeli deklinacji, zawiera placeholder {lemma}",
-    "placeholders": {
-      "lemma": {
-        "type": "String",
-        "example": "kot"
-      }
-    }
-  },
-  "conjugationTableTitle": "Koniugacja dla \"{lemma}\"",
-  "@conjugationTableTitle": {
+
+  "conjugationTableTitle2": "Koniugacja dla \"{lemma}\"",
+  "@conjugationTableTitle2": {
     "description": "Format tytułu tabeli koniugacji, zawiera placeholder {lemma}",
     "placeholders": {
       "lemma": {
@@ -220,6 +212,20 @@
         "example": "robić"
       }
     }
+  },
+  "numeralDeclensionTableTitle": "Deklinacja liczebnika \"{lemma}\"",
+  "@numeralDeclensionTableTitle": {
+    "description": "Format tytułu tabeli deklinacji liczebnika, zawiera placeholder {lemma}",
+    "placeholders": {
+      "lemma": {
+        "type": "String",
+        "example": "pięć"
+      }
+    }
+  },
+  "numeralDeclensionTableDescription": "Tabela deklinacji polskich liczebników.",
+  "@numeralDeclensionTableDescription": {
+    "description": "Opis tabeli deklinacji liczebników."
   },
   "translationLabel": "Tłumaczenie",
   "impersonalAccuracyWarning": "Może nie być dokładne"

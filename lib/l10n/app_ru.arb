@@ -212,22 +212,37 @@
     "description": "Метка для среднего рода типа 2 (n2)"
   },
   "declensionTableTitle": "Склонение для \"{lemma}\"",
-  "@declensionTableTitle": {
-    "description": "Формат заголовка таблицы склонения, включает плейсхолдер {lemma}",
-    "placeholders": {
-      "lemma": {
-        "type": "String",
-        "example": "kot"
-      }
-    }
-  },
-  "conjugationTableTitle": "Спряжение для \"{lemma}\"",
-  "@conjugationTableTitle": {
+  "numeralDeclensionTableTitle": "Числительное склонение для \"{lemma}\"",
+  "conjugationTableTitle2": "Спряжение для \"{lemma}\"",
+  "@conjugationTableTitle2": {
     "description": "Формат заголовка таблицы спряжения, включает плейсхолдер {lemma}",
     "placeholders": {
       "lemma": {
         "type": "String",
-        "example": "robić"
+        "example": "делать"
+      }
+    }
+  },
+  "@numeralDeclensionTableTitle": {
+    "description": "Формат заголовка таблицы склонения числительного, включает плейсхолдер {lemma}",
+    "placeholders": {
+      "lemma": {
+        "type": "String",
+        "example": "пять"
+      }
+    }
+  },
+  "numeralDeclensionTableDescription": "Таблица склонения польских числительных.",
+  "@numeralDeclensionTableDescription": {
+    "description": "Описание таблицы склонения числительных."
+  },
+  "conjugationTableTitle2": "Спряжение для \"{lemma}\"",
+  "@conjugationTableTitle2": {
+    "description": "Формат заголовка таблицы спряжения, включает плейсхолдер {lemma}",
+    "placeholders": {
+      "lemma": {
+        "type": "String",
+        "example": "делать"
       }
     }
   },

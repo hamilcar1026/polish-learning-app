@@ -30,9 +30,6 @@ class AppLocalizationsPl extends AppLocalizations {
   String get declensionTitle => 'Deklinacja';
 
   @override
-  String get conjugationTitle => 'Koniugacja';
-
-  @override
   String get grammarTitle => 'Gramatyka';
 
   @override
@@ -391,12 +388,17 @@ class AppLocalizationsPl extends AppLocalizations {
   String get genderLabelN2 => 'Nijaki 2';
 
   @override
-  String declensionTableTitle(String lemma) {
+  String declensionTableTitle(Object lemma) {
     return 'Deklinacja dla \"$lemma\"';
   }
 
   @override
-  String conjugationTableTitle(String lemma) {
+  String numeralDeclensionTableTitle(String lemma) {
+    return 'Deklinacja liczebnika \"$lemma\"';
+  }
+
+  @override
+  String conjugationTableTitle2(String lemma) {
     return 'Koniugacja dla \"$lemma\"';
   }
 

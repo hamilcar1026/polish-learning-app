@@ -7,7 +7,7 @@
   "fontSizeSettingTitle": "Font Size",
   "analysisTitle": "Analysis",
   "declensionTitle": "Declension",
-  "conjugationTitle": "Conjugation",
+
   "grammarTitle": "Grammar",
   "pronounceWordTooltip": "Pronounce the word",
   "searchButtonTooltip": "Search",
@@ -215,18 +215,19 @@
      "description": "Label for neuter gender type 2 (n2)"
    },
    "declensionTableTitle": "Declension for \"{lemma}\"",
-   "@declensionTableTitle": {
-     "description": "Title format for the declension table, includes lemma placeholder",
+   "numeralDeclensionTableTitle": "Numeral Declension for \"{lemma}\"",
+   "conjugationTableTitle2": "Conjugation for \"{lemma}\"",
+   "@conjugationTableTitle2": {
+     "description": "Format for conjugation table title, includes lemma placeholder",
      "placeholders": {
        "lemma": {
          "type": "String",
-         "example": "kot"
+         "example": "do"
        }
      }
    },
-   "conjugationTableTitle": "Conjugation for \"{lemma}\"",
-   "@conjugationTableTitle": {
-     "description": "Title format for the conjugation table, includes lemma placeholder",
+   "@numeralDeclensionTableTitle": {
+     "description": "Title format for the numeral declension table, includes lemma placeholder",
      "placeholders": {
        "lemma": {
          "type": "String",
@@ -234,6 +235,7 @@
        }
      }
    },
+ 
    "translationLabel": "Translation",
    "suggestionDidYouMean": "Did you mean \"{suggestedWord}\"?",
    "@suggestionDidYouMean": {
