@@ -1,79 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../data/numeral_declensions.dart';
 
-/// Basic numeral declension table for Polish numerals 1-100.
-/// [forms] is a map of case code (e.g. 'nom', 'gen', etc.) to the declension form.
+/// NumeralDeclensionTable
+/// 숫자(1~100) 격변화 표를 표시하는 위젯. 헤더는 i18n 적용.
 class NumeralDeclensionTable extends StatelessWidget {
-  final String lemma; // e.g. "pięć"
-  final Map<String, String> forms;
+  final int number;
 
-  const NumeralDeclensionTable({
-    Key? key,
-    required this.lemma,
-    required this.forms,
-  }) : super(key: key);
+  const NumeralDeclensionTable({super.key, required this.number});
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final caseOrder = [
-      'nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc'
+    final loc = AppLocalizations.of(context)!;
+    final data = numeralDeclensions[number];
+
+    if (data == null) {
+      return Center(child: Text('${loc.noDeclensionData} ($number)'));
+    }
+
+    // i18n 케이스 라벨 매핑
+    final caseLabels = {
+      'caseNominative': loc.caseNominative,
+      'caseGenitive': loc.caseGenitive,
+      'caseDative': loc.caseDative,
+      'caseAccusative': loc.caseAccusative,
+      'caseInstrumental': loc.caseInstrumental,
+      'caseLocative': loc.caseLocative,
+      'caseVocative': loc.caseVocative,
+    };
+
+    // 폴란드어 격 순서 (numeral_declensions.dart의 키와 일치)
+    final polishCases = [
+      'caseNominative',
+      'caseGenitive',
+      'caseDative',
+      'caseAccusative',
+      'caseInstrumental',
+      'caseLocative',
+      'caseVocative',
     ];
-    final caseNames = [
-      l10n.caseNominative,
-      l10n.caseGenitive,
-      l10n.caseDative,
-      l10n.caseAccusative,
-      l10n.caseInstrumental,
-      l10n.caseLocative,
-      l10n.caseVocative,
-    ];
-    return Card(
-      color: Theme.of(context).colorScheme.surface,
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Table(
-          border: TableBorder.all(color: Theme.of(context).dividerColor),
-          columnWidths: const {
-            0: IntrinsicColumnWidth(),
-            1: FlexColumnWidth(),
-          },
-          children: [
-            TableRow(
-              decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary.withOpacity(0.08)),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text(l10n.tableHeaderCase, style: Theme.of(context).textTheme.labelLarge),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text(
-                    lemma,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-            ...List.generate(caseOrder.length, (i) {
-              final code = caseOrder[i];
-              return TableRow(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6.0),
-                    child: Text(caseNames[i]),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6.0),
-                    child: Text(forms[code] ?? '-'),
-                  ),
-                ],
-              );
-            }),
+
+    return DataTable(
+      columns: [
+        DataColumn(label: Text(loc.tableHeaderCase)),
+        DataColumn(label: Text(loc.tableHeaderSingular)),
+      ],
+      rows: polishCases.map((caseKey) {
+        return DataRow(
+          cells: [
+            DataCell(Text(caseLabels[caseKey] ?? caseKey)),
+            DataCell(Text(data[caseKey] ?? '-')),
           ],
-        ),
-      ),
+        );
+      }).toList(),
     );
   }
 }
