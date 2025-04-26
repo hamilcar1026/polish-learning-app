@@ -419,6 +419,7 @@ def is_impersonal_form(form, tag_full):
 
 # Helper function to generate forms and format them (REFACTORED)
 def generate_and_format_forms(word, check_func):
+    has_reflexive_sie = False  # Ensure variable is always initialized
     if morf is None:
         return None, "Morfeusz2 analyzer not available."
 
