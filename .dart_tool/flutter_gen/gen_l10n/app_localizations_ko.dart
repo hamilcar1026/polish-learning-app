@@ -425,4 +425,19 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get impersonalConditionalForm => '비인칭 조건법';
+
+  @override
+  String get settingsLanguage => '언어';
+
+  @override
+  String get genderLabelM => '남성';
+
+  @override
+  String get genderLabelN => '중성';
+
+  @override
+  String get genderLabelM1Pl => '남성 인격';
+
+  @override
+  String get genderLabelNonM1Pl => '비남성 인격';
 }

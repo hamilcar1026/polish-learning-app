@@ -425,4 +425,19 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get impersonalConditionalForm => 'Impersonal conditional form';
+
+  @override
+  String get settingsLanguage => 'Język';
+
+  @override
+  String get genderLabelM => 'męski';
+
+  @override
+  String get genderLabelN => 'nijaki';
+
+  @override
+  String get genderLabelM1Pl => 'męskoosob.';
+
+  @override
+  String get genderLabelNonM1Pl => 'niemęskoosob.';
 }

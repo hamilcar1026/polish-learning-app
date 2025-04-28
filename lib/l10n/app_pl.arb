@@ -222,5 +222,25 @@
     }
   },
   "translationLabel": "Tłumaczenie",
-  "impersonalAccuracyWarning": "Może nie być dokładne"
+  "impersonalAccuracyWarning": "Może nie być dokładne",
+  "settingsLanguage": "Język",
+  "@settingsLanguage": {
+    "description": "Etykieta wyboru języka w ustawieniach"
+  },
+  "genderLabelM": "męski",
+  "@genderLabelM": {
+    "description": "Etykieta rodzaju męskiego liczby pojedynczej (łączy m1, m2, m3)"
+  },
+  "genderLabelN": "nijaki",
+  "@genderLabelN": {
+    "description": "Etykieta rodzaju nijakiego liczby pojedynczej (łączy n, n1, n2)"
+  },
+  "genderLabelM1Pl": "męskoosob.",
+  "@genderLabelM1Pl": {
+    "description": "Etykieta rodzaju męskoosobowego liczby mnogiej (m1)"
+  },
+  "genderLabelNonM1Pl": "niemęskoosob.",
+  "@genderLabelNonM1Pl": {
+    "description": "Etykieta rodzaju niemęskoosobowego liczby mnogiej (łączy f, n, m2, m3)"
+  }
 } 

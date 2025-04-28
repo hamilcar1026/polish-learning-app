@@ -988,9 +988,19 @@ def get_conjugation_category_key(base_tag, full_tag):
 def get_declension_category_key(base_tag, full_tag):
     # Simple mapping for now, can be expanded
     if base_tag == 'subst': return 'declensionCategoryNoun'
-    elif base_tag == 'adj': return 'declensionCategoryAdjective'
-    elif base_tag == 'adja': return 'declensionCategoryAdjective' # Group adja with adj
-    elif base_tag == 'adjp': return 'declensionCategoryAdjective' # Group adjp with adj
+    elif base_tag in ['adj', 'adja', 'adjp']:
+        # --- 수정: 형용사 등급 구분 ---
+        parts = full_tag.split(':')
+        degree = None
+        for part in parts:
+            if part in ['pos', 'com', 'sup']:
+                degree = part
+                break
+        if degree == 'pos': return 'declensionCategoryAdjectivePositive'
+        elif degree == 'com': return 'declensionCategoryAdjectiveComparative'
+        elif degree == 'sup': return 'declensionCategoryAdjectiveSuperlative'
+        else: return 'declensionCategoryAdjective' # Fallback if degree not found
+        # ---------------------------
     elif base_tag == 'depr': return 'declensionCategoryPronoun' # Assuming depr is pronoun
     else: return 'declensionCategoryOtherForms'
 # --------------------------------------------------

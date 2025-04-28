@@ -250,5 +250,25 @@
   "impersonalConditionalForm": "비인칭 조건법",
   "@impersonalConditionalForm": {
     "description": "비인칭 조건법에 대한 설명"
+  },
+  "settingsLanguage": "언어",
+  "@settingsLanguage": {
+    "description": "설정에서 언어 선택 레이블"
+  },
+  "genderLabelM": "남성",
+  "@genderLabelM": {
+    "description": "단수 남성 성별 레이블 (m1, m2, m3 통합)"
+  },
+  "genderLabelN": "중성",
+  "@genderLabelN": {
+    "description": "단수 중성 성별 레이블 (n, n1, n2 통합)"
+  },
+  "genderLabelM1Pl": "남성 인격",
+  "@genderLabelM1Pl": {
+    "description": "복수 남성 인격 성별 레이블 (m1)"
+  },
+  "genderLabelNonM1Pl": "비남성 인격",
+  "@genderLabelNonM1Pl": {
+    "description": "복수 비남성 인격 성별 레이블 (f, n, m2, m3 통합)"
   }
 } 

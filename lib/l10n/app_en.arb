@@ -266,5 +266,25 @@
    "impersonalConditionalForm": "Impersonal conditional form",
    "@impersonalConditionalForm": {
      "description": "Description for the impersonal conditional form"
+   },
+   "settingsLanguage": "Language",
+   "@settingsLanguage": {
+     "description": "Label for language selection in settings"
+   },
+   "genderLabelM": "masculine",
+   "@genderLabelM": {
+     "description": "Label for singular masculine gender (combines m1, m2, m3)"
+   },
+   "genderLabelN": "neuter",
+   "@genderLabelN": {
+     "description": "Label for singular neuter gender (combines n, n1, n2)"
+   },
+   "genderLabelM1Pl": "masc. pers.",
+   "@genderLabelM1Pl": {
+     "description": "Label for plural masculine personal gender (m1)"
+   },
+   "genderLabelNonM1Pl": "non-masc. pers.",
+   "@genderLabelNonM1Pl": {
+     "description": "Label for plural non-masculine personal gender (combines f, n, m2, m3)"
    }
 } 

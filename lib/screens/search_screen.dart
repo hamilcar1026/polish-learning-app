@@ -605,141 +605,201 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   // --- Builder for Declension Results --- 
   Widget _buildDeclensionResults(DeclensionResult lemmaData, AppLocalizations l10n) {
     print("[_buildDeclensionResults] Building declension widget for: ${lemmaData.lemma}");
-    
-    Map<String, Map<String, String>> declensionTable = {}; // {caseCode: {sg: form, pl: form}}
-    final casesOrder = ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc']; 
 
-    // --- 수정: grouped_forms 맵을 순회하여 모든 폼 처리 ---
-    List<DeclensionForm> allForms = [];
-    lemmaData.grouped_forms.values.forEach((formList) {
-      allForms.addAll(formList);
-    });
-    // ---------------------------------------------------
+    bool isAdjective = lemmaData.grouped_forms.keys.any((key) => key.startsWith('declensionCategoryAdjective'));
+    print("[_buildDeclensionResults] Is adjective? $isAdjective");
 
-    // for (var formInfo in lemmaData.forms) { // <--- 이전 로직 제거
-    for (var formInfo in allForms) { // <--- 수정: 합쳐진 폼 리스트 사용
+    // --- 수정: 테이블 데이터 구조 변경 (형용사용) ---
+    dynamic declensionTable; // Use dynamic to hold different map types
+    if (isAdjective) {
+      // Case -> Number -> Gender -> Form
+      declensionTable = <String, Map<String, Map<String, String>>>{}; 
+    } else {
+      declensionTable = <String, Map<String, String>>{}; // Case -> Number -> Form
+    }
+    // ---------------------------------------------
+
+    final casesOrder = ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc'];
+    // --- 추가: 형용사 표 성별 표시 순서 ---
+    final sgGenderOrder = ['m', 'f', 'n']; // 단수 성별 표시 순서
+    final plGenderOrder = ['m1pl', 'non_m1']; // 복수 성별 표시 순서
+    // -----------------------------------
+
+    final List<DeclensionForm> formsToDisplay = lemmaData.grouped_forms['declensionCategoryAdjectivePositive'] ??
+                                                lemmaData.grouped_forms['declensionCategoryNoun'] ??
+                                                lemmaData.grouped_forms['declensionCategoryPronoun'] ??
+                                                [];
+    print("[_buildDeclensionResults] Found ${formsToDisplay.length} forms to display.");
+
+
+    for (var formInfo in formsToDisplay) {
       final tagMap = _parseTag(formInfo.tag);
-      // Get potential combined cases (e.g., "gen.acc") or single case
-      final casePart = tagMap['case'] ?? tagMap['case_person']; 
+      final casePart = tagMap['case'];
       final numberCode = tagMap['number'];
+      final genderCode = tagMap['gender']; // 성별 정보 추출
 
       if (casePart != null && numberCode != null) {
-        // Split combined cases like "gen.acc" or "nom.acc.voc"
-        final individualCases = casePart.split('.'); 
+        final individualCases = casePart.split('.');
 
         for (var caseCode in individualCases) {
-           // Ensure the case is one we want to display in the table
-          if (casesOrder.contains(caseCode)) { 
+          if (casesOrder.contains(caseCode)) {
             if (!declensionTable.containsKey(caseCode)) {
-              declensionTable[caseCode] = {};
+              if (isAdjective) {
+                declensionTable[caseCode] = <String, Map<String, String>>{'sg': {}, 'pl': {}}; // Initialize gender maps
+              } else {
+                declensionTable[caseCode] = <String, String>{}; // Initialize form map
+              }
             }
 
-            // Assign the form to the singular or plural slot for this case
-            // Avoid overwriting if multiple forms map to the same slot (e.g., different gender variations not shown here)
-            // For simplicity, we take the first one encountered.
             if (numberCode == 'sg') {
-              declensionTable[caseCode]!['sg'] ??= formInfo.form; 
+              if (isAdjective && genderCode != null) {
+                // --- 수정: 형용사 단수 - 성별 키에 따라 저장 ---
+                String displayGenderKey = '';
+                if (genderCode.contains('m')) displayGenderKey = 'm';
+                else if (genderCode == 'f') displayGenderKey = 'f';
+                else if (genderCode.contains('n')) displayGenderKey = 'n';
+
+                if (displayGenderKey.isNotEmpty && declensionTable[caseCode]!['sg'][displayGenderKey] == null) {
+                  declensionTable[caseCode]!['sg'][displayGenderKey] = formInfo.form;
+                   print("          Assigned sg form (adj): $displayGenderKey -> ${formInfo.form}");
+                }
+                // -----------------------------------------
+              } else { // Not adjective or null gender
+                if (declensionTable[caseCode]!['sg'] == null) {
+                  declensionTable[caseCode]!['sg'] = formInfo.form;
+                }
+              }
             } else if (numberCode == 'pl') {
-              declensionTable[caseCode]!['pl'] ??= formInfo.form;
+              if (isAdjective && genderCode != null) {
+                 // --- 수정: 형용사 복수 - 성별 키에 따라 저장 ---
+                String displayGenderKey = '';
+                if (genderCode == 'm1') displayGenderKey = 'm1pl';
+                else if (genderCode == 'f' || genderCode.contains('n') || genderCode == 'm2' || genderCode == 'm3' || genderCode.contains('.')) {
+                   // Handle m2.m3.f.n and other non-m1 cases
+                   displayGenderKey = 'non_m1'; 
+                }
+                
+                if (displayGenderKey.isNotEmpty && declensionTable[caseCode]!['pl'][displayGenderKey] == null) {
+                  declensionTable[caseCode]!['pl'][displayGenderKey] = formInfo.form;
+                  print("          Assigned pl form (adj): $displayGenderKey -> ${formInfo.form}");
+                }
+                 // -----------------------------------------
+              } else { // Not adjective or null gender
+                 if (declensionTable[caseCode]!['pl'] == null) {
+                   declensionTable[caseCode]!['pl'] = formInfo.form;
+                 }
+              }
             }
           }
         }
       }
     }
 
-    // DEBUG: Print the final declensionTable content
     print("[_buildDeclensionResults] Final declensionTable data: $declensionTable");
 
-    // Display as a card with a table
-    // No Card needed here as the tab builder wraps it
     return Column(
-      // Center the children horizontally
-      crossAxisAlignment: CrossAxisAlignment.center, 
-      mainAxisSize: MainAxisSize.min, 
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Builder( // Use Builder to get context for theme/l10n access
+        Builder(
           builder: (context) {
             final l10n = AppLocalizations.of(context)!;
-            // Get the first tag (assuming it's representative, handle potential emptiness)
-            // --- 수정: 첫 번째 폼 가져오는 로직 변경 ---
-            String firstTagString = allForms.isNotEmpty ? allForms.first.tag : '';
-            // -------------------------------------
-            String translatedTagString = '';
-
-            if (firstTagString.isNotEmpty) {
-              // Split the tag and translate each part using the existing helper
-              translatedTagString = firstTagString
-                  .split(':')
-                  .map((part) => _translateGrammarTerm(part, l10n)) // Translate each part
-                  .join(':'); // Join back with colons
-            }
-            
             return Text(
-              // Append translated tag if available
-              '${l10n.declensionTableTitle(lemmaData.lemma)}${translatedTagString.isNotEmpty ? ' ($translatedTagString)' : ''}', 
+              l10n.declensionTableTitle(lemmaData.lemma),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             );
           }
         ),
         const SizedBox(height: 16),
-        
-        // Table display
+
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            // Center the Table widget horizontally
-            child: Center( 
-              child: Table(
+            child: Table(
                 border: TableBorder.all(color: Colors.grey.shade300),
                 columnWidths: const {
                   0: IntrinsicColumnWidth(), // Case column
                   1: IntrinsicColumnWidth(), // Singular column
                   2: IntrinsicColumnWidth(), // Plural column
                 },
-                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                defaultVerticalAlignment: TableCellVerticalAlignment.top, // Align top for multi-line cells
                 children: [
-                  // Header row
                   TableRow(
                     decoration: BoxDecoration(color: Colors.grey.shade100),
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(l10n.tableHeaderCase, style: TextStyle(fontWeight: FontWeight.bold)), 
+                        child: Text(l10n.tableHeaderCase, style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(l10n.tableHeaderSingular, style: TextStyle(fontWeight: FontWeight.bold)), 
+                        child: Text(l10n.tableHeaderSingular, style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(l10n.tableHeaderPlural, style: TextStyle(fontWeight: FontWeight.bold)), 
+                        child: Text(l10n.tableHeaderPlural, style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
                   // Data rows
                   ...casesOrder.map((caseCode) {
-                    final forms = declensionTable[caseCode] ?? {};
+                    final formsMap = declensionTable[caseCode];
+
+                    Widget sgCellContent = const Text('-');
+                    Widget plCellContent = const Text('-');
+
+                    if (formsMap != null) {
+                      if (isAdjective) {
+                        // --- 수정: 형용사 셀 - Column으로 성별별 표시 ---
+                        List<Widget> sgWidgets = [];
+                        for (var genderKey in sgGenderOrder) {
+                          final form = formsMap['sg']?[genderKey];
+                          if (form != null) {
+                            sgWidgets.add(Text('$form (${_getGenderLabel(genderKey, l10n)})'));
+                          }
+                        }
+                        if (sgWidgets.isNotEmpty) {
+                           sgCellContent = Column(crossAxisAlignment: CrossAxisAlignment.start, children: sgWidgets);
+                        }
+
+                        List<Widget> plWidgets = [];
+                        for (var genderKey in plGenderOrder) {
+                          final form = formsMap['pl']?[genderKey];
+                          if (form != null) {
+                            plWidgets.add(Text('$form (${_getGenderLabel(genderKey, l10n)})'));
+                          }
+                        }
+                         if (plWidgets.isNotEmpty) {
+                           plCellContent = Column(crossAxisAlignment: CrossAxisAlignment.start, children: plWidgets);
+                        }
+                        // -------------------------------------------
+                      } else {
+                        // For non-adjectives, display single form
+                        sgCellContent = Text(formsMap['sg'] ?? '-');
+                        plCellContent = Text(formsMap['pl'] ?? '-');
+                      }
+                    }
+
                     return TableRow(
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text(_getCaseName(caseCode, l10n)), 
+                          child: Text(_getCaseName(caseCode, l10n)),
                         ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text(forms['sg'] ?? '-'), // Display '-' if null
+                          child: sgCellContent, // Display generated cell content
                         ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text(forms['pl'] ?? '-'), // Display '-' if null
+                          child: plCellContent, // Display generated cell content
                         ),
                       ],
                     );
                   }).toList(),
                 ],
               ),
-            ),
           ),
         ),
       ],
@@ -783,7 +843,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
         tableData[personKey]![numberKey] = form;
         print("[_buildConjugationTable] Added form $form to tableData[$personKey][$numberKey]");
-      } else {
+                      } else {
         print("[_buildConjugationTable] Skipping form $form because personKey=$personKey or numberKey=$numberKey");
       }
     }
@@ -1239,24 +1299,24 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         // Data rows
         ...casesOrder.map((caseCode) {
           final forms = declensionTable[caseCode] ?? {};
-          return TableRow(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(_getCaseName(caseCode, l10n)), 
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
+                    return TableRow(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(_getCaseName(caseCode, l10n)),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
                 child: Text(forms['sg'] ?? '-'), 
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
                 child: Text(forms['pl'] ?? '-'), 
-              ),
-            ],
-          );
-        }).toList(),
-      ],
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ],
     );
   }
 
@@ -2147,12 +2207,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   String _getGenderLabel(String? genderCode, AppLocalizations l10n) {
     switch (genderCode) {
+      // --- 기존 --- 
       case 'm1': return l10n.genderLabelM1;
       case 'm2': return l10n.genderLabelM2;
       case 'm3': return l10n.genderLabelM3;
-      case 'f': return l10n.genderLabelF;
+      case 'f': return l10n.genderLabelF; // 여성은 단/복수 동일 키 사용 가능
       case 'n1': return l10n.genderLabelN1;
       case 'n2': return l10n.genderLabelN2;
+      // --- 추가: 형용사 테이블용 단순화된 키 ---
+      case 'm': return l10n.genderLabelM; // 단수 남성 통합
+      case 'n': return l10n.genderLabelN; // 단수 중성 통합
+      case 'm1pl': return l10n.genderLabelM1Pl; // 복수 남성 인격
+      case 'non_m1': return l10n.genderLabelNonM1Pl; // 복수 비남성 인격 통합
+      // --- Fallback ---
       default: return genderCode ?? '-';
     }
   }

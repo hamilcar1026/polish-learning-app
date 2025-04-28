@@ -914,6 +914,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Impersonal conditional form'**
   String get impersonalConditionalForm;
+
+  /// Label for language selection in settings
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingsLanguage;
+
+  /// Label for singular masculine gender (combines m1, m2, m3)
+  ///
+  /// In en, this message translates to:
+  /// **'masculine'**
+  String get genderLabelM;
+
+  /// Label for singular neuter gender (combines n, n1, n2)
+  ///
+  /// In en, this message translates to:
+  /// **'neuter'**
+  String get genderLabelN;
+
+  /// Label for plural masculine personal gender (m1)
+  ///
+  /// In en, this message translates to:
+  /// **'masc. pers.'**
+  String get genderLabelM1Pl;
+
+  /// Label for plural non-masculine personal gender (combines f, n, m2, m3)
+  ///
+  /// In en, this message translates to:
+  /// **'non-masc. pers.'**
+  String get genderLabelNonM1Pl;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

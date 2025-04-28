@@ -232,5 +232,29 @@
     }
   },
   "translationLabel": "Перевод",
-  "impersonalAccuracyWarning": "Может быть неточным"
+  "impersonalAccuracyWarning": "Может быть неточным",
+  "settingsLanguage": "Язык",
+  "@settingsLanguage": {
+    "description": "Ярлык для выбора языка в настройках"
+  },
+  "genderLabelM": "мужской",
+  "@genderLabelM": {
+    "description": "Метка мужского рода единственного числа (объединяет m1, m2, m3)"
+  },
+  "genderLabelF": "женский",
+  "@genderLabelF": {
+    "description": "Метка женского рода (единственное/множественное число)"
+  },
+  "genderLabelN": "средний",
+  "@genderLabelN": {
+    "description": "Метка среднего рода единственного числа (объединяет n, n1, n2)"
+  },
+  "genderLabelM1Pl": "муж. лиц.",
+  "@genderLabelM1Pl": {
+    "description": "Метка мужского личного рода множественного числа (m1)"
+  },
+  "genderLabelNonM1Pl": "не-муж. лиц.",
+  "@genderLabelNonM1Pl": {
+    "description": "Метка не-мужского личного рода множественного числа (объединяет f, n, m2, m3)"
+  }
 } 
