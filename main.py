@@ -1037,17 +1037,15 @@ def generate_and_format_forms(word, check_func, category_func):
     - Filters based on check_func (e.g., is_verb, is_declinable).
     - Groups forms using category_func (e.g., get_conjugation_category_key).
     - Handles potential errors gracefully.
+    - Tries the next best lemma interpretation if the first one yields empty/invalid results.
     - Returns a dictionary containing the lemma and grouped forms, or None if no valid forms found.
     """
     print(f"[generate_and_format_forms] Starting for word: '{word}'")
 
-    # --- 하드코딩된 대명사/단어 확인 --- 
+    # --- Hardcoded Check --- 
     if word in hardcoded_declensions:
         print(f"[generate_and_format_forms] Found hardcoded entry for '{word}'. Returning pre-defined data.")
-        # 프론트엔드가 기대하는 리스트 형태로 감싸서 반환 ([{lemma:..., grouped_forms:...}])
-        # 또는 API 응답 구조에 맞게 수정 필요 (여기서는 /decline, /conjugate가 직접 반환하므로 그냥 dict 반환)
         return hardcoded_declensions[word]
-    # -------------------------------------
 
     if morf is None:
         print("Error: Morfeusz2 is not initialized.")
@@ -1059,12 +1057,10 @@ def generate_and_format_forms(word, check_func, category_func):
         analysis_result = morf.analyse(word)
         if not analysis_result:
             print(f"[generate_and_format_forms] Word '{word}' not found or cannot be analyzed.")
-            return None # Return None on failure
+            return None
 
-        # --- 수정: 기본형 선택 로직 (m2 우선, **지정된 서수사만** 형용사 우선) ---
-        possible_lemmas_data = [] # Store dicts with more info
-        cleaned_lemmas_found = set()
-
+        # --- Lemma Selection Logic (Get potential candidates) ---
+        possible_lemmas_data = []
         for r in analysis_result:
             if len(r) >= 3 and isinstance(r[2], tuple) and len(r[2]) >= 3:
                 analysis_tuple = r[2]
@@ -1072,566 +1068,339 @@ def generate_and_format_forms(word, check_func, category_func):
                 current_tag_full = analysis_tuple[2]
                 current_base_tag = current_tag_full.split(':', 1)[0]
                 cleaned_lemma = _clean_lemma(current_lemma)
-                # Ensure cleaned_lemma is not None before adding
-                if cleaned_lemma:
-                     cleaned_lemmas_found.add(cleaned_lemma)
-                else: # Handle case where cleaning might fail or return None
-                     print(f"Warning: _clean_lemma returned None for {current_lemma}")
-                     cleaned_lemma = word # Fallback to original word if cleaning fails
-                     cleaned_lemmas_found.add(cleaned_lemma)
-
-                if check_func(current_base_tag): # Check if it's the desired type (verb/declinable)
+                if check_func(current_base_tag): # Only consider lemmas matching the function type
                     possible_lemmas_data.append({
                         "lemma": current_lemma,
-                        "cleaned_lemma": cleaned_lemma, # Store cleaned lemma
+                        "cleaned_lemma": cleaned_lemma or word, # Fallback
                         "tag": current_tag_full,
                         "base_tag": current_base_tag,
                     })
-
+        
         if not possible_lemmas_data:
             print(f"[generate_and_format_forms] No primary lemma matching check_func ({check_func.__name__}) found for '{word}'.")
             return None
 
-        # --- Prioritization Logic --- 
+        # --- Prioritization Logic (Select the single best candidate for the first attempt) ---
+        # (This part remains the same as the Karolina fix version) 
         primary_lemma_info = None
-        # Check if any of the identified cleaned lemmas belong to the specified ordinal set
-        word_is_ordinal = any(cl in ORDINAL_NUMERALS_SET for cl in cleaned_lemmas_found)
+        cleaned_lemmas_found = {p['cleaned_lemma'] for p in possible_lemmas_data}
+        exact_match_candidates = [p for p in possible_lemmas_data if p["cleaned_lemma"].lower() == word.lower()]
+        target_lemma_list = exact_match_candidates if exact_match_candidates else possible_lemmas_data
+        print(f"[generate_and_format_forms] Prioritizing within {'exact matches' if exact_match_candidates else 'all lemmas'} ({len(target_lemma_list)} candidates).")
 
+        # Apply rules within the target_lemma_list
+        word_is_ordinal = any(cl in ORDINAL_NUMERALS_SET for cl in cleaned_lemmas_found)
         if word_is_ordinal and check_func == is_declinable:
-            print(f"[generate_and_format_forms] Word '{word}' identified as a potential ordinal numeral from the set.")
+            # ... (Ordinal adjective priority logic - find adj_interpretation) ...
             adj_interpretation = None
             subst_interpretation = None
-            # Find if both adj and subst interpretations exist for this ordinal's cleaned lemma
-            target_cleaned_lemma = next((cl for cl in cleaned_lemmas_found if cl in ORDINAL_NUMERALS_SET), None)
-            
-            if target_cleaned_lemma:
-                for p_info in possible_lemmas_data:
-                    # Ensure we are comparing interpretations for the same base word
-                    if p_info["cleaned_lemma"] == target_cleaned_lemma:
-                        if p_info["base_tag"] == 'adj':
-                            adj_interpretation = p_info
-                        elif p_info["base_tag"] == 'subst':
-                            subst_interpretation = p_info
-            else: 
-                 print(f"Warning: Could not determine the specific ordinal lemma for {word} from cleaned_lemmas_found.")
-
+            target_cleaned_ordinal_lemma = next((cl for cl in cleaned_lemmas_found if cl in ORDINAL_NUMERALS_SET), None)
+            if target_cleaned_ordinal_lemma:
+                 for p_info in target_lemma_list:
+                     if p_info["cleaned_lemma"] == target_cleaned_ordinal_lemma:
+                         if p_info["base_tag"] == 'adj': adj_interpretation = p_info
+                         elif p_info["base_tag"] == 'subst': subst_interpretation = p_info
             if adj_interpretation and subst_interpretation:
-                # Both exist for a listed ordinal, prioritize adjective
-                primary_lemma_info = adj_interpretation
-                print(f"[generate_and_format_forms] Prioritizing ADJECTIVE interpretation for ordinal numeral: {primary_lemma_info['lemma']} ({primary_lemma_info['tag']})")
-            else:
-                # Ordinal, but only one interpretation type (or neither matched adj/subst for the target lemma)
-                print(f"[generate_and_format_forms] Ordinal numeral ({target_cleaned_lemma}), but not both ADJ and SUBST interpretations found/matched. Using default logic.")
-                # Fall through to default logic below
-                pass 
+                 primary_lemma_info = adj_interpretation
+                 print(f"[generate_and_format_forms] Prioritizing ADJECTIVE for ordinal: {primary_lemma_info['lemma']}")
 
-        # --- Default Logic (If not prioritized as ordinal adjective above) --- 
-        if primary_lemma_info is None:
-            print(f"[generate_and_format_forms] Applying default lemma selection logic for '{word}'.")
-            if check_func == is_declinable and len(possible_lemmas_data) > 1:
-                # Apply m2 prioritization (existing logic, but use possible_lemmas_data)
-                m2_lemma_info = None
-                m1_lemma_info = None
-                for p in possible_lemmas_data:
-                    # Use the full tag for m1/m2 check
+        if primary_lemma_info is None: # If ordinal rule didn't apply or didn't find both
+            if check_func == is_declinable and len(target_lemma_list) > 1:
+                 # ... (m2 priority logic - find m2_lemma_info) ...
+                 m2_lemma_info = None; m1_lemma_info = None
+                 for p in target_lemma_list:
                     if ':m2:' in p["tag"] or p["tag"].endswith(':m2'): m2_lemma_info = p
                     if ':m1:' in p["tag"] or p["tag"].endswith(':m1'): m1_lemma_info = p
-                
-                # Check if *different* base lemmas correspond to m1 and m2 if needed
-                # Simple check first:
-                if m2_lemma_info and m1_lemma_info:
-                     # Basic m2 priority - might need refinement if m1/m2 lemmas are different but represent same word concept
-                     primary_lemma_info = m2_lemma_info 
-                     print(f"[generate_and_format_forms] Prioritizing m2 interpretation (default logic): {primary_lemma_info['lemma']}")
-                elif possible_lemmas_data: # Added check if list is not empty
-                     primary_lemma_info = possible_lemmas_data[0]
-                     print(f"[generate_and_format_forms] Using first found interpretation (default logic, no m2 prio or only one type): {primary_lemma_info['lemma']}")
-                else:
-                    # This case should theoretically not be reached if initial check passed
-                    print(f"Error: No possible lemmas left in default logic for '{word}'.")
-                    return None
-            elif possible_lemmas_data: # Added check if list is not empty
-                # For verbs or single declinable result
-                primary_lemma_info = possible_lemmas_data[0]
-                print(f"[generate_and_format_forms] Using first found interpretation (verb or single declinable): {primary_lemma_info['lemma']}")
-            else:
-                 # This case should theoretically not be reached
-                 print(f"Error: No possible lemmas data available at the end for '{word}'.")
-                 return None
+                 if m2_lemma_info and m1_lemma_info:
+                     primary_lemma_info = m2_lemma_info
+                     print(f"[generate_and_format_forms] Prioritizing m2: {primary_lemma_info['lemma']}")
+                 elif target_lemma_list: # Fallback to first in target list
+                     primary_lemma_info = target_lemma_list[0]
+                     print(f"[generate_and_format_forms] Using first from target list (no m2/ordinal prio): {primary_lemma_info['lemma']}")
+            elif target_lemma_list: # Verb or single declinable result
+                 primary_lemma_info = target_lemma_list[0]
+                 print(f"[generate_and_format_forms] Using first from target list (verb/single): {primary_lemma_info['lemma']}")
 
-        # Extract info from the selected lemma
-        if primary_lemma_info is None: # Final safety check
-             print(f"Error: Could not determine primary_lemma_info for '{word}' after all checks.")
+        if primary_lemma_info is None: # Final check if no lemma could be selected
+            print(f"Error: Could not determine primary lemma for '{word}' after prioritization.")
+            return None
+        # --- End of Prioritization Logic ---
+
+        # Extract info for the first attempt
+        current_lemma = primary_lemma_info["lemma"]
+        current_tag_full = primary_lemma_info["tag"]
+        current_base_tag = primary_lemma_info["base_tag"]
+        current_is_imperfective = 'imperf' in current_tag_full.split(':')
+        current_has_reflexive_sie = ' się' in current_lemma or current_lemma.endswith('się')
+        print(f"[generate_and_format_forms] Attempt 1: Using lemma='{current_lemma}', tag='{current_tag_full}'")
+
+        # --- First attempt at generating forms using helper --- 
+        grouped_forms = _generate_grouped_forms(current_lemma, check_func, category_func, current_is_imperfective, current_has_reflexive_sie)
+        
+        # --- Check Validity and Potentially Retry --- 
+        if not _is_form_result_valid(grouped_forms, check_func, current_base_tag, current_tag_full):
+            print(f"  -> Attempt 1 result for '{current_lemma}' is empty or invalid. Looking for alternative lemma...")
+            
+            # Find the index of the failed lemma info in the original *filtered* list
+            failed_lemma_index = -1
+            for i, p_info in enumerate(possible_lemmas_data):
+                 if p_info["lemma"] == current_lemma and p_info["tag"] == current_tag_full:
+                     failed_lemma_index = i
+                     break
+            
+            next_candidate_info = None
+            if failed_lemma_index != -1:
+                 # Iterate through the rest of the *original filtered* list 
+                 for i in range(failed_lemma_index + 1, len(possible_lemmas_data)):
+                     # No need to check check_func again, as possible_lemmas_data was already filtered
+                     next_candidate_info = possible_lemmas_data[i]
+                     print(f"  -> Found next candidate: '{next_candidate_info['lemma']}' ({next_candidate_info['tag']})")
+                     break # Take the first valid alternative
+            
+            if next_candidate_info:
+                # Retry with the next candidate
+                print(f"--- Attempt 2: Retrying with {next_candidate_info['lemma']} ---")
+                retry_lemma = next_candidate_info["lemma"]
+                retry_tag_full = next_candidate_info["tag"]
+                retry_base_tag = next_candidate_info["base_tag"]
+                retry_is_imperfective = 'imperf' in retry_tag_full.split(':')
+                retry_has_reflexive_sie = ' się' in retry_lemma or retry_lemma.endswith('się')
+
+                # Call the helper function again for the retry
+                retry_grouped_forms = _generate_grouped_forms(retry_lemma, check_func, category_func, retry_is_imperfective, retry_has_reflexive_sie)
+                
+                # Check if the retry was successful
+                if _is_form_result_valid(retry_grouped_forms, check_func, retry_base_tag, retry_tag_full):
+                    print(f"  -> SUCCESS: Attempt 2 with '{retry_lemma}' yielded valid results.")
+                    # Update the main variables to reflect the successful retry
+                    current_lemma = retry_lemma
+                    grouped_forms = retry_grouped_forms
+                    # Update current_tag_full, current_base_tag etc. if needed elsewhere, maybe not necessary if only lemma/forms are returned
+                else:
+                    print(f"  -> INFO: Attempt 2 with '{retry_lemma}' also failed or yielded invalid results.")
+                    # Keep the original (invalid) grouped_forms from Attempt 1
+            else:
+                print(f"  -> No suitable alternative lemma found to retry.")
+        else:
+             print(f"  -> SUCCESS: Attempt 1 with '{current_lemma}' yielded valid results.")
+
+        # --- Final Check and Return --- 
+        # Check the *final* state of grouped_forms (could be from attempt 1 or 2)
+        # Need the *final* base_tag and full_tag used for the result we are checking
+        final_base_tag = current_base_tag # This assumes current_base_tag was updated if retry succeeded - let's ensure that
+        final_tag_full = current_tag_full
+        if 'retry_base_tag' in locals() and _is_form_result_valid(grouped_forms, check_func, retry_base_tag, retry_tag_full): # Check if retry succeeded using retry tags
+            final_base_tag = retry_base_tag
+            final_tag_full = retry_tag_full
+            
+        if not _is_form_result_valid(grouped_forms, check_func, final_base_tag, final_tag_full):
+             print(f"[generate_and_format_forms] Final check: No valid forms found for '{word}' after all attempts.")
              return None
 
-        primary_lemma = primary_lemma_info["lemma"]
-        primary_tag_full = primary_lemma_info["tag"]
-        # --- END OF Prioritization Logic ---
+        print(f"  -> Final grouped forms categories being returned for lemma '{current_lemma}': {list(grouped_forms.keys())}")
+        return {"lemma": current_lemma, "grouped_forms": grouped_forms}
 
-        # --- 수정: 선택된 기본형 정보 설정 (is_primary_imperfective, has_reflexive_sie 포함) ---
-        primary_base_tag = primary_tag_full.split(':', 1)[0]
-        is_primary_imperfective = False # 기본값 초기화
-        if 'imperf' in primary_tag_full.split(':'):
-            is_primary_imperfective = True
-        has_reflexive_sie = False # 기본값 초기화
-        if ' się' in primary_lemma or primary_lemma.endswith('się'):
-            has_reflexive_sie = True
-        print(f"[generate_and_format_forms] Selected primary analysis: lemma='{primary_lemma}', tag='{primary_tag_full}', is_imperfective={is_primary_imperfective}, has_reflexive_sie={has_reflexive_sie}")
-        # -------------------------------------------------
+    except Exception as e:
+        print(f"Error during main part of generate_and_format_forms for '{word}': {e}")
+        import traceback
+        traceback.print_exc()
+        return None
 
-        # Morfeusz2 generate 호출 시 expand_tags=True 옵션 사용 (복합 태그 자동 분리)
-        generated_forms_raw = morf.generate(primary_lemma)
-        print(f"  -> Raw generated forms for primary lemma '{primary_lemma}': {generated_forms_raw}")
+# --- NEW Internal Helper Function: Generate Grouped Forms --- 
+def _generate_grouped_forms(lemma_to_generate, check_func, category_func, is_imperfective, has_reflexive_sie):
+    """Internal helper to generate and group forms for a given lemma."""
+    grouped_forms = {}
+    infinitive_form = None
+    past_forms = {} 
+    past_impersonal_form = None
+    present_impersonal_forms = []
+    
+    try:
+        generated_forms_raw = morf.generate(lemma_to_generate)
+        print(f"    [_generate_grouped_forms] Raw generated forms for '{lemma_to_generate}': count={len(generated_forms_raw)}")
 
-        # --- Process generated forms and store needed ones ---
-        grouped_forms = {}
-        infinitive_form = None
-        past_forms = {} # To store praet forms: {'sg:m1': 'robił', 'sg:f': 'robiła', ...}
-        past_impersonal_form = None
-        present_impersonal_forms = [] # 다양한 현재 비인칭 형태 저장
-        
-        # 디버깅: 동명사(Gerund) 추적
-        print(f"[디버그-동명사] 형태 생성 시작 - 기본형: '{primary_lemma}'")
-        gerund_forms_found = 0
-
-        # 디버깅: 미래시제 추적
-        future_forms_perf = 0
-        future_forms_imperf = 0
-        print(f"[디버그-미래시제] 미래시제 처리 - 미완료상: {is_primary_imperfective}")
-        
-        # 디버깅: 비인칭 추적
-        impersonal_forms_found = 0
-        print(f"[디버그-비인칭] 비인칭 처리 시작 - 동사: '{primary_lemma}', 본질적 재귀형: {has_reflexive_sie}")
-
+        # --- Form Processing Loop --- 
         for form_tuple in generated_forms_raw:
             try:
-                if len(form_tuple) < 3:
-                    continue
-
+                # ... (Logic for parsing form_tuple) ...
+                if len(form_tuple) < 3: continue
                 form = form_tuple[0]
                 form_lemma_full = form_tuple[1]
                 form_tag_full = form_tuple[2]
                 qualifiers = list(form_tuple[3:]) if len(form_tuple) > 3 else []
                 base_tag = form_tag_full.split(':', 1)[0]
-
+                
+                # ... (should_process check using check_func) ...
                 should_process = False
-                if check_func == is_verb:
-                    should_process = base_tag in ALLOWED_TAGS
-                elif check_func == is_declinable:
-                    should_process = base_tag in DECLINABLE_TAGS
+                if check_func == is_verb: should_process = base_tag in ALLOWED_TAGS
+                elif check_func == is_declinable: should_process = base_tag in DECLINABLE_TAGS
+                if not should_process: continue
                 
-                if not should_process:
-                    continue
-                
-                # 디버깅: 동명사 형태 확인
-                if base_tag == 'ger':
-                    gerund_forms_found += 1
-                    print(f"[디버그-동명사] 동명사 발견 #{gerund_forms_found}: '{form}', 태그: '{form_tag_full}'")
-                    if ':neg' in form_tag_full:
-                        print(f"[디버그-동명사] 부정 동명사 필터링됨: '{form}'")
-                        continue  # 부정 동명사 필터링
-                
-                # 디버깅: 미래시제 형태 확인 (완료상)
-                if base_tag == 'fin' and 'perf' in form_tag_full.split(':'):
-                    future_forms_perf += 1
-                    print(f"[디버그-미래시제] 미래 완료형 발견 #{future_forms_perf}: '{form}', 태그: '{form_tag_full}'")
-                    
-                    # 인칭/수 정보 추출 디버깅
-                    parts = form_tag_full.split(':')
-                    number = next((p for p in parts if p in ['sg', 'pl']), 'unknown')
-                    person = next((p for p in parts if p in ['pri', 'sec', 'ter']), 'unknown')
-                    print(f"[디버그-미래시제] 태그 파싱 결과 - 수: {number}, 인칭: {person}")
-                
-                # --- 비인칭 형태 감지 및 처리 (향상됨) ---
-                is_impersonal = False
-                if check_func == is_verb: # Only check for impersonals if processing a verb
-                    is_impersonal = is_impersonal_form(form, form_tag_full)
-                    if is_impersonal:
-                        impersonal_forms_found += 1
-                        print(f"[디버그-비인칭] 비인칭 형태 발견 #{impersonal_forms_found}: '{form}', 태그: '{form_tag_full}'")
-                        
-                        # 현재 비인칭 형태 저장
-                        if base_tag == 'imps' and not (form.endswith('no') or form.endswith('to')):
-                            if form not in present_impersonal_forms:
-                                present_impersonal_forms.append(form)
-                                print(f"[디버그-비인칭] 현재 비인칭 형태 저장: '{form}'")
+                # ... (Filtering, e.g., negative gerunds) ...
+                if base_tag == 'ger' and ':neg' in form_tag_full: continue 
 
-                # --- Store infinitive ---
-                if base_tag == 'inf':
-                    infinitive_form = form
-                    print(f"      >> Found infinitive: {infinitive_form}")
-                # -----------------------
-
-                # --- Store past tense forms needed for conditional ---
+                # ... (Store key forms like infinitive, past_forms, impersonals) ...
+                if base_tag == 'inf': infinitive_form = form
+                if base_tag == 'imps' and (form.endswith('no') or form.endswith('to')): past_impersonal_form = form
+                if check_func == is_verb and is_impersonal_form(form, form_tag_full) and base_tag == 'imps' and not (form.endswith('no') or form.endswith('to')):
+                    if form not in present_impersonal_forms: present_impersonal_forms.append(form)
                 if base_tag == 'praet':
                     parts = form_tag_full.split(':')
-                    num_gen_key = None
-                    # 과거시제 형태 저장 개선 - 보다 세부적인 성별 구분 지원
-                    if 'sg' in parts:
-                        num = 'sg'
-                        # 단수형에서 더 세부적인 성별 처리 (m1, m2, m3, f, n1, n2, m1.m2.m3 등 모든 가능한 성별 포함)
-                        for gen in parts:
-                            # 복합 태그(m1.m2.m3 등) 분리해서 각각 past_forms에 넣기
-                            if '.' in gen:
-                                for subgen in gen.split('.'):
-                                    if subgen in ['m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2']:
-                                        num_gen_key = f"{num}:{subgen}"
-                                        past_forms[num_gen_key] = form
-                                        print(f"      >> Found past form for {num_gen_key} (from composite tag {gen}): {form}")
-                            # 기존 단일 태그 처리
-                            if gen in ['m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2']:
-                                num_gen_key = f"{num}:{gen}"
-                                past_forms[num_gen_key] = form
-                                print(f"      >> Found past form for {num_gen_key}: {form}")
-                    elif 'pl' in parts:
-                        num = 'pl'
-                        # 복수형에서 더 세부적인 처리 (m1, non-m1, m2.m3.f.n 등 가능한 모든 조합)
-                        for gen in parts:
-                            if gen in ['m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2', 'non-m1', 'm2.m3.f.n']:
-                                num_gen_key = f"{num}:{gen}"
-                                if num_gen_key:
-                                    past_forms[num_gen_key] = form
-                                    print(f"      >> Found past form for {num_gen_key}: {form}")
-                    
-                    # 추가: 인칭 정보 명시적으로 처리
-                    person = None
-                    # 태그에서 인칭 정보 직접 확인
-                    for part in parts:
-                        if part in ['pri', 'sec', 'ter']:
-                            person = part
-                            break
-                    
-                    # 태그에 인칭 정보가 없을 경우 형태에서 추론
-                    if person is None:
+                    num = next((p for p in parts if p in ['sg', 'pl']), None)
+                    if num:
+                        for gen_part in parts:
+                            if '.' in gen_part: # Composite tag like m1.m2.m3
+                                for subgen in gen_part.split('.'):
+                                    if subgen in ['m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2']: 
+                                        k = f"{num}:{subgen}"
+                                        if k not in past_forms: past_forms[k] = form
+                            elif gen_part in ['m1','m2','m3','f','n','n1','n2','non-m1']: # Single tag
+                                k = f"{num}:{gen_part}"
+                                past_forms[k] = form # Prefer specific
+                    person = next((p for p in parts if p in ['pri', 'sec', 'ter']), None)
+                    if person is None: # Infer if missing
                         if form.endswith(('łem', 'łam')): person = 'pri'
                         elif form.endswith(('łeś', 'łaś')): person = 'sec'
                         elif form.endswith(('ł', 'ła', 'ło')): person = 'ter'
                         elif form.endswith(('liśmy', 'łyśmy')): person = 'pri'
                         elif form.endswith(('liście', 'łyście')): person = 'sec'
                         elif form.endswith(('li', 'ły')): person = 'ter'
-                    
-                    if person:
-                        form_tag_full += f':{person}' # Append inferred person
-                # --------------------------------------------------
+                    if person and f':{person}:' not in f':{form_tag_full}:': form_tag_full += f':{person}'
 
-                # --- 과거 비인칭 형태 저장 (no/to 형태) ---
-                if base_tag == 'imps' and (form.endswith('no') or form.endswith('to')):
-                    past_impersonal_form = form
-                    print(f"      >> Found past impersonal form: {past_impersonal_form}")
-                # --------------------------------------------------
-
-                # --- 수정: 품사 종류에 따라 적절한 카테고리 키 함수 사용 ---
+                # ... (Get category_key using category_func, refine for impersonals) ...
                 category_key = None
-                if check_func == is_verb:
-                    category_key = get_conjugation_category_key(base_tag, form_tag_full)
-                elif check_func == is_declinable:
-                    category_key = get_declension_category_key(base_tag, form_tag_full)
-                # -----------------------------------------------------
+                if check_func == is_verb: category_key = get_conjugation_category_key(base_tag, form_tag_full)
+                elif check_func == is_declinable: category_key = get_declension_category_key(base_tag, form_tag_full)
+                if check_func == is_verb and is_impersonal_form(form, form_tag_full):
+                   if form.endswith(('no', 'to')): category_key = 'conjugationCategoryPastImpersonal'
+                   elif base_tag == 'imps': category_key = 'conjugationCategoryPresentImpersonal'
+                   elif base_tag in ['impt', 'impt_imps'] or 'impt' in form_tag_full : category_key = 'conjugationCategoryImperativeImpersonal'
+                   elif base_tag == 'fut_imps': category_key = 'conjugationCategoryFutureImpersonal'
+                   elif base_tag == 'cond_imps': category_key = 'conjugationCategoryConditionalImpersonal'
 
-                # --- 향상된 비인칭 카테고리 분류 (업데이트됨) ---
-                if is_impersonal: # This check is now inside the is_verb specific logic above
-                    if form.endswith(('no', 'to')):
-                        category_key = 'conjugationCategoryPastImpersonal'
-                    elif base_tag == 'imps':
-                        category_key = 'conjugationCategoryPresentImpersonal'
-                    elif base_tag == 'impt' or 'impt' in form_tag_full:
-                        category_key = 'conjugationCategoryImperativeImpersonal'
-                # -------------------------------------------------
-
+                # ... (Append form_data to grouped_forms[category_key], avoid duplicates) ...
                 if category_key:
                     form_data = {"form": form, "tag": form_tag_full, "qualifiers": qualifiers}
-                    if category_key not in grouped_forms:
-                         grouped_forms[category_key] = []
-                    grouped_forms[category_key].append(form_data)
-                else:
-                    pass # Explicitly pass if skipping
+                    if category_key not in grouped_forms: grouped_forms[category_key] = []
+                    if form_data not in grouped_forms[category_key]: grouped_forms[category_key].append(form_data)
 
             except Exception as form_proc_error:
-                print(f"!!!!! ERROR processing form tuple: {form_tuple} !!!!!")
-                print(f"!!!!! Form Processing Error: {form_proc_error}")
-                import traceback
-                traceback.print_exc() # Keep traceback for unexpected errors
-                continue 
-        # --- End processing loop ---
-        
-        # 디버깅: 동명사 결과 요약
-        print(f"[디버그-동명사] 동명사 처리 결과: 발견된 형태 {gerund_forms_found}개")
-        if 'conjugationCategoryVerbalNoun' in grouped_forms:
-            print(f"[디버그-동명사] 집계된 동명사 형태: {len(grouped_forms['conjugationCategoryVerbalNoun'])}개")
-            for idx, form_data in enumerate(grouped_forms['conjugationCategoryVerbalNoun']):
-                print(f"[디버그-동명사] #{idx+1}: 형태='{form_data['form']}', 태그='{form_data['tag']}'")
-        else:
-            print(f"[디버그-동명사] 최종 결과에 포함된 동명사 없음")
-        
-        # 디버깅: 비인칭 결과 요약
-        print(f"[디버그-비인칭] 비인칭 처리 결과: 발견된 형태 {impersonal_forms_found}개")
-        print(f"[디버그-비인칭] 현재 비인칭 형태: {present_impersonal_forms}")
-        print(f"[디버그-비인칭] 과거 비인칭 형태: {past_impersonal_form}")
+                print(f"      [_generate_grouped_forms] ERROR processing form tuple: {form_tuple} - {form_proc_error}")
+                continue
+        # --- End Form Processing Loop ---
 
-        # --- 향상된 비인칭 형태 생성 ---
-        # 1. 과거 비인칭 형태가 있는 경우 미래/조건 비인칭 생성
+        # --- Post-processing (Impersonal, Future, Conditional - Copied from previous version) ---
+        # (This extensive block should be copied here without changes from the previous working version)
         if past_impersonal_form:
-            # 미래 비인칭 (다양한 변형)
             future_imps_key = 'conjugationCategoryFutureImpersonal'
             if future_imps_key not in grouped_forms: grouped_forms[future_imps_key] = []
-            
-            # 기본 미래 비인칭 (będzie + 과거 비인칭)
-            future_imps_form1 = f"będzie {past_impersonal_form}"
-            grouped_forms[future_imps_key].append({
-                "form": future_imps_form1, 
-                "tag": "fut_imps:imperf", 
-                "qualifiers": []
-            })
-            print(f"[디버그-비인칭] 미래 비인칭 생성 (기본): {future_imps_form1}")
-            
-            # się가 있는 미래 비인칭 (będzie się + 과거 비인칭)
-            future_imps_form2 = f"będzie się {past_impersonal_form}"
-            grouped_forms[future_imps_key].append({
-                "form": future_imps_form2, 
-                "tag": "fut_imps:imperf:refl", 
-                "qualifiers": []
-            })
-            print(f"[디버그-비인칭] 미래 비인칭 생성 (się): {future_imps_form2}")
-
-            # 조건 비인칭 (다양한 변형)
+            f1 = f"będzie {past_impersonal_form}"
+            f2 = f"będzie się {past_impersonal_form}"
+            if not any(d['form'] == f1 for d in grouped_forms[future_imps_key]): grouped_forms[future_imps_key].append({"form": f1, "tag": "fut_imps:imperf", "qualifiers": []})
+            if not any(d['form'] == f2 for d in grouped_forms[future_imps_key]): grouped_forms[future_imps_key].append({"form": f2, "tag": "fut_imps:imperf:refl", "qualifiers": []})
             cond_imps_key = 'conjugationCategoryConditionalImpersonal'
             if cond_imps_key not in grouped_forms: grouped_forms[cond_imps_key] = []
-            
-            # 기본 조건 비인칭 (standard by + past impersonal)
-            cond_imps_form1 = f"{past_impersonal_form} by"
-            grouped_forms[cond_imps_key].append({
-                "form": cond_imps_form1, 
-                "tag": "cond_imps", 
-                "qualifiers": []
-            })
-            print(f"[디버그-비인칭] 조건 비인칭 생성 (기본): {cond_imps_form1}")
-            
-            # 대체 조건 비인칭 (by + past impersonal)
-            cond_imps_form2 = f"by {past_impersonal_form}"
-            grouped_forms[cond_imps_key].append({
-                "form": cond_imps_form2, 
-                "tag": "cond_imps:alt", 
-                "qualifiers": []
-            })
-            print(f"[디버그-비인칭] 조건 비인칭 생성 (대체): {cond_imps_form2}")
-            
-            # się가 있는 조건 비인칭
-            if not has_reflexive_sie:  # 이미 reflexive 동사가 아닌 경우에만
-                cond_imps_form3 = f"{past_impersonal_form} by się"
-                grouped_forms[cond_imps_key].append({
-                    "form": cond_imps_form3, 
-                    "tag": "cond_imps:refl", 
-                    "qualifiers": []
-                })
-                print(f"[디버그-비인칭] 조건 비인칭 생성 (się): {cond_imps_form3}")
-        
-        # 2. 현재 비인칭 형태가 있는 경우
-        if present_impersonal_forms and len(present_impersonal_forms) > 0:
-            # 명령형 비인칭 생성
+            c1 = f"{past_impersonal_form} by"
+            c2 = f"by {past_impersonal_form}"
+            c3 = f"{past_impersonal_form} by się"
+            if not any(d['form'] == c1 for d in grouped_forms[cond_imps_key]): grouped_forms[cond_imps_key].append({"form": c1, "tag": "cond_imps", "qualifiers": []})
+            if not any(d['form'] == c2 for d in grouped_forms[cond_imps_key]): grouped_forms[cond_imps_key].append({"form": c2, "tag": "cond_imps:alt", "qualifiers": []})
+            if not has_reflexive_sie and not any(d['form'] == c3 for d in grouped_forms[cond_imps_key]): grouped_forms[cond_imps_key].append({"form": c3, "tag": "cond_imps:refl", "qualifiers": []})
+        if present_impersonal_forms:
             impt_imps_key = 'conjugationCategoryImperativeImpersonal'
             if impt_imps_key not in grouped_forms: grouped_forms[impt_imps_key] = []
-            
-            for present_form in present_impersonal_forms:
-                impt_imps_form = f"{IMPERSONAL_IMPERATIVE_PREFIX} {present_form}"
-                grouped_forms[impt_imps_key].append({
-                    "form": impt_imps_form,
-                    "tag": "impt_imps",
-                    "qualifiers": []
-                })
-                print(f"[디버그-비인칭] 명령형 비인칭 생성: {impt_imps_form}")
-        
-        # 3. 부정형 비인칭 추가 (현재 비인칭 기준)
-        if present_impersonal_forms and len(present_impersonal_forms) > 0:
+            for pf in present_impersonal_forms:
+                iif = f"{IMPERSONAL_IMPERATIVE_PREFIX} {pf}"
+                if not any(d['form'] == iif for d in grouped_forms[impt_imps_key]): grouped_forms[impt_imps_key].append({"form": iif, "tag": "impt_imps", "qualifiers": []})
             present_imps_key = 'conjugationCategoryPresentImpersonal'
-            
-            # 부정형 추가
-            for present_form in present_impersonal_forms:
-                if not present_form.startswith("nie "):  # 이미 부정형이 아닌 경우에만
-                    neg_form = f"nie {present_form}"
-                    grouped_forms[present_imps_key].append({
-                        "form": neg_form,
-                        "tag": "imps:neg",
-                        "qualifiers": []
-                    })
-                    print(f"[디버그-비인칭] 부정 현재 비인칭 추가: {neg_form}")
-        # ----------------------------------------------
-
-        # --- Generate Future Imperfective / Conditional ---
-        if is_primary_imperfective:
-            # 1. Future Imperfective (using infinitive)
+            if present_imps_key not in grouped_forms: grouped_forms[present_imps_key] = [] 
+            for pf in present_impersonal_forms:
+                if not pf.startswith("nie "):
+                    nf = f"nie {pf}"
+                    if not any(d['form'] == nf for d in grouped_forms[present_imps_key]): grouped_forms[present_imps_key].append({"form": nf, "tag": "imps:neg", "qualifiers": []})
+        if is_imperfective:
             if infinitive_form:
                 future_key = 'conjugationCategoryFutureImperfectiveIndicative'
-                print(f"[디버그-미래시제] 미래 미완료형 생성 시작: infinitive='{infinitive_form}'")
                 if future_key not in grouped_forms: grouped_forms[future_key] = []
-                for num_pers, aux_form in BYC_FUTURE_FORMS.items():
-                    num, pers = num_pers.split(':')
-                    generated_form = f"{aux_form} {infinitive_form}"
-                    generated_tag = f"fut:{num}:{pers}:imperf" # Construct a tag
-                    print(f"      >> Generating Future Imperfective: {generated_form} ({generated_tag})")
-                    future_forms_imperf += 1
-                    grouped_forms[future_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
-                
-                print(f"[디버그-미래시제] 미래 미완료형 생성 완료: {future_forms_imperf}개 생성됨")
-            else:
-                print(f"      >> Cannot generate Future Imperfective: Infinitive form not found.")
-
-            # 2. Conditional (using past forms)
-            # 중요: 알고리즘 추측을 최소화하고 morf에서 직접 가져온 형태 우선 사용
+                for np, aux in BYC_FUTURE_FORMS.items():
+                    num, pers = np.split(':')
+                    gf = f"{aux} {infinitive_form}"
+                    gt = f"fut:{num}:{pers}:imperf"
+                    if not any(d['form'] == gf for d in grouped_forms[future_key]):
+                        grouped_forms[future_key].append({"form": gf, "tag": gt, "qualifiers": []})
             conditional_key = 'conjugationCategoryConditional'
             if conditional_key not in grouped_forms: grouped_forms[conditional_key] = []
-            
-            # 2-1. Morfeusz에서 직접 조건법 형태 찾기
-            direct_conditional_forms = []
-            for form_tuple in generated_forms_raw:
-                if len(form_tuple) < 3:
-                    continue
-                form = form_tuple[0]
-                form_tag_full = form_tuple[2]
-                if form_tag_full.startswith('cond:'):
-                    print(f"      >> Found direct conditional form: {form}, tag: {form_tag_full}")
-                    direct_conditional_forms.append(form_tuple)
-                    # 바로 그룹에 추가
-                    base_tag = form_tag_full.split(':', 1)[0]
-                    qualifiers = list(form_tuple[3:]) if len(form_tuple) > 3 else []
-                    form_data = {"form": form, "tag": form_tag_full, "qualifiers": qualifiers}
-                    grouped_forms[conditional_key].append(form_data)
-            
-            print(f"[디버그-조건법] Morfeusz에서 직접 찾은 조건법 형태 수: {len(direct_conditional_forms)}")
-            
-            # 2-2. 직접 찾은 형태가 충분하지 않은 경우에만 생성
-            if len(direct_conditional_forms) < 6:  # 최소한 몇 개의 기본 형태가 있어야 함
-                print(f"[디버그-조건법] 직접 찾은 조건법 형태가 부족하여 필요한 형태 생성 시도")
-                if past_forms:
-                    for num_pers, particle in BY_CONDITIONAL_PARTICLES.items():
-                        num, pers = num_pers.split(':')
-                        # 이미 해당 인칭/수에 대한 형태가 있는지 확인
-                        has_existing_form = any(
-                            form["tag"].startswith(f"cond:{num}:") and f":{pers}:" in form["tag"]
-                            for form in grouped_forms[conditional_key]
-                        )
-                        
-                        if has_existing_form:
-                            print(f"      >> Skipping generation for {num}:{pers} - already exists in direct forms")
-                            continue
-                        
-                        # Find corresponding past forms based on number and gender
-                        if num == 'sg':
-                            # 수정: 모든 필요한 단수 성별을 명시적으로 처리 (중성 포함)
-                            genders_to_try = []
-                            
-                            # 남성 단수 형태들 - m1, m2, m3 중 있는 것 사용
-                            if 'sg:m1' in past_forms: 
-                                genders_to_try.append('m1')
-                                past_key = 'sg:m1'
-                                if past_key in past_forms:
-                                    base_past = past_forms[past_key]
-                                    generated_form = f"{base_past}{particle}" # Attach particle
-                                    generated_tag = f"cond:{num}:m1:{pers}:imperf"
-                                    print(f"      >> Generating Conditional (남성 인격): {generated_form} ({generated_tag})")
-                                    grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
-                            
-                            if 'sg:m2' in past_forms:
-                                genders_to_try.append('m2')
-                                past_key = 'sg:m2'
-                                if past_key in past_forms:
-                                    base_past = past_forms[past_key]
-                                    generated_form = f"{base_past}{particle}" # Attach particle
-                                    generated_tag = f"cond:{num}:m2:{pers}:imperf"
-                                    print(f"      >> Generating Conditional (남성 동물): {generated_form} ({generated_tag})")
-                                    grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
-                                    
-                            if 'sg:m3' in past_forms:
-                                genders_to_try.append('m3')
-                                past_key = 'sg:m3'
-                                if past_key in past_forms:
-                                    base_past = past_forms[past_key]
-                                    generated_form = f"{base_past}{particle}" # Attach particle
-                                    generated_tag = f"cond:{num}:m3:{pers}:imperf"
-                                    print(f"      >> Generating Conditional (남성 사물): {generated_form} ({generated_tag})")
-                                    grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
-                            
-                            # 만약 sg:m, sg:m1, sg:m2, sg:m3 중 어느 것도 없다면 m1.m2.m3 키를 확인
-                            if 'sg:m1.m2.m3' in past_forms and not (set(genders_to_try) & set(['m1', 'm2', 'm3'])):
-                                past_key = 'sg:m1.m2.m3'
-                                if past_key in past_forms:
-                                    base_past = past_forms[past_key]
-                                    # 남성 전체 형태를 각각의 세부 성별로 복제 (m1, m2, m3)
-                                    for m_gender in ['m1', 'm2', 'm3']:
-                                        generated_form = f"{base_past}{particle}" # Attach particle
-                                        generated_tag = f"cond:{num}:{m_gender}:{pers}:imperf"
-                                        print(f"      >> Generating Conditional (남성 통합): {generated_form} ({generated_tag})")
-                                        grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
-                            
-                            # 여성 단수 형태
-                            if 'sg:f' in past_forms:
-                                past_key = 'sg:f'
-                                if past_key in past_forms:
-                                    base_past = past_forms[past_key]
-                                    generated_form = f"{base_past}{particle}" # Attach particle
-                                    generated_tag = f"cond:{num}:f:{pers}:imperf"
-                                    print(f"      >> Generating Conditional (여성): {generated_form} ({generated_tag})")
-                                    grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
-                            
-                            # 중성 단수 형태 - 이 부분을 누락하지 않도록 명시적으로 처리
-                            if 'sg:n' in past_forms:
-                                past_key = 'sg:n'
-                                if past_key in past_forms:
-                                    base_past = past_forms[past_key]
-                                    generated_form = f"{base_past}{particle}" # Attach particle
-                                    generated_tag = f"cond:{num}:n:{pers}:imperf"
-                                    print(f"      >> Generating Conditional (중성): {generated_form} ({generated_tag})")
-                                    grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
-                            elif 'sg:n1' in past_forms or 'sg:n2' in past_forms:
-                                # n1, n2 등의 세부 구분이 있는 경우
-                                for n_type in ['n1', 'n2']:
-                                    past_key = f'sg:{n_type}'
-                                    if past_key in past_forms:
-                                        base_past = past_forms[past_key]
-                                        generated_form = f"{base_past}{particle}" # Attach particle
-                                        generated_tag = f"cond:{num}:{n_type}:{pers}:imperf"
-                                        print(f"      >> Generating Conditional (중성 세부): {generated_form} ({generated_tag})")
-                                        grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
-
-                        elif num == 'pl':
-                            # 복수 형태도 더 세부적으로 처리 - m1(남성 인격) 외에도 non-m1 형태도 포함
-                            genders_to_try = ['m1', 'm2.m3.f.n', 'non-m1']
-                            for gender in genders_to_try:
-                                past_key = f"pl:{gender}"
-                                if past_key in past_forms:
-                                    base_past = past_forms[past_key]
-                                    generated_form = f"{base_past}{particle}" # Attach particle
-                                    generated_tag = f"cond:{num}:{gender}:{pers}:imperf" # Use simplified gender tag
-                                    print(f"      >> Generating Conditional: {generated_form} ({generated_tag})")
-                                    grouped_forms[conditional_key].append({"form": generated_form, "tag": generated_tag, "qualifiers": []})
-                else:
-                     print(f"      >> Cannot generate Conditional: Past tense forms not found.")
-        # ---------------------------------------------------
+            if len(grouped_forms.get(conditional_key, [])) < 6 and past_forms:
+                print(f"      [_generate_grouped_forms] Attempting conditional generation based on past forms for {lemma_to_generate}")
+                for np, particle in BY_CONDITIONAL_PARTICLES.items():
+                    num, pers = np.split(':')
+                    genders_to_try = sorted(list(set(k.split(':')[1] for k in past_forms.keys() if k.startswith(f'{num}:'))))
+                    if not genders_to_try and num == 'pl': genders_to_try = ['m1', 'non-m1'] 
+                    if not genders_to_try and num == 'sg': genders_to_try = ['m1', 'f', 'n'] 
+                    for gender in genders_to_try:
+                        past_key_specific = f"{num}:{gender}"
+                        past_key_composite = None # Logic to find composite tag if specific is missing
+                        if num == 'sg' and gender in ['m1','m2','m3'] and 'sg:m1.m2.m3' in past_forms: past_key_composite = 'sg:m1.m2.m3'
+                        elif num == 'pl' and gender in ['m2','m3','f','n','non-m1'] and 'pl:m2.m3.f.n' in past_forms: past_key_composite = 'pl:m2.m3.f.n'
+                        elif num == 'pl' and gender == 'non-m1' and 'pl:m2.m3.f.n' in past_forms: past_key_composite = 'pl:m2.m3.f.n'
+                        base_past = past_forms.get(past_key_specific) or past_forms.get(past_key_composite)
+                        if base_past:
+                            gf = f"{base_past}{particle}"
+                            gt = f"cond:{num}:{gender}:{pers}:imperf"
+                            is_already_present = any(f['form'] == gf and f['tag'] == gt for f in grouped_forms.get(conditional_key, []))
+                            if not is_already_present:
+                                grouped_forms[conditional_key].append({"form": gf, "tag": gt, "qualifiers": []})
+        # --- End Post-processing ---
         
-        # 디버깅: 미래시제 결과 요약
-        print(f"[디버그-미래시제] 미래시제 처리 결과: 완료형 {future_forms_perf}개, 미완료형 {future_forms_imperf}개")
-        
-        # 미래 완료형 결과
-        if 'conjugationCategoryFuturePerfectiveIndicative' in grouped_forms:
-            print(f"[디버그-미래시제] 집계된 미래 완료형: {len(grouped_forms['conjugationCategoryFuturePerfectiveIndicative'])}개")
-            for idx, form_data in enumerate(grouped_forms['conjugationCategoryFuturePerfectiveIndicative']):
-                print(f"[디버그-미래시제] 완료형 #{idx+1}: 형태='{form_data['form']}', 태그='{form_data['tag']}'")
-        
-        # 미래 미완료형 결과
-        if 'conjugationCategoryFutureImperfectiveIndicative' in grouped_forms:
-            print(f"[디버그-미래시제] 집계된 미래 미완료형: {len(grouped_forms['conjugationCategoryFutureImperfectiveIndicative'])}개")
-            for idx, form_data in enumerate(grouped_forms['conjugationCategoryFutureImperfectiveIndicative']):
-                print(f"[디버그-미래시제] 미완료형 #{idx+1}: 형태='{form_data['form']}', 태그='{form_data['tag']}'")
-
-        final_grouped_forms = grouped_forms
-
-        print(f"  -> Final grouped forms categories: {list(final_grouped_forms.keys())}")
-        return {"lemma": primary_lemma, "grouped_forms": final_grouped_forms}
+        return grouped_forms
 
     except Exception as e:
-        print(f"Error during form generation for '{word}': {e}")
+        print(f"    [_generate_grouped_forms] Error generating forms for '{lemma_to_generate}': {e}")
         import traceback
-        traceback.print_exc() # Print full traceback for debugging
-        return None # Return None on exception
+        traceback.print_exc() 
+        return {} # Return empty dict on error within helper
+
+# --- NEW Helper Function: Check if grouped_forms result is valid --- 
+def _is_form_result_valid(grouped_forms, check_func, base_tag, full_tag):
+    """Checks if the grouped_forms dictionary contains meaningful data."""
+    print(f"[_is_form_result_valid] Checking validity for {'verb' if check_func == is_verb else 'declinable'}. Grouped forms: {grouped_forms}") # Add more logging
+    if not grouped_forms:
+        print("[_is_form_result_valid] Invalid: grouped_forms is empty.")
+        return False
+    
+    if check_func == is_verb:
+        # Check if any core verb category has actual forms
+        verb_keys_to_check = [
+            'conjugationCategoryPresentIndicative', 
+            'conjugationCategoryPastTense', 
+            'conjugationCategoryInfinitive',
+            'conjugationCategoryFuturePerfectiveIndicative',
+            'conjugationCategoryFutureImperfectiveIndicative',
+            'conjugationCategoryPresentActiveParticiple', 
+            'conjugationCategoryPastPassiveParticiple'
+        ]
+        is_valid = any(key in grouped_forms and grouped_forms[key] for key in verb_keys_to_check)
+        print(f"[_is_form_result_valid] Verb validity check: {is_valid}")
+        return is_valid
+    
+    elif check_func == is_declinable:
+        # Check the specific category expected for this declinable word
+        expected_category_key = get_declension_category_key(base_tag, full_tag)
+        print(f"[_is_form_result_valid] Expected key for declinable: {expected_category_key}")
+        if expected_category_key in grouped_forms and grouped_forms[expected_category_key]:
+            # --- MODIFIED VALIDITY CHECK --- 
+            # Check if there are MORE THAN ONE distinct forms in the main category.
+            # This prevents accepting results where only the base form itself was generated.
+            num_forms = len(grouped_forms[expected_category_key])
+            is_valid = num_forms > 1 
+            print(f"[_is_form_result_valid] Declinable validity check: Key '{expected_category_key}' found with {num_forms} forms. Valid: {is_valid}")
+            return is_valid
+        else:
+            print(f"[_is_form_result_valid] Declinable validity check: Expected key '{expected_category_key}' not found or empty.")
+            return False # Category not found or empty
+        
+    print("[_is_form_result_valid] Unknown check_func, defaulting to valid.")
+    return True # Default to valid if check_func is unknown
 
 # --- NEW Helper function to get category key (similar to frontend) ---
 # Maps Morfeusz base tags (and sometimes qualifiers) to frontend category keys
