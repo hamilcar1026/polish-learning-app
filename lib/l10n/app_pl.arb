@@ -280,5 +280,7 @@
   "fontSizeSmall": "Mały",
   "fontSizeMedium": "Średni",
   "fontSizeLarge": "Duży",
-  "copyrightNotice": "Ten program został stworzony przy użyciu API morfeusz2."
+  "copyrightNotice": "Ten program został stworzony przy użyciu API morfeusz2.",
+  "qualifier_wok": "klityka (wokaliczna)",
+  "qualifier_nwok": "klityka (niewokaliczna)"
 } 

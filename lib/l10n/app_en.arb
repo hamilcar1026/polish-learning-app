@@ -315,5 +315,7 @@
    "fontSizeSmall": "Small",
    "fontSizeMedium": "Medium",
    "fontSizeLarge": "Large",
-   "copyrightNotice": "This program was created using the morfeusz2 api."
+   "copyrightNotice": "This program was created using the morfeusz2 api.",
+   "qualifier_wok": "clitic (vocalic)",
+   "qualifier_nwok": "clitic (non-vocalic)"
 } 

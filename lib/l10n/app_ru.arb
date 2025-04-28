@@ -285,5 +285,7 @@
   "@addToFavorites": {
     "description": "Подсказка для кнопки добавления слова в избранное."
   },
-  "copyrightNotice": "Эта программа была создана с использованием API morfeusz2."
+  "copyrightNotice": "Эта программа была создана с использованием API morfeusz2.",
+  "qualifier_wok": "клитика (гласн.)",
+  "qualifier_nwok": "клитика (согл.)"
 } 
