@@ -70,6 +70,187 @@ IMPERSONAL_SIE_PATTERNS = {
 IMPERSONAL_IMPERATIVE_PREFIX = "niech"
 # ---------------------------
 
+# --- 하드코딩된 곡용 데이터 --- 
+hardcoded_declensions = {
+    "ja": {
+        "lemma": "ja",
+        "grouped_forms": {
+            "declensionCategoryPronoun": [
+                {"form": "ja", "tag": "ppron12:sg:nom:m1"},
+                {"form": "mnie", "tag": "ppron12:sg:gen:m1"},
+                {"form": "mi", "tag": "ppron12:sg:dat:m1"},
+                {"form": "mnie", "tag": "ppron12:sg:acc:m1"},
+                {"form": "mną", "tag": "ppron12:sg:inst:m1"},
+                {"form": "mnie", "tag": "ppron12:sg:loc:m1"},
+            ]
+        },
+        "translation_en": "I" # 번역 정보도 추가
+    },
+    "ty": {
+        "lemma": "ty",
+        "grouped_forms": {
+            "declensionCategoryPronoun": [
+                {"form": "ty", "tag": "ppron12:sg:nom:m1"},
+                {"form": "ciebie", "tag": "ppron12:sg:gen:m1"},
+                {"form": "ci", "tag": "ppron12:sg:dat:m1"}, # Short form
+                {"form": "tobie", "tag": "ppron12:sg:dat:m1"}, # Long form
+                {"form": "ciebie", "tag": "ppron12:sg:acc:m1"},
+                {"form": "tobą", "tag": "ppron12:sg:inst:m1"},
+                {"form": "tobie", "tag": "ppron12:sg:loc:m1"},
+                {"form": "ty", "tag": "ppron12:sg:voc:m1"},
+            ]
+        },
+        "translation_en": "you (sg.)"
+    },
+    "on": {
+        "lemma": "on",
+        "grouped_forms": {
+            "declensionCategoryPronoun": [
+                {"form": "on", "tag": "ppron3:sg:nom:m1"},
+                {"form": "niego", "tag": "ppron3:sg:gen:m1"},
+                {"form": "jemu", "tag": "ppron3:sg:dat:m1"}, # or mu
+                {"form": "mu", "tag": "ppron3:sg:dat:m1"}, 
+                {"form": "go", "tag": "ppron3:sg:acc:m1"},   # or niego
+                {"form": "niego", "tag": "ppron3:sg:acc:m1"},
+                {"form": "nim", "tag": "ppron3:sg:inst:m1"},
+                {"form": "nim", "tag": "ppron3:sg:loc:m1"},
+                # --- Add m2/m3 specific forms if different (often overlap) ---
+                {"form": "on", "tag": "ppron3:sg:nom:m2"}, # Same nom
+                {"form": "niego", "tag": "ppron3:sg:gen:m2"}, # Same gen
+                {"form": "jemu", "tag": "ppron3:sg:dat:m2"}, # Same dat
+                {"form": "mu", "tag": "ppron3:sg:dat:m2"}, 
+                {"form": "go", "tag": "ppron3:sg:acc:m2"},   # Same acc
+                {"form": "niego", "tag": "ppron3:sg:acc:m2"}, 
+                {"form": "nim", "tag": "ppron3:sg:inst:m2"}, # Same inst
+                {"form": "nim", "tag": "ppron3:sg:loc:m2"}, # Same loc
+                {"form": "on", "tag": "ppron3:sg:nom:m3"}, # Same nom
+                {"form": "niego", "tag": "ppron3:sg:gen:m3"}, # Same gen
+                {"form": "jemu", "tag": "ppron3:sg:dat:m3"}, # Same dat
+                {"form": "mu", "tag": "ppron3:sg:dat:m3"}, 
+                {"form": "go", "tag": "ppron3:sg:acc:m3"},   # Same acc
+                {"form": "niego", "tag": "ppron3:sg:acc:m3"},
+                {"form": "nim", "tag": "ppron3:sg:inst:m3"}, # Same inst
+                {"form": "nim", "tag": "ppron3:sg:loc:m3"}, # Same loc
+            ]
+        },
+        "translation_en": "he/it (masc.)"
+    },
+    "ona": {
+        "lemma": "ona",
+        "grouped_forms": {
+            "declensionCategoryPronoun": [
+                {"form": "ona", "tag": "ppron3:sg:nom:f"},
+                {"form": "niej", "tag": "ppron3:sg:gen:f"},
+                {"form": "jej", "tag": "ppron3:sg:dat:f"}, # or niej
+                {"form": "niej", "tag": "ppron3:sg:dat:f"},
+                {"form": "ją", "tag": "ppron3:sg:acc:f"},  # or nią
+                {"form": "nią", "tag": "ppron3:sg:acc:f"},
+                {"form": "nią", "tag": "ppron3:sg:inst:f"},
+                {"form": "niej", "tag": "ppron3:sg:loc:f"},
+            ]
+        },
+        "translation_en": "she/it (fem.)"
+    },
+    "ono": {
+        "lemma": "ono",
+        "grouped_forms": {
+            "declensionCategoryPronoun": [
+                {"form": "ono", "tag": "ppron3:sg:nom:n"},
+                {"form": "niego", "tag": "ppron3:sg:gen:n"}, # or go
+                {"form": "go", "tag": "ppron3:sg:gen:n"}, 
+                {"form": "jemu", "tag": "ppron3:sg:dat:n"}, # or mu
+                {"form": "mu", "tag": "ppron3:sg:dat:n"}, 
+                {"form": "je", "tag": "ppron3:sg:acc:n"},  # or nie
+                {"form": "nie", "tag": "ppron3:sg:acc:n"},
+                {"form": "nim", "tag": "ppron3:sg:inst:n"},
+                {"form": "nim", "tag": "ppron3:sg:loc:n"},
+            ]
+        },
+        "translation_en": "it (neuter)"
+    },
+    "siebie": {
+        "lemma": "siebie",
+        "grouped_forms": {
+             # Note: Need a specific category or use Pronoun? Pronoun is fine.
+             # Tags need careful consideration for parsing on frontend
+            "declensionCategoryPronoun": [
+                # No nominative/vocative
+                {"form": "siebie", "tag": "siebie:gen:nodist"}, # Add :nodist or similar if gender/number don't apply
+                {"form": "sobie", "tag": "siebie:dat:nodist"},
+                {"form": "siebie", "tag": "siebie:acc:nodist"},
+                {"form": "sobą", "tag": "siebie:inst:nodist"},
+                {"form": "sobie", "tag": "siebie:loc:nodist"},
+            ]
+        },
+        "translation_en": "oneself"
+    },
+    # --- Plural pronouns --- 
+    "my": {
+        "lemma": "my",
+        "grouped_forms": {
+            "declensionCategoryPronoun": [
+                {"form": "my", "tag": "ppron12:pl:nom:m1"}, # Gender usually doesn't matter for 1st/2nd pl nom
+                {"form": "nas", "tag": "ppron12:pl:gen:m1"},
+                {"form": "nam", "tag": "ppron12:pl:dat:m1"},
+                {"form": "nas", "tag": "ppron12:pl:acc:m1"},
+                {"form": "nami", "tag": "ppron12:pl:inst:m1"},
+                {"form": "nas", "tag": "ppron12:pl:loc:m1"},
+            ]
+        },
+        "translation_en": "we"
+    },
+    "wy": {
+        "lemma": "wy",
+        "grouped_forms": {
+            "declensionCategoryPronoun": [
+                {"form": "wy", "tag": "ppron12:pl:nom:m1"},
+                {"form": "was", "tag": "ppron12:pl:gen:m1"},
+                {"form": "wam", "tag": "ppron12:pl:dat:m1"},
+                {"form": "was", "tag": "ppron12:pl:acc:m1"},
+                {"form": "wami", "tag": "ppron12:pl:inst:m1"},
+                {"form": "was", "tag": "ppron12:pl:loc:m1"},
+                {"form": "wy", "tag": "ppron12:pl:voc:m1"},
+            ]
+        },
+        "translation_en": "you (pl.)"
+    },
+    "oni": {
+        "lemma": "oni",
+        "grouped_forms": {
+            # Masculine personal plural
+            "declensionCategoryPronoun": [
+                {"form": "oni", "tag": "ppron3:pl:nom:m1"},
+                {"form": "ich", "tag": "ppron3:pl:gen:m1"},
+                {"form": "im", "tag": "ppron3:pl:dat:m1"},
+                {"form": "ich", "tag": "ppron3:pl:acc:m1"}, # or nich
+                {"form": "nich", "tag": "ppron3:pl:acc:m1"},
+                {"form": "nimi", "tag": "ppron3:pl:inst:m1"},
+                {"form": "nich", "tag": "ppron3:pl:loc:m1"},
+            ]
+        },
+        "translation_en": "they (masc. pers.)"
+    },
+    "one": {
+        "lemma": "one",
+        "grouped_forms": {
+             # Non-masculine personal plural (feminine, neuter, non-pers masc.)
+            "declensionCategoryPronoun": [
+                {"form": "one", "tag": "ppron3:pl:nom:f"}, # Use 'f' as representative non-m1
+                {"form": "ich", "tag": "ppron3:pl:gen:f"}, # or nich
+                {"form": "nich", "tag": "ppron3:pl:gen:f"},
+                {"form": "im", "tag": "ppron3:pl:dat:f"},  # or nim
+                {"form": "nim", "tag": "ppron3:pl:dat:f"},
+                {"form": "je", "tag": "ppron3:pl:acc:f"},  # or nie
+                {"form": "nie", "tag": "ppron3:pl:acc:f"},
+                {"form": "nimi", "tag": "ppron3:pl:inst:f"},
+                {"form": "nich", "tag": "ppron3:pl:loc:f"},
+            ]
+        },
+        "translation_en": "they (non-masc. pers.)"
+    }
+}
+# ----------------------------
+
 # --- Lingvanex Translation Function ---
 def translate_text_lingvanex(text, target_language):
     if not LINGVANEX_API_KEY:
@@ -423,17 +604,36 @@ def is_impersonal_form(form, tag_full):
     return False
 # ---------------------------
 
-# Helper function to generate forms and format them (REFACTORED)
-def generate_and_format_forms(word, check_func):
+# --- Generic Form Generation and Formatting ---
+def generate_and_format_forms(word, check_func, category_func):
+    """Generates and formats forms (either conjugation or declension) for a given word.
+    - Uses Morfeusz.generate().
+    - Filters based on check_func (e.g., is_verb, is_declinable).
+    - Groups forms using category_func (e.g., get_conjugation_category_key).
+    - Handles potential errors gracefully.
+    - Returns a dictionary containing the lemma and grouped forms, or None if no valid forms found.
+    """
+    print(f"[generate_and_format_forms] Starting for word: '{word}'")
+
+    # --- 하드코딩된 대명사/단어 확인 --- 
+    if word in hardcoded_declensions:
+        print(f"[generate_and_format_forms] Found hardcoded entry for '{word}'. Returning pre-defined data.")
+        # 프론트엔드가 기대하는 리스트 형태로 감싸서 반환 ([{lemma:..., grouped_forms:...}])
+        # 또는 API 응답 구조에 맞게 수정 필요 (여기서는 /decline, /conjugate가 직접 반환하므로 그냥 dict 반환)
+        return hardcoded_declensions[word]
+    # -------------------------------------
+
     if morf is None:
-        return None, "Morfeusz2 analyzer not available."
+        print("Error: Morfeusz2 is not initialized.")
+        return None
 
     try:
         word = word.lower()
         print(f"[디버그] 분석 시작 - 단어: '{word}', 함수: {check_func.__name__}")
         analysis_result = morf.analyse(word)
         if not analysis_result:
-            return None, "Word not found or cannot be analyzed."
+            print(f"[generate_and_format_forms] Word '{word}' not found or cannot be analyzed.")
+            return None # Return None on failure
 
         # --- 수정: 기본형 선택 로직 (m2 우선) ---
         possible_lemmas = []
@@ -448,7 +648,7 @@ def generate_and_format_forms(word, check_func):
 
         if not possible_lemmas:
             print(f"[generate_and_format_forms] No primary lemma matching check_func found for '{word}'.")
-            return None, f"No analysis matching the required type (verb/declinable) found for '{word}'."
+            return None # Return None if no suitable lemma found
 
         # m2 우선 선택 로직 (is_declinable 경우)
         if check_func == is_declinable and len(possible_lemmas) > 1:
@@ -508,150 +708,154 @@ def generate_and_format_forms(word, check_func):
         print(f"[디버그-비인칭] 비인칭 처리 시작 - 동사: '{primary_lemma}', 본질적 재귀형: {has_reflexive_sie}")
 
         for form_tuple in generated_forms_raw:
-            if len(form_tuple) < 3:
-                print(f"    >> Skipping malformed generated tuple: {form_tuple}")
-                continue
+            try:
+                if len(form_tuple) < 3:
+                    continue
 
-            form = form_tuple[0]
-            form_lemma_full = form_tuple[1]
-            form_tag_full = form_tuple[2]
-            qualifiers = list(form_tuple[3:]) if len(form_tuple) > 3 else []
-            base_tag = form_tag_full.split(':', 1)[0]
+                form = form_tuple[0]
+                form_lemma_full = form_tuple[1]
+                form_tag_full = form_tuple[2]
+                qualifiers = list(form_tuple[3:]) if len(form_tuple) > 3 else []
+                base_tag = form_tag_full.split(':', 1)[0]
 
-            # --- 수정: 품사 종류에 따라 허용 태그 확인 ---
-            should_process = False
-            if check_func == is_verb:
-                should_process = base_tag in ALLOWED_TAGS
-            elif check_func == is_declinable:
-                should_process = base_tag in DECLINABLE_TAGS
-
-            if not should_process:
-                # print(f"    >> Skipping tag '{base_tag}' based on check_func {check_func.__name__}")
-                continue
-            # --------------------------------------------
+                should_process = False
+                if check_func == is_verb:
+                    should_process = base_tag in ALLOWED_TAGS
+                elif check_func == is_declinable:
+                    should_process = base_tag in DECLINABLE_TAGS
                 
-            # 디버깅: 동명사 형태 확인
-            if base_tag == 'ger':
-                gerund_forms_found += 1
-                print(f"[디버그-동명사] 동명사 발견 #{gerund_forms_found}: '{form}', 태그: '{form_tag_full}'")
-                if ':neg' in form_tag_full:
-                    print(f"[디버그-동명사] 부정 동명사 필터링됨: '{form}'")
-                    continue  # 부정 동명사 필터링
-            
-            # 디버깅: 미래시제 형태 확인 (완료상)
-            if base_tag == 'fin' and 'perf' in form_tag_full.split(':'):
-                future_forms_perf += 1
-                print(f"[디버그-미래시제] 미래 완료형 발견 #{future_forms_perf}: '{form}', 태그: '{form_tag_full}'")
+                if not should_process:
+                    continue
                 
-                # 인칭/수 정보 추출 디버깅
-                parts = form_tag_full.split(':')
-                number = next((p for p in parts if p in ['sg', 'pl']), 'unknown')
-                person = next((p for p in parts if p in ['pri', 'sec', 'ter']), 'unknown')
-                print(f"[디버그-미래시제] 태그 파싱 결과 - 수: {number}, 인칭: {person}")
-            
-            # --- 비인칭 형태 감지 및 처리 (향상됨) ---
-            is_impersonal = False
-            if check_func == is_verb: # Only check for impersonals if processing a verb
-                is_impersonal = is_impersonal_form(form, form_tag_full)
-                if is_impersonal:
-                    impersonal_forms_found += 1
-                    print(f"[디버그-비인칭] 비인칭 형태 발견 #{impersonal_forms_found}: '{form}', 태그: '{form_tag_full}'")
+                # 디버깅: 동명사 형태 확인
+                if base_tag == 'ger':
+                    gerund_forms_found += 1
+                    print(f"[디버그-동명사] 동명사 발견 #{gerund_forms_found}: '{form}', 태그: '{form_tag_full}'")
+                    if ':neg' in form_tag_full:
+                        print(f"[디버그-동명사] 부정 동명사 필터링됨: '{form}'")
+                        continue  # 부정 동명사 필터링
+                
+                # 디버깅: 미래시제 형태 확인 (완료상)
+                if base_tag == 'fin' and 'perf' in form_tag_full.split(':'):
+                    future_forms_perf += 1
+                    print(f"[디버그-미래시제] 미래 완료형 발견 #{future_forms_perf}: '{form}', 태그: '{form_tag_full}'")
                     
-                    # 현재 비인칭 형태 저장
-                    if base_tag == 'imps' and not (form.endswith('no') or form.endswith('to')):
-                        if form not in present_impersonal_forms:
-                            present_impersonal_forms.append(form)
-                            print(f"[디버그-비인칭] 현재 비인칭 형태 저장: '{form}'")
+                    # 인칭/수 정보 추출 디버깅
+                    parts = form_tag_full.split(':')
+                    number = next((p for p in parts if p in ['sg', 'pl']), 'unknown')
+                    person = next((p for p in parts if p in ['pri', 'sec', 'ter']), 'unknown')
+                    print(f"[디버그-미래시제] 태그 파싱 결과 - 수: {number}, 인칭: {person}")
+                
+                # --- 비인칭 형태 감지 및 처리 (향상됨) ---
+                is_impersonal = False
+                if check_func == is_verb: # Only check for impersonals if processing a verb
+                    is_impersonal = is_impersonal_form(form, form_tag_full)
+                    if is_impersonal:
+                        impersonal_forms_found += 1
+                        print(f"[디버그-비인칭] 비인칭 형태 발견 #{impersonal_forms_found}: '{form}', 태그: '{form_tag_full}'")
+                        
+                        # 현재 비인칭 형태 저장
+                        if base_tag == 'imps' and not (form.endswith('no') or form.endswith('to')):
+                            if form not in present_impersonal_forms:
+                                present_impersonal_forms.append(form)
+                                print(f"[디버그-비인칭] 현재 비인칭 형태 저장: '{form}'")
 
-            # --- Store infinitive ---
-            if base_tag == 'inf':
-                infinitive_form = form
-                print(f"      >> Found infinitive: {infinitive_form}")
-            # -----------------------
+                # --- Store infinitive ---
+                if base_tag == 'inf':
+                    infinitive_form = form
+                    print(f"      >> Found infinitive: {infinitive_form}")
+                # -----------------------
 
-            # --- Store past tense forms needed for conditional ---
-            if base_tag == 'praet':
-                parts = form_tag_full.split(':')
-                num_gen_key = None
-                # 과거시제 형태 저장 개선 - 보다 세부적인 성별 구분 지원
-                if 'sg' in parts:
-                    num = 'sg'
-                    # 단수형에서 더 세부적인 성별 처리 (m1, m2, m3, f, n1, n2, m1.m2.m3 등 모든 가능한 성별 포함)
-                    for gen in parts:
-                        # 복합 태그(m1.m2.m3 등) 분리해서 각각 past_forms에 넣기
-                        if '.' in gen:
-                            for subgen in gen.split('.'):
-                                if subgen in ['m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2']:
-                                    num_gen_key = f"{num}:{subgen}"
-                                    past_forms[num_gen_key] = form
-                                    print(f"      >> Found past form for {num_gen_key} (from composite tag {gen}): {form}")
-                        # 기존 단일 태그 처리
-                        if gen in ['m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2']:
-                            num_gen_key = f"{num}:{gen}"
-                            past_forms[num_gen_key] = form
-                            print(f"      >> Found past form for {num_gen_key}: {form}")
-                elif 'pl' in parts:
-                    num = 'pl'
-                    # 복수형에서 더 세부적인 처리 (m1, non-m1, m2.m3.f.n 등 가능한 모든 조합)
-                    for gen in parts:
-                        if gen in ['m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2', 'non-m1', 'm2.m3.f.n']:
-                            num_gen_key = f"{num}:{gen}"
-                            if num_gen_key:
+                # --- Store past tense forms needed for conditional ---
+                if base_tag == 'praet':
+                    parts = form_tag_full.split(':')
+                    num_gen_key = None
+                    # 과거시제 형태 저장 개선 - 보다 세부적인 성별 구분 지원
+                    if 'sg' in parts:
+                        num = 'sg'
+                        # 단수형에서 더 세부적인 성별 처리 (m1, m2, m3, f, n1, n2, m1.m2.m3 등 모든 가능한 성별 포함)
+                        for gen in parts:
+                            # 복합 태그(m1.m2.m3 등) 분리해서 각각 past_forms에 넣기
+                            if '.' in gen:
+                                for subgen in gen.split('.'):
+                                    if subgen in ['m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2']:
+                                        num_gen_key = f"{num}:{subgen}"
+                                        past_forms[num_gen_key] = form
+                                        print(f"      >> Found past form for {num_gen_key} (from composite tag {gen}): {form}")
+                            # 기존 단일 태그 처리
+                            if gen in ['m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2']:
+                                num_gen_key = f"{num}:{gen}"
                                 past_forms[num_gen_key] = form
                                 print(f"      >> Found past form for {num_gen_key}: {form}")
-                
-                # 추가: 인칭 정보 명시적으로 처리
-                person = None
-                # 태그에서 인칭 정보 직접 확인
-                for part in parts:
-                    if part in ['pri', 'sec', 'ter']:
-                        person = part
-                        break
-                
-                # 태그에 인칭 정보가 없을 경우 형태에서 추론
-                if person is None:
-                    if form.endswith(('łem', 'łam')): person = 'pri'
-                    elif form.endswith(('łeś', 'łaś')): person = 'sec'
-                    elif form.endswith(('ł', 'ła', 'ło')): person = 'ter'
-                    elif form.endswith(('liśmy', 'łyśmy')): person = 'pri'
-                    elif form.endswith(('liście', 'łyście')): person = 'sec'
-                    elif form.endswith(('li', 'ły')): person = 'ter'
-                
-                if person:
-                    form_tag_full += f':{person}' # Append inferred person
-            # --------------------------------------------------
+                    elif 'pl' in parts:
+                        num = 'pl'
+                        # 복수형에서 더 세부적인 처리 (m1, non-m1, m2.m3.f.n 등 가능한 모든 조합)
+                        for gen in parts:
+                            if gen in ['m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2', 'non-m1', 'm2.m3.f.n']:
+                                num_gen_key = f"{num}:{gen}"
+                                if num_gen_key:
+                                    past_forms[num_gen_key] = form
+                                    print(f"      >> Found past form for {num_gen_key}: {form}")
+                    
+                    # 추가: 인칭 정보 명시적으로 처리
+                    person = None
+                    # 태그에서 인칭 정보 직접 확인
+                    for part in parts:
+                        if part in ['pri', 'sec', 'ter']:
+                            person = part
+                            break
+                    
+                    # 태그에 인칭 정보가 없을 경우 형태에서 추론
+                    if person is None:
+                        if form.endswith(('łem', 'łam')): person = 'pri'
+                        elif form.endswith(('łeś', 'łaś')): person = 'sec'
+                        elif form.endswith(('ł', 'ła', 'ło')): person = 'ter'
+                        elif form.endswith(('liśmy', 'łyśmy')): person = 'pri'
+                        elif form.endswith(('liście', 'łyście')): person = 'sec'
+                        elif form.endswith(('li', 'ły')): person = 'ter'
+                    
+                    if person:
+                        form_tag_full += f':{person}' # Append inferred person
+                # --------------------------------------------------
 
-            # --- 과거 비인칭 형태 저장 (no/to 형태) ---
-            if base_tag == 'imps' and (form.endswith('no') or form.endswith('to')):
-                past_impersonal_form = form
-                print(f"      >> Found past impersonal form: {past_impersonal_form}")
-            # --------------------------------------------------
+                # --- 과거 비인칭 형태 저장 (no/to 형태) ---
+                if base_tag == 'imps' and (form.endswith('no') or form.endswith('to')):
+                    past_impersonal_form = form
+                    print(f"      >> Found past impersonal form: {past_impersonal_form}")
+                # --------------------------------------------------
 
-            # --- 수정: 품사 종류에 따라 적절한 카테고리 키 함수 사용 ---
-            category_key = None
-            if check_func == is_verb:
-                category_key = get_conjugation_category_key(base_tag, form_tag_full)
-            elif check_func == is_declinable:
-                category_key = get_declension_category_key(base_tag, form_tag_full)
-            # -----------------------------------------------------
+                # --- 수정: 품사 종류에 따라 적절한 카테고리 키 함수 사용 ---
+                category_key = None
+                if check_func == is_verb:
+                    category_key = get_conjugation_category_key(base_tag, form_tag_full)
+                elif check_func == is_declinable:
+                    category_key = get_declension_category_key(base_tag, form_tag_full)
+                # -----------------------------------------------------
 
-            # --- 향상된 비인칭 카테고리 분류 (업데이트됨) ---
-            if is_impersonal: # This check is now inside the is_verb specific logic above
-                if form.endswith(('no', 'to')):
-                    category_key = 'conjugationCategoryPastImpersonal'
-                elif base_tag == 'imps':
-                    category_key = 'conjugationCategoryPresentImpersonal'
-                elif base_tag == 'impt' or 'impt' in form_tag_full:
-                    category_key = 'conjugationCategoryImperativeImpersonal'
-            # -------------------------------------------------
+                # --- 향상된 비인칭 카테고리 분류 (업데이트됨) ---
+                if is_impersonal: # This check is now inside the is_verb specific logic above
+                    if form.endswith(('no', 'to')):
+                        category_key = 'conjugationCategoryPastImpersonal'
+                    elif base_tag == 'imps':
+                        category_key = 'conjugationCategoryPresentImpersonal'
+                    elif base_tag == 'impt' or 'impt' in form_tag_full:
+                        category_key = 'conjugationCategoryImperativeImpersonal'
+                # -------------------------------------------------
 
-            if category_key: # Ensure category_key was set
-                print(f"    >> DEBUG: Adding form '{form}' with tag '{form_tag_full}' to category '{category_key}'") # DEBUG LINE
-                form_data = {"form": form, "tag": form_tag_full, "qualifiers": qualifiers}
-                if category_key not in grouped_forms: grouped_forms[category_key] = []
-                grouped_forms[category_key].append(form_data)
-            else:
-                print(f"    >> Skipping form, could not determine category key for tag '{form_tag_full}' with check_func {check_func.__name__}")
+                if category_key:
+                    form_data = {"form": form, "tag": form_tag_full, "qualifiers": qualifiers}
+                    if category_key not in grouped_forms:
+                         grouped_forms[category_key] = []
+                    grouped_forms[category_key].append(form_data)
+                else:
+                    pass # Explicitly pass if skipping
+
+            except Exception as form_proc_error:
+                print(f"!!!!! ERROR processing form tuple: {form_tuple} !!!!!")
+                print(f"!!!!! Form Processing Error: {form_proc_error}")
+                import traceback
+                traceback.print_exc() # Keep traceback for unexpected errors
+                continue 
         # --- End processing loop ---
         
         # 디버깅: 동명사 결과 요약
@@ -922,16 +1126,16 @@ def generate_and_format_forms(word, check_func):
             for idx, form_data in enumerate(grouped_forms['conjugationCategoryFutureImperfectiveIndicative']):
                 print(f"[디버그-미래시제] 미완료형 #{idx+1}: 형태='{form_data['form']}', 태그='{form_data['tag']}'")
 
-        final_grouped_forms = grouped_forms # Return all grouped forms
+        final_grouped_forms = grouped_forms
 
         print(f"  -> Final grouped forms categories: {list(final_grouped_forms.keys())}")
-        return {"lemma": primary_lemma, "grouped_forms": final_grouped_forms}, None
+        return {"lemma": primary_lemma, "grouped_forms": final_grouped_forms}
 
     except Exception as e:
         print(f"Error during form generation for '{word}': {e}")
         import traceback
         traceback.print_exc() # Print full traceback for debugging
-        return None, f"An error occurred during form generation: {e}"
+        return None # Return None on exception
 
 # --- NEW Helper function to get category key (similar to frontend) ---
 # Maps Morfeusz base tags (and sometimes qualifiers) to frontend category keys
@@ -1007,42 +1211,59 @@ def get_declension_category_key(base_tag, full_tag):
 
 @app.route('/conjugate/<word>', methods=['GET'])
 def conjugate_word(word):
-    # generate_and_format_forms now returns a dict {"lemma": ..., "grouped_forms": ...} or None
-    result_data, error_message = generate_and_format_forms(word, is_verb)
+    # generate_and_format_forms returns a dict (if successful) or None
+    result_data = generate_and_format_forms(word, is_verb, get_conjugation_category_key)
 
-    if error_message:
-        # If error occurred during generation
-        return jsonify({"status": "error", "message": error_message}), 500
-
-    if result_data is None or not result_data.get("grouped_forms"):
-        # If generation succeeded but found no matching forms or lemma
+    if result_data is None:
+        # Handle case where generation failed or no matching forms found
+        print(f"[/conjugate] No valid conjugation data found for '{word}'.")
         return jsonify({
-            "status": "success",
+            "status": "success", # Still return success, but with empty data
             "word": word,
-            "data": [], # Keep data as empty list for consistency
+            "data": [],
             "message": f"No conjugation data found for '{word}' or word type mismatch."
         }), 200
-
-    # Success: return the structured data
-    # The frontend expects data to be a list containing one item (the lemma object)
-    # So we wrap result_data in a list.
-    response_payload = {
-        "status": "success",
-        "word": word,
-        "data": [result_data] # Wrap the dict in a list
-    }
-    print(f"[/conjugate] Returning successful data structure for '{word}': {response_payload}")
-    return jsonify(response_payload)
+    elif isinstance(result_data, dict):
+        # Success: Wrap the result dict in a list for the API response
+        response_payload = {
+            "status": "success",
+            "word": word,
+            "data": [result_data] # Wrap the dict in a list
+        }
+        print(f"[/conjugate] Returning successful data structure for '{word}'.")
+        return jsonify(response_payload)
+    else:
+        # Should not happen normally
+        print(f"[/conjugate] Unexpected result type from generate_and_format_forms for '{word}': {type(result_data)}")
+        return jsonify({"status": "error", "message": "Internal server error processing conjugation."}), 500
 
 @app.route('/decline/<word>', methods=['GET'])
 def decline_word(word):
-    data, error_message = generate_and_format_forms(word, is_declinable)
-    if error_message:
-        return jsonify({"status": "error", "message": error_message}), 500
-    if data is None or not data: # Check if data is None or empty list
-        return jsonify({"status": "success", "word": word, "data": [], "message": f"No declension data found for '{word}' or word type mismatch."}), 200
-    # Wrap the data in a list, similar to /conjugate
-    return jsonify({"status": "success", "word": word, "data": [data]})
+    # generate_and_format_forms returns a dict (if successful) or None
+    result_data = generate_and_format_forms(word, is_declinable, get_declension_category_key)
+
+    if result_data is None:
+         # Handle case where generation failed or no matching forms found
+        print(f"[/decline] No valid declension data found for '{word}'.")
+        return jsonify({
+            "status": "success", # Still return success, but with empty data
+            "word": word,
+            "data": [],
+            "message": f"No declension data found for '{word}' or word type mismatch."
+        }), 200
+    elif isinstance(result_data, dict):
+        # Success: Wrap the result dict in a list for the API response
+        response_payload = {
+            "status": "success",
+            "word": word,
+            "data": [result_data] # Wrap the dict in a list
+        }
+        print(f"[/decline] Returning successful data structure for '{word}'.")
+        return jsonify(response_payload)
+    else:
+        # Should not happen normally
+        print(f"[/decline] Unexpected result type from generate_and_format_forms for '{word}': {type(result_data)}")
+        return jsonify({"status": "error", "message": "Internal server error processing declension."}), 500
 
 # --- 간단한 테스트 경로 추가 ---
 @app.route('/test_log/<item>', methods=['GET'])
