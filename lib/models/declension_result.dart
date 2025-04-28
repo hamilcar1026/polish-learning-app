@@ -33,25 +33,34 @@ class DeclensionForm {
 @immutable
 class DeclensionResult {
   final String lemma;
-  final List<DeclensionForm> forms;
+  final Map<String, List<DeclensionForm>> grouped_forms;
 
   const DeclensionResult({
     required this.lemma,
-    required this.forms,
+    required this.grouped_forms,
   });
 
   factory DeclensionResult.fromJson(Map<String, dynamic> json) {
+    final Map<String, List<DeclensionForm>> parsedGroupedForms = {};
+    final Map<String, dynamic> rawGroupedForms = json['grouped_forms'] as Map<String, dynamic>? ?? {};
+
+    rawGroupedForms.forEach((categoryKey, formList) {
+      if (formList is List) {
+        parsedGroupedForms[categoryKey] = formList
+            .map((item) => DeclensionForm.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
+    });
+
     return DeclensionResult(
       lemma: json['lemma'] as String? ?? '',
-      forms: (json['forms'] as List<dynamic>? ?? [])
-          .map((item) => DeclensionForm.fromJson(item as Map<String, dynamic>))
-          .toList(),
+      grouped_forms: parsedGroupedForms,
     );
   }
 
   @override
   String toString() {
-    return 'DeclensionResult(lemma: $lemma, forms: ${forms.length} forms)';
+    return 'DeclensionResult(lemma: $lemma, grouped_forms: ${grouped_forms.keys.length} categories)';
   }
 }
 

@@ -609,7 +609,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     Map<String, Map<String, String>> declensionTable = {}; // {caseCode: {sg: form, pl: form}}
     final casesOrder = ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc']; 
 
-    for (var formInfo in lemmaData.forms) {
+    // --- 수정: grouped_forms 맵을 순회하여 모든 폼 처리 ---
+    List<DeclensionForm> allForms = [];
+    lemmaData.grouped_forms.values.forEach((formList) {
+      allForms.addAll(formList);
+    });
+    // ---------------------------------------------------
+
+    // for (var formInfo in lemmaData.forms) { // <--- 이전 로직 제거
+    for (var formInfo in allForms) { // <--- 수정: 합쳐진 폼 리스트 사용
       final tagMap = _parseTag(formInfo.tag);
       // Get potential combined cases (e.g., "gen.acc") or single case
       final casePart = tagMap['case'] ?? tagMap['case_person']; 
@@ -639,6 +647,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       }
     }
 
+    // DEBUG: Print the final declensionTable content
+    print("[_buildDeclensionResults] Final declensionTable data: $declensionTable");
+
     // Display as a card with a table
     // No Card needed here as the tab builder wraps it
     return Column(
@@ -650,7 +661,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           builder: (context) {
             final l10n = AppLocalizations.of(context)!;
             // Get the first tag (assuming it's representative, handle potential emptiness)
-            String firstTagString = lemmaData.forms.isNotEmpty ? lemmaData.forms.first.tag : '';
+            // --- 수정: 첫 번째 폼 가져오는 로직 변경 ---
+            String firstTagString = allForms.isNotEmpty ? allForms.first.tag : '';
+            // -------------------------------------
             String translatedTagString = '';
 
             if (firstTagString.isNotEmpty) {

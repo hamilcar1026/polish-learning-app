@@ -6,14 +6,14 @@ from flask_cors import CORS
 import logging
 
 app = Flask(__name__)
-# --- CORS 설정 (명시적 출처 지정) ---
-origins = [
-    "http://localhost:8000", # 로컬 개발 환경 (필요하다면)
-    "http://localhost:3000", # 또 다른 로컬 개발 환경 포트 (필요하다면)
-    "https://polish-learning-app.web.app", # 배포된 프론트엔드 주소
-    # 필요한 다른 프론트엔드 주소 추가 가능
-]
-CORS(app, origins=origins, supports_credentials=True, methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]) # 명시적으로 출처와 메소드 지정
+# --- CORS 설정 (모든 출처 허용 - 개발용) ---
+# origins = [
+#     "http://localhost:8000", # 로컬 개발 환경 (필요하다면)
+#     "http://localhost:3000", # 또 다른 로컬 개발 환경 포트 (필요하다면)
+#     "https://polish-learning-app.web.app", # 배포된 프론트엔드 주소
+#     # 필요한 다른 프론트엔드 주소 추가 가능
+# ]
+CORS(app, supports_credentials=True, methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]) # origins 파라미터 제거
 # ------------------------------------
 
 # --- Lingvanex API Key ---
@@ -54,6 +54,10 @@ BY_CONDITIONAL_PARTICLES = {
 
 # Allowed tags (Ensure all needed tags are included)
 ALLOWED_TAGS = {'fin', 'impt', 'imps', 'inf', 'pact', 'pant', 'pcon', 'ppas', 'praet', 'bedzie', 'ger', 'cond', 'impt_periph', 'fut_imps', 'cond_imps', 'impt_imps'} # Add all needed impersonal tags
+
+# --- 추가: 곡용 가능한 품사 태그 목록 ---
+DECLINABLE_TAGS = {'subst', 'depr', 'adj', 'adja', 'adjp'}
+# -------------------------------------
 
 # --- 향상된 비인칭 처리를 위한 새로운 상수 추가 ---
 # 비인칭 동사의 się 위치 패턴 (동사에 따라 다를 수 있음)
@@ -431,14 +435,8 @@ def generate_and_format_forms(word, check_func):
         if not analysis_result:
             return None, "Word not found or cannot be analyzed."
 
-        # --- Find the primary lemma and its full tag ---
-        primary_lemma = None
-        primary_tag_full = None
-        primary_base_tag = None
-        is_primary_imperfective = False # Flag for imperfective aspect
-        has_reflexive_sie = False # Flag to check if verb is inherently reflexive (uses się)
-
-        # Heuristic to find the most likely primary verb/declinable lemma
+        # --- 수정: 기본형 선택 로직 (m2 우선) ---
+        possible_lemmas = []
         for r in analysis_result:
             if len(r) >= 3 and isinstance(r[2], tuple) and len(r[2]) >= 3:
                 analysis_tuple = r[2]
@@ -446,21 +444,43 @@ def generate_and_format_forms(word, check_func):
                 current_tag_full = analysis_tuple[2]
                 current_base_tag = current_tag_full.split(':', 1)[0]
                 if check_func(current_base_tag): # Check if it's the desired type (verb/declinable)
-                    primary_lemma = current_lemma
-                    primary_tag_full = current_tag_full
-                    primary_base_tag = current_base_tag
-                    if 'imperf' in current_tag_full.split(':'):
-                        is_primary_imperfective = True
-                    # Check if this verb uses się naturally
-                    if ' się' in current_lemma or current_lemma.endswith('się'):
-                        has_reflexive_sie = True
-                        print(f"[generate_and_format_forms] Identified reflexive verb with się: {current_lemma}")
-                    print(f"[generate_and_format_forms] Selected primary analysis: lemma='{primary_lemma}', tag='{primary_tag_full}', is_imperfective={is_primary_imperfective}")
-                    break # Found the first matching analysis
+                    possible_lemmas.append((current_lemma, current_tag_full))
 
-        if primary_lemma is None:
+        if not possible_lemmas:
             print(f"[generate_and_format_forms] No primary lemma matching check_func found for '{word}'.")
             return None, f"No analysis matching the required type (verb/declinable) found for '{word}'."
+
+        # m2 우선 선택 로직 (is_declinable 경우)
+        if check_func == is_declinable and len(possible_lemmas) > 1:
+            m2_lemma = None
+            m1_lemma = None
+            # Check if both m1 and m2 types exist
+            for lem, tag in possible_lemmas:
+                if ':m2' in tag: m2_lemma = (lem, tag)
+                if ':m1' in tag: m1_lemma = (lem, tag)
+            
+            if m2_lemma and m1_lemma:
+                # If both exist, prioritize m2
+                primary_lemma, primary_tag_full = m2_lemma
+                print(f"[generate_and_format_forms] Prioritizing m2 lemma: '{primary_lemma}' from {possible_lemmas}")
+            else:
+                # Otherwise, just take the first one found
+                primary_lemma, primary_tag_full = possible_lemmas[0]
+                print(f"[generate_and_format_forms] Using first found lemma: '{primary_lemma}' from {possible_lemmas}")
+        else:
+            # For verbs or single declinable result, take the first one
+            primary_lemma, primary_tag_full = possible_lemmas[0]
+            print(f"[generate_and_format_forms] Using first found lemma (verb or single): '{primary_lemma}'")
+
+        # --- 수정: 선택된 기본형 정보 설정 (is_primary_imperfective, has_reflexive_sie 포함) ---
+        primary_base_tag = primary_tag_full.split(':', 1)[0]
+        is_primary_imperfective = False # 기본값 초기화
+        if 'imperf' in primary_tag_full.split(':'):
+            is_primary_imperfective = True
+        has_reflexive_sie = False # 기본값 초기화
+        if ' się' in primary_lemma or primary_lemma.endswith('się'):
+            has_reflexive_sie = True
+        print(f"[generate_and_format_forms] Selected primary analysis: lemma='{primary_lemma}', tag='{primary_tag_full}', is_imperfective={is_primary_imperfective}, has_reflexive_sie={has_reflexive_sie}")
         # -------------------------------------------------
 
         # Morfeusz2 generate 호출 시 expand_tags=True 옵션 사용 (복합 태그 자동 분리)
@@ -498,8 +518,17 @@ def generate_and_format_forms(word, check_func):
             qualifiers = list(form_tuple[3:]) if len(form_tuple) > 3 else []
             base_tag = form_tag_full.split(':', 1)[0]
 
-            if base_tag not in ALLOWED_TAGS:
+            # --- 수정: 품사 종류에 따라 허용 태그 확인 ---
+            should_process = False
+            if check_func == is_verb:
+                should_process = base_tag in ALLOWED_TAGS
+            elif check_func == is_declinable:
+                should_process = base_tag in DECLINABLE_TAGS
+
+            if not should_process:
+                # print(f"    >> Skipping tag '{base_tag}' based on check_func {check_func.__name__}")
                 continue
+            # --------------------------------------------
                 
             # 디버깅: 동명사 형태 확인
             if base_tag == 'ger':
@@ -521,16 +550,18 @@ def generate_and_format_forms(word, check_func):
                 print(f"[디버그-미래시제] 태그 파싱 결과 - 수: {number}, 인칭: {person}")
             
             # --- 비인칭 형태 감지 및 처리 (향상됨) ---
-            is_impersonal = is_impersonal_form(form, form_tag_full)
-            if is_impersonal:
-                impersonal_forms_found += 1
-                print(f"[디버그-비인칭] 비인칭 형태 발견 #{impersonal_forms_found}: '{form}', 태그: '{form_tag_full}'")
-                
-                # 현재 비인칭 형태 저장
-                if base_tag == 'imps' and not (form.endswith('no') or form.endswith('to')):
-                    if form not in present_impersonal_forms:
-                        present_impersonal_forms.append(form)
-                        print(f"[디버그-비인칭] 현재 비인칭 형태 저장: '{form}'")
+            is_impersonal = False
+            if check_func == is_verb: # Only check for impersonals if processing a verb
+                is_impersonal = is_impersonal_form(form, form_tag_full)
+                if is_impersonal:
+                    impersonal_forms_found += 1
+                    print(f"[디버그-비인칭] 비인칭 형태 발견 #{impersonal_forms_found}: '{form}', 태그: '{form_tag_full}'")
+                    
+                    # 현재 비인칭 형태 저장
+                    if base_tag == 'imps' and not (form.endswith('no') or form.endswith('to')):
+                        if form not in present_impersonal_forms:
+                            present_impersonal_forms.append(form)
+                            print(f"[디버그-비인칭] 현재 비인칭 형태 저장: '{form}'")
 
             # --- Store infinitive ---
             if base_tag == 'inf':
@@ -596,10 +627,16 @@ def generate_and_format_forms(word, check_func):
                 print(f"      >> Found past impersonal form: {past_impersonal_form}")
             # --------------------------------------------------
 
-            category_key = get_conjugation_category_key(base_tag, form_tag_full)
+            # --- 수정: 품사 종류에 따라 적절한 카테고리 키 함수 사용 ---
+            category_key = None
+            if check_func == is_verb:
+                category_key = get_conjugation_category_key(base_tag, form_tag_full)
+            elif check_func == is_declinable:
+                category_key = get_declension_category_key(base_tag, form_tag_full)
+            # -----------------------------------------------------
 
             # --- 향상된 비인칭 카테고리 분류 (업데이트됨) ---
-            if is_impersonal:
+            if is_impersonal: # This check is now inside the is_verb specific logic above
                 if form.endswith(('no', 'to')):
                     category_key = 'conjugationCategoryPastImpersonal'
                 elif base_tag == 'imps':
@@ -608,9 +645,13 @@ def generate_and_format_forms(word, check_func):
                     category_key = 'conjugationCategoryImperativeImpersonal'
             # -------------------------------------------------
 
-            form_data = {"form": form, "tag": form_tag_full, "qualifiers": qualifiers}
-            if category_key not in grouped_forms: grouped_forms[category_key] = []
-            grouped_forms[category_key].append(form_data)
+            if category_key: # Ensure category_key was set
+                print(f"    >> DEBUG: Adding form '{form}' with tag '{form_tag_full}' to category '{category_key}'") # DEBUG LINE
+                form_data = {"form": form, "tag": form_tag_full, "qualifiers": qualifiers}
+                if category_key not in grouped_forms: grouped_forms[category_key] = []
+                grouped_forms[category_key].append(form_data)
+            else:
+                print(f"    >> Skipping form, could not determine category key for tag '{form_tag_full}' with check_func {check_func.__name__}")
         # --- End processing loop ---
         
         # 디버깅: 동명사 결과 요약
@@ -943,6 +984,17 @@ def get_conjugation_category_key(base_tag, full_tag):
     elif base_tag == 'impt_imps': return 'conjugationCategoryImperativeImpersonal'
     else: return 'conjugationCategoryOtherForms' # Group others
 
+# --- NEW Helper function for Declension Categories ---
+def get_declension_category_key(base_tag, full_tag):
+    # Simple mapping for now, can be expanded
+    if base_tag == 'subst': return 'declensionCategoryNoun'
+    elif base_tag == 'adj': return 'declensionCategoryAdjective'
+    elif base_tag == 'adja': return 'declensionCategoryAdjective' # Group adja with adj
+    elif base_tag == 'adjp': return 'declensionCategoryAdjective' # Group adjp with adj
+    elif base_tag == 'depr': return 'declensionCategoryPronoun' # Assuming depr is pronoun
+    else: return 'declensionCategoryOtherForms'
+# --------------------------------------------------
+
 @app.route('/conjugate/<word>', methods=['GET'])
 def conjugate_word(word):
     # generate_and_format_forms now returns a dict {"lemma": ..., "grouped_forms": ...} or None
@@ -979,7 +1031,8 @@ def decline_word(word):
         return jsonify({"status": "error", "message": error_message}), 500
     if data is None or not data: # Check if data is None or empty list
         return jsonify({"status": "success", "word": word, "data": [], "message": f"No declension data found for '{word}' or word type mismatch."}), 200
-    return jsonify({"status": "success", "word": word, "data": data})
+    # Wrap the data in a list, similar to /conjugate
+    return jsonify({"status": "success", "word": word, "data": [data]})
 
 # --- 간단한 테스트 경로 추가 ---
 @app.route('/test_log/<item>', methods=['GET'])
