@@ -1004,6 +1004,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'non-masc. pers.'**
   String get genderLabelNonM1Pl;
+
+  /// No description provided for @copyrightsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Copyrights'**
+  String get copyrightsTitle;
+
+  /// No description provided for @fontSizeSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get fontSizeSmall;
+
+  /// No description provided for @fontSizeMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get fontSizeMedium;
+
+  /// No description provided for @fontSizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get fontSizeLarge;
+
+  /// No description provided for @copyrightNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This program was created using the morfeusz2 api.'**
+  String get copyrightNotice;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

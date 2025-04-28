@@ -470,4 +470,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get genderLabelNonM1Pl => 'non-masc. pers.';
+
+  @override
+  String get copyrightsTitle => 'Copyrights';
+
+  @override
+  String get fontSizeSmall => 'Small';
+
+  @override
+  String get fontSizeMedium => 'Medium';
+
+  @override
+  String get fontSizeLarge => 'Large';
+
+  @override
+  String get copyrightNotice => 'This program was created using the morfeusz2 api.';
 }

@@ -9,13 +9,12 @@ class ContributorsScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.settingsContributors),
+        title: Text(l10n.copyrightsTitle),
       ),
-      body: const Padding(
-        padding: EdgeInsets.all(16.0),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Center(
-          // TODO: Replace with actual contributor list/info
-          child: Text('Contributor information will be shown here.'), 
+          child: Text(l10n.copyrightNotice),
         ),
       ),
     );

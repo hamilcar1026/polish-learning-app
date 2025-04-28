@@ -274,5 +274,11 @@
   },
   "@impersonalAccuracyWarning": {
     "description": "Tekst ostrzegawczy wyświetlany obok tytułów koniugacji bezosobowych."
-  }
+  },
+  "copyrightsTitle": "Prawa autorskie",
+  "settingsFontSize": "Rozmiar czcionki",
+  "fontSizeSmall": "Mały",
+  "fontSizeMedium": "Średni",
+  "fontSizeLarge": "Duży",
+  "copyrightNotice": "Ten program został stworzony przy użyciu API morfeusz2."
 } 

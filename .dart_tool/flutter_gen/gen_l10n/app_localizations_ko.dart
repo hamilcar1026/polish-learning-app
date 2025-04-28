@@ -470,4 +470,19 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get genderLabelNonM1Pl => '비남성 인격';
+
+  @override
+  String get copyrightsTitle => '저작권 정보';
+
+  @override
+  String get fontSizeSmall => '작게';
+
+  @override
+  String get fontSizeMedium => '중간';
+
+  @override
+  String get fontSizeLarge => '크게';
+
+  @override
+  String get copyrightNotice => '이 프로그램은 morfeusz2 api를 이용하여 제작되었습니다.';
 }

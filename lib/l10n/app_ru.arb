@@ -3,6 +3,13 @@
   "appTitle": "Приложение для изучения польского",
   "searchHint": "Введите польское слово",
   "settingsTitle": "Настройки",
+  "settingsLanguage": "Язык",
+  "settingsFontSize": "Размер шрифта",
+  "settingsContributors": "Участники",
+  "copyrightsTitle": "Авторские права",
+  "fontSizeSmall": "Маленький",
+  "fontSizeMedium": "Средний",
+  "fontSizeLarge": "Большой",
   "languageSettingTitle": "Язык",
   "fontSizeSettingTitle": "Размер шрифта",
   "analysisTitle": "Анализ",
@@ -181,10 +188,6 @@
   "@caseVocative": {
     "description": "Vocative case name"
   },
-  "settingsContributors": "Участники",
-  "@settingsContributors": {
-    "description": "Текст пункта меню для Участников"
-  },
   "personLabelFirst": "1-е л. (я/мы)",
   "@personLabelFirst": {
     "description": "Метка для первого лица в таблицах спряжения"
@@ -246,10 +249,6 @@
   "@impersonalAccuracyWarning": {
     "description": "Предупреждающий текст, отображаемый рядом с заголовками безличного спряжения."
   },
-  "settingsLanguage": "Язык",
-  "@settingsLanguage": {
-    "description": "Ярлык для выбора языка в настройках"
-  },
   "genderLabelM": "мужской",
   "@genderLabelM": {
     "description": "Метка мужского рода единственного числа (объединяет m1, m2, m3)"
@@ -285,5 +284,6 @@
   "addToFavorites": "Добавить в избранное",
   "@addToFavorites": {
     "description": "Подсказка для кнопки добавления слова в избранное."
-  }
+  },
+  "copyrightNotice": "Эта программа была создана с использованием API morfeusz2."
 } 

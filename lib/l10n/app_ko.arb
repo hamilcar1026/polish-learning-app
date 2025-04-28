@@ -309,5 +309,10 @@
   "genderLabelNonM1Pl": "비남성 인격",
   "@genderLabelNonM1Pl": {
     "description": "복수 비남성 인격 성별 레이블 (f, n, m2, m3 통합)"
-  }
+  },
+  "copyrightsTitle": "저작권 정보",
+  "fontSizeSmall": "작게",
+  "fontSizeMedium": "중간",
+  "fontSizeLarge": "크게",
+  "copyrightNotice": "이 프로그램은 morfeusz2 api를 이용하여 제작되었습니다."
 } 

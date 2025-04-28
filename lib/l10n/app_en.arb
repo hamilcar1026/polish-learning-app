@@ -310,5 +310,10 @@
    "genderLabelNonM1Pl": "non-masc. pers.",
    "@genderLabelNonM1Pl": {
      "description": "Label for plural non-masculine personal gender (combines f, n, m2, m3)"
-   }
+   },
+   "copyrightsTitle": "Copyrights",
+   "fontSizeSmall": "Small",
+   "fontSizeMedium": "Medium",
+   "fontSizeLarge": "Large",
+   "copyrightNotice": "This program was created using the morfeusz2 api."
 } 
