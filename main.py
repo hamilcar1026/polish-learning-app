@@ -2098,6 +2098,91 @@ def decline_word(word):
         else:
              print(f"[/decline] generate_and_format_forms failed for '{target_word}'.")
 
+    # --- NEW: Proper Noun Handling ---
+    if result_data is None: # Only if not already handled as a detailed numeral
+        analysis_result = None
+        try:
+            analysis_result = morf.analyse(mapped_word) # Use the potentially mapped word
+        except Exception as e:
+            print(f"[/decline] Error analyzing word '{mapped_word}': {e}")
+            analysis_result = None # Ensure it's None on error
+
+        is_proper_noun = False
+        primary_tag = None # Keep track of the primary tag
+
+        # Check Morfeusz tags for proper noun indication
+        if analysis_result:
+            # Find the most likely analysis (e.g., the first one)
+            # TODO: You might need more sophisticated logic to choose the best analysis if multiple exist
+            if analysis_result: # Check if analysis_result is not empty
+                 first_analysis = analysis_result[0]
+                 interp_tuple = first_analysis[2] # (lemma, tag, qual1, qual2)
+                 tag_parts = interp_tuple[1].split(':')
+                 primary_tag = tag_parts[0] # e.g., 'subst', 'adj'
+                 
+                 # Check if primary tag is 'subst' and has a 'prop' component (proper noun)
+                 # Or check for specific proper noun categories like 'nazwisko' (surname), 'imię' (first name), 'geog' (geographical) etc. in qualifiers (qual2)
+                 # Morfeusz Python binding returns qualifiers as a list in the 5th element (index 4) of the interpretation tuple
+                 qualifiers = interp_tuple[4] if len(interp_tuple) > 4 else [] # Get qualifiers if they exist
+                 proper_noun_indicators = {'prop', 'nazwisko', 'imię', 'geog'} # Add more indicators if needed
+
+                 if primary_tag == 'subst' and ('prop' in tag_parts or any(q in proper_noun_indicators for q in qualifiers)):
+                      is_proper_noun = True
+                      print(f"[/decline] Detected '{mapped_word}' as a potential proper noun based on Morfeusz tag: {interp_tuple[1]} or qualifiers: {qualifiers}")
+
+                 # Optional: Add other checks like capitalization if Morfeusz tag isn't enough
+                 # elif mapped_word[0].isupper() and primary_tag == 'subst':
+                 #    print(f"[/decline] Potential proper noun '{mapped_word}' based on capitalization.")
+                 #    is_proper_noun = True # Be careful, this might misclassify sentence beginnings
+            else:
+                print(f"[/decline] Morfeusz analysis returned empty result for '{mapped_word}'.")
+
+
+        if is_proper_noun:
+            print(f"[/decline] Attempting specific declension logic for proper noun: '{mapped_word}'")
+            # Call the new function to generate declensions for proper nouns
+            proper_noun_declensions = generate_proper_noun_declensions(mapped_word, analysis_result) # Pass analysis results
+
+            if proper_noun_declensions:
+                 lemma_from_analysis = _clean_lemma(analysis_result[0][2][0]) if analysis_result else mapped_word # Get lemma from analysis
+                 result_data = {
+                    "lemma": lemma_from_analysis,
+                    "grouped_forms": proper_noun_declensions,
+                    "is_detailed_numeral_table": False # Proper nouns don't use the numeral table
+                 }
+                 print(f"[/decline] Successfully generated declensions for proper noun '{mapped_word}'.")
+            else:
+                 print(f"[/decline] Failed to generate specific declensions for proper noun '{mapped_word}'. Falling back to standard.")
+                 # Let it fall through to the standard declension below if specific logic fails
+
+
+    # --- Standard Declension (Non-numerals, non-handled proper nouns, or numerals 1-19) ---
+    if result_data is None: # Only proceed if detailed/proper noun generation didn't happen or failed
+        target_word = mapped_word # Use the potentially mapped word
+        print(f"[/decline] Processing standard declension for: '{target_word}' (Original: '{original_input}')")
+        # generate_and_format_forms returns a dict (if successful) or None
+        generated_data = generate_and_format_forms(target_word, is_declinable, get_declension_category_key)
+
+        if generated_data and isinstance(generated_data, dict):
+            result_data = generated_data
+            result_data["is_detailed_numeral_table"] = False # Ensure flag is false for standard path
+            
+            # Special check: If the standard path processed a simple numeral (1-19, or failed tens/100 conversion)
+            # We might still want the detailed table if conversion is possible from its output
+            if is_numeral and not is_detailed_numeral_table: 
+                 category_key = get_declension_category_key('num', '') # Assume 'num' category
+                 if category_key in result_data.get("grouped_forms", {}):
+                     forms_list = result_data["grouped_forms"][category_key]
+                     converted_detailed = _convert_simple_numeral_to_detailed(target_word, forms_list)
+                     if converted_detailed:
+                         print(f"[/decline] Successfully converted standard numeral result for '{target_word}' to detailed format.")
+                         result_data["grouped_forms"] = converted_detailed
+                         result_data["is_detailed_numeral_table"] = True
+                         is_detailed_numeral_table = True # Update flag
+                     else:
+                         print(f"[/decline] Failed to convert standard numeral result for '{target_word}' to detailed format.")
+        else:
+             print(f"[/decline] generate_and_format_forms failed for '{target_word}'.")
 
     # --- Final Response Formatting --- 
     if result_data is None:
@@ -2122,6 +2207,69 @@ def decline_word(word):
         # Should not happen normally
         print(f"[/decline] Unexpected result type for '{original_input}': {type(result_data)}")
         return jsonify({"status": "error", "message": "Internal server error processing declension."}), 500
+
+# --- NEW Placeholder Function for Proper Noun Declension ---
+def generate_proper_noun_declensions(word, analysis_result):
+    """
+    Generates declensions specifically for proper nouns identified by Morfeusz.
+    Uses morf.generate() based on the lemma from the analysis result.
+    """
+    print(f"[generate_proper_noun_declensions] Processing: {word}")
+    if not analysis_result:
+        print(f"[generate_proper_noun_declensions] No analysis result provided for {word}, cannot generate.")
+        return None
+
+    # Extract the lemma from the first (most likely) analysis
+    # Morfeusz interpretation tuple: (start_node, end_node, (form, lemma, tag, qual1, qual2))
+    try:
+        lemma = analysis_result[0][2][1] # Get the lemma
+        base_tag = analysis_result[0][2][2] # Get the full tag
+        print(f"[generate_proper_noun_declensions] Using lemma '{lemma}' and base tag '{base_tag}' for generation.")
+    except IndexError:
+        print(f"[generate_proper_noun_declensions] Could not extract lemma/tag from analysis result for {word}.")
+        return None
+
+    generated_forms = []
+    try:
+        # Use expand_tags=True to get individual forms directly
+        # Use the identified lemma for generation
+        generated = morf.generate(lemma, expand_tags=True)
+        print(f"[generate_proper_noun_declensions] Morf.generate returned {len(generated)} forms for lemma '{lemma}'.")
+
+        # Filter and format the results
+        for item in generated:
+            # item format: (start_node, end_node, (form, lemma, tag, qual1, qual2))
+            # We only need the inner tuple's components
+            form_data = item[2]
+            form_text = form_data[0]
+            form_lemma = form_data[1]
+            form_tag = form_data[2]
+
+            # Optional: Add more filtering if needed (e.g., only subst tags if the original was subst)
+            # We keep the lemma from generation to handle potential homonyms resolved during generation
+            # if form_lemma == lemma: # Optional: only keep forms for the exact input lemma if needed
+            generated_forms.append({"form": form_text, "tag": form_tag})
+
+    except Exception as e:
+        print(f"[generate_proper_noun_declensions] Error during morf.generate or processing for lemma '{lemma}': {e}")
+        return None # Indicate failure
+
+    if not generated_forms:
+        print(f"[generate_proper_noun_declensions] No forms generated or filtered for lemma '{lemma}'.")
+        return None
+
+    # Group the forms by category key (similar to generate_and_format_forms)
+    grouped = {}
+    # Use the base tag from the initial analysis to determine the category
+    category_key = get_declension_category_key('subst', base_tag) # Assuming proper nouns are subst
+
+    if category_key:
+        grouped[category_key] = generated_forms
+        print(f"[generate_proper_noun_declensions] Grouped {len(generated_forms)} forms under key '{category_key}'.")
+        return grouped
+    else:
+        print(f"[generate_proper_noun_declensions] Could not determine category key for base tag '{base_tag}'.")
+        return None # Indicate failure if no category key found
 
 # --- 간단한 테스트 경로 추가 ---
 @app.route('/test_log/<item>', methods=['GET'])
