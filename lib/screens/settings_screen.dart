@@ -87,7 +87,7 @@ class SettingsScreen extends ConsumerWidget {
 
           // Contributors Link
           ListTile(
-            title: Text(l10n.settingsContributors), // Use localized title
+            title: Text(l10n.copyrightsTitle), // Use the correct key for Copyrights
             leading: const Icon(Icons.people_outline),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
