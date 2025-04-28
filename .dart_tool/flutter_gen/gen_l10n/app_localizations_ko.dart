@@ -430,10 +430,19 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get suggestionErrorFallback => '제안을 표시하는 중 오류가 발생했습니다.';
+  String get suggestionErrorFallback => '추천 단어를 불러올 수 없습니다.';
 
   @override
-  String get impersonalAccuracyWarning => '정확하지 않을 수 있음';
+  String get noRelevantAnalysisForNumeral => '숫자에 대한 관련 분석을 찾을 수 없습니다.';
+
+  @override
+  String get removeFromFavorites => '즐겨찾기에서 삭제';
+
+  @override
+  String get addToFavorites => '즐겨찾기에 추가';
+
+  @override
+  String get impersonalAccuracyWarning => '비인칭 형태는 정확하지 않을 수 있습니다';
 
   @override
   String get impersonalPresentForm => '비인칭 현재형 (미완료)';

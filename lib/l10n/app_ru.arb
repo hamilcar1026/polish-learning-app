@@ -242,7 +242,10 @@
     }
   },
   "translationLabel": "Перевод",
-  "impersonalAccuracyWarning": "Может быть неточным",
+  "impersonalAccuracyWarning": "Безличные формы могут быть менее точными",
+  "@impersonalAccuracyWarning": {
+    "description": "Предупреждающий текст, отображаемый рядом с заголовками безличного спряжения."
+  },
   "settingsLanguage": "Язык",
   "@settingsLanguage": {
     "description": "Ярлык для выбора языка в настройках"
@@ -266,5 +269,21 @@
   "genderLabelNonM1Pl": "не-муж. лиц.",
   "@genderLabelNonM1Pl": {
     "description": "Метка не-мужского личного рода множественного числа (объединяет f, n, m2, m3)"
+  },
+  "suggestionErrorFallback": "Не удалось загрузить предложенное слово.",
+  "@suggestionErrorFallback": {
+    "description": "Резервное сообщение, если получен статус предложения, но предложенное слово отсутствует."
+  },
+  "noRelevantAnalysisForNumeral": "Не найдено подходящего анализа для числительного.",
+  "@noRelevantAnalysisForNumeral": {
+    "description": "Сообщение, показываемое, когда обнаружено числительное, но после фильтрации не найдено анализа с тегом 'num'."
+  },
+  "removeFromFavorites": "Удалить из избранного",
+  "@removeFromFavorites": {
+    "description": "Подсказка для кнопки удаления слова из избранного."
+  },
+  "addToFavorites": "Добавить в избранное",
+  "@addToFavorites": {
+    "description": "Подсказка для кнопки добавления слова в избранное."
   }
 } 

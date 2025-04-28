@@ -22,6 +22,15 @@ if not LINGVANEX_API_KEY:
     print("WARNING: LINGVANEX_API_KEY environment variable not set. Translation feature will be disabled.")
 # --------------------------
 
+# --- Ordinal Numerals Set ---
+ORDINAL_NUMERALS_SET = {
+    "pierwszy", "drugi", "trzeci", "czwarty", "piąty", "szósty", "siódmy", "ósmy", "dziewiąty", "dziesiąty",
+    "jedenasty", "dwunasty", "trzynasty", "czternasty", "piętnasty", "szesnasty", "siedemnasty", "osiemnasty", "dziewiętnasty",
+    "dwudziesty", "trzydziesty", "czterdziesty", "pięćdziesiąty", "sześćdziesiąty", "siedemdziesiąty", "osiemdziesiąty", "dziewięćdziesiąty",
+    "setny"
+}
+# --------------------------
+
 # Initialize Morfeusz2
 try:
     # 향상된 옵션으로 Morfeusz2 초기화
@@ -818,18 +827,22 @@ def analyze_word(word):
             if not formatted_results:
                  return jsonify({"status": "success", "word": original_word_lower, "data": [], "message": f"Analysis found but formatting failed for '{original_word_lower}'."}), 200
             
-            primary_lemma = formatted_results[0].get("lemma")
+            # Use the original results for further processing
+            primary_lemma = formatted_results[0].get("lemma") if formatted_results else None # Use original formatted_results
             cleaned_lemma = _clean_lemma(primary_lemma)
             translation_result = None
-            if cleaned_lemma:
-                print(f"[analyze_word] DEBUG: Calling translate_text_lingvanex with target_lang = {target_lang}")
-                translation_result = translate_text_lingvanex(cleaned_lemma, target_lang)
-            
+            print(f"[analyze_word] DEBUG: Calling translate_text_lingvanex with target_lang = {target_lang}")
+            translation_result = translate_text_lingvanex(cleaned_lemma, target_lang)
+
+            # <<< DEFINE is_numeral HERE >>>
+            is_numeral = any(result.get('tag', '').startswith('num') for result in formatted_results) if formatted_results else False
+
             response_data = {
                 "status": "success",
                 "word": original_word_lower,
-                "data": formatted_results,
-                "translation_en": translation_result
+                "data": formatted_results, # Return the original formatted_results
+                "translation_en": translation_result,
+                "is_numeral_input": is_numeral # <<< USE FLAG HERE >>>
             }
             print(f"[analyze_word] Returning JSON (translation is for {target_lang}): {response_data}")
             return jsonify(response_data)
@@ -874,7 +887,8 @@ def analyze_word(word):
                  "status": "suggestion",
                  "message": suggestion_message,
                  "suggested_word": suggested_word,
-                 "original_word": original_word
+                 "original_word": original_word,
+                 "is_numeral_input": False # <<< ADD FLAG HERE (False for suggestions) >>>
              }
              print(f"[analyze_word] Returning suggestion JSON: {response_data}")
              return jsonify(response_data)
@@ -887,11 +901,17 @@ def analyze_word(word):
         print(f"[analyze_word] Trying to translate original word '{original_word}' as fallback.")
         if original_word:
             failed_translation_result = translate_text_lingvanex(original_word, target_lang)
+
+        # <<< DEFINE is_numeral HERE for fallback case >>>
+        # Check if the *original input* was a numeral, even if analysis failed
+        is_numeral = original_input.isdigit() or (original_input in NUMERAL_WORD_MAP) # Check original input here
+
         final_response = {
-             "status": "success", 
+             "status": "success", # Keep status success even if analysis failed, just return empty data
              "word": original_word, 
-             "data": [], 
-             "message": f"No analysis found for '{original_word}'."
+             "data": [], # Keep data empty on overall failure
+             "message": f"No analysis found for '{original_word}'.",
+             "is_numeral_input": is_numeral # <<< USE FLAG HERE >>>
         }
         if failed_translation_result:
              final_response["translation_en"] = failed_translation_result
@@ -1041,42 +1061,112 @@ def generate_and_format_forms(word, check_func, category_func):
             print(f"[generate_and_format_forms] Word '{word}' not found or cannot be analyzed.")
             return None # Return None on failure
 
-        # --- 수정: 기본형 선택 로직 (m2 우선) ---
-        possible_lemmas = []
+        # --- 수정: 기본형 선택 로직 (m2 우선, **지정된 서수사만** 형용사 우선) ---
+        possible_lemmas_data = [] # Store dicts with more info
+        cleaned_lemmas_found = set()
+
         for r in analysis_result:
             if len(r) >= 3 and isinstance(r[2], tuple) and len(r[2]) >= 3:
                 analysis_tuple = r[2]
                 current_lemma = analysis_tuple[1]
                 current_tag_full = analysis_tuple[2]
                 current_base_tag = current_tag_full.split(':', 1)[0]
+                cleaned_lemma = _clean_lemma(current_lemma)
+                # Ensure cleaned_lemma is not None before adding
+                if cleaned_lemma:
+                     cleaned_lemmas_found.add(cleaned_lemma)
+                else: # Handle case where cleaning might fail or return None
+                     print(f"Warning: _clean_lemma returned None for {current_lemma}")
+                     cleaned_lemma = word # Fallback to original word if cleaning fails
+                     cleaned_lemmas_found.add(cleaned_lemma)
+
                 if check_func(current_base_tag): # Check if it's the desired type (verb/declinable)
-                    possible_lemmas.append((current_lemma, current_tag_full))
+                    possible_lemmas_data.append({
+                        "lemma": current_lemma,
+                        "cleaned_lemma": cleaned_lemma, # Store cleaned lemma
+                        "tag": current_tag_full,
+                        "base_tag": current_base_tag,
+                    })
 
-        if not possible_lemmas:
-            print(f"[generate_and_format_forms] No primary lemma matching check_func found for '{word}'.")
-            return None # Return None if no suitable lemma found
+        if not possible_lemmas_data:
+            print(f"[generate_and_format_forms] No primary lemma matching check_func ({check_func.__name__}) found for '{word}'.")
+            return None
 
-        # m2 우선 선택 로직 (is_declinable 경우)
-        if check_func == is_declinable and len(possible_lemmas) > 1:
-            m2_lemma = None
-            m1_lemma = None
-            # Check if both m1 and m2 types exist
-            for lem, tag in possible_lemmas:
-                if ':m2' in tag: m2_lemma = (lem, tag)
-                if ':m1' in tag: m1_lemma = (lem, tag)
+        # --- Prioritization Logic --- 
+        primary_lemma_info = None
+        # Check if any of the identified cleaned lemmas belong to the specified ordinal set
+        word_is_ordinal = any(cl in ORDINAL_NUMERALS_SET for cl in cleaned_lemmas_found)
+
+        if word_is_ordinal and check_func == is_declinable:
+            print(f"[generate_and_format_forms] Word '{word}' identified as a potential ordinal numeral from the set.")
+            adj_interpretation = None
+            subst_interpretation = None
+            # Find if both adj and subst interpretations exist for this ordinal's cleaned lemma
+            target_cleaned_lemma = next((cl for cl in cleaned_lemmas_found if cl in ORDINAL_NUMERALS_SET), None)
             
-            if m2_lemma and m1_lemma:
-                # If both exist, prioritize m2
-                primary_lemma, primary_tag_full = m2_lemma
-                print(f"[generate_and_format_forms] Prioritizing m2 lemma: '{primary_lemma}' from {possible_lemmas}")
+            if target_cleaned_lemma:
+                for p_info in possible_lemmas_data:
+                    # Ensure we are comparing interpretations for the same base word
+                    if p_info["cleaned_lemma"] == target_cleaned_lemma:
+                        if p_info["base_tag"] == 'adj':
+                            adj_interpretation = p_info
+                        elif p_info["base_tag"] == 'subst':
+                            subst_interpretation = p_info
+            else: 
+                 print(f"Warning: Could not determine the specific ordinal lemma for {word} from cleaned_lemmas_found.")
+
+            if adj_interpretation and subst_interpretation:
+                # Both exist for a listed ordinal, prioritize adjective
+                primary_lemma_info = adj_interpretation
+                print(f"[generate_and_format_forms] Prioritizing ADJECTIVE interpretation for ordinal numeral: {primary_lemma_info['lemma']} ({primary_lemma_info['tag']})")
             else:
-                # Otherwise, just take the first one found
-                primary_lemma, primary_tag_full = possible_lemmas[0]
-                print(f"[generate_and_format_forms] Using first found lemma: '{primary_lemma}' from {possible_lemmas}")
-        else:
-            # For verbs or single declinable result, take the first one
-            primary_lemma, primary_tag_full = possible_lemmas[0]
-            print(f"[generate_and_format_forms] Using first found lemma (verb or single): '{primary_lemma}'")
+                # Ordinal, but only one interpretation type (or neither matched adj/subst for the target lemma)
+                print(f"[generate_and_format_forms] Ordinal numeral ({target_cleaned_lemma}), but not both ADJ and SUBST interpretations found/matched. Using default logic.")
+                # Fall through to default logic below
+                pass 
+
+        # --- Default Logic (If not prioritized as ordinal adjective above) --- 
+        if primary_lemma_info is None:
+            print(f"[generate_and_format_forms] Applying default lemma selection logic for '{word}'.")
+            if check_func == is_declinable and len(possible_lemmas_data) > 1:
+                # Apply m2 prioritization (existing logic, but use possible_lemmas_data)
+                m2_lemma_info = None
+                m1_lemma_info = None
+                for p in possible_lemmas_data:
+                    # Use the full tag for m1/m2 check
+                    if ':m2:' in p["tag"] or p["tag"].endswith(':m2'): m2_lemma_info = p
+                    if ':m1:' in p["tag"] or p["tag"].endswith(':m1'): m1_lemma_info = p
+                
+                # Check if *different* base lemmas correspond to m1 and m2 if needed
+                # Simple check first:
+                if m2_lemma_info and m1_lemma_info:
+                     # Basic m2 priority - might need refinement if m1/m2 lemmas are different but represent same word concept
+                     primary_lemma_info = m2_lemma_info 
+                     print(f"[generate_and_format_forms] Prioritizing m2 interpretation (default logic): {primary_lemma_info['lemma']}")
+                elif possible_lemmas_data: # Added check if list is not empty
+                     primary_lemma_info = possible_lemmas_data[0]
+                     print(f"[generate_and_format_forms] Using first found interpretation (default logic, no m2 prio or only one type): {primary_lemma_info['lemma']}")
+                else:
+                    # This case should theoretically not be reached if initial check passed
+                    print(f"Error: No possible lemmas left in default logic for '{word}'.")
+                    return None
+            elif possible_lemmas_data: # Added check if list is not empty
+                # For verbs or single declinable result
+                primary_lemma_info = possible_lemmas_data[0]
+                print(f"[generate_and_format_forms] Using first found interpretation (verb or single declinable): {primary_lemma_info['lemma']}")
+            else:
+                 # This case should theoretically not be reached
+                 print(f"Error: No possible lemmas data available at the end for '{word}'.")
+                 return None
+
+        # Extract info from the selected lemma
+        if primary_lemma_info is None: # Final safety check
+             print(f"Error: Could not determine primary_lemma_info for '{word}' after all checks.")
+             return None
+
+        primary_lemma = primary_lemma_info["lemma"]
+        primary_tag_full = primary_lemma_info["tag"]
+        # --- END OF Prioritization Logic ---
 
         # --- 수정: 선택된 기본형 정보 설정 (is_primary_imperfective, has_reflexive_sie 포함) ---
         primary_base_tag = primary_tag_full.split(':', 1)[0]

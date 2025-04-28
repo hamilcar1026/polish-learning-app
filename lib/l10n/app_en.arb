@@ -249,18 +249,32 @@
    "@suggestionDidYouMean": {
      "description": "Suggestion message shown when the user might have misspelled a diacritic.",
      "placeholders": {
-        "suggestedWord": {
-          "type": "String",
-          "example": "robić"
-        }
+       "suggestedWord": {
+         "type": "String",
+         "example": "książka"
+       }
      }
    },
-   "suggestionErrorFallback": "Error displaying suggestion.",
+   "suggestionErrorFallback": "Suggestion could not be loaded.",
    "@suggestionErrorFallback": {
-     "description": "Error message shown when suggestion status is received but suggested word is missing."
+     "description": "Fallback message if suggestion status received but word is null."
    },
-   "impersonalAccuracyWarning": "May not be accurate",
-   
+   "noRelevantAnalysisForNumeral": "No relevant analysis for numeral found.",
+   "@noRelevantAnalysisForNumeral": {
+     "description": "Message shown when a numeral is detected but no 'num' tagged analysis is found after filtering."
+   },
+   "removeFromFavorites": "Remove from favorites",
+   "@removeFromFavorites": {
+     "description": "Tooltip for the button to remove a word from favorites."
+   },
+   "addToFavorites": "Add to favorites",
+   "@addToFavorites": {
+     "description": "Tooltip for the button to add a word to favorites."
+   },
+   "impersonalAccuracyWarning": "Impersonal forms may be less accurate",
+   "@impersonalAccuracyWarning": {
+     "description": "Warning text displayed next to impersonal conjugation titles."
+   },
    "impersonalPresentForm": "Impersonal present form (imperf)",
    "@impersonalPresentForm": {
      "description": "Description for the impersonal present form"

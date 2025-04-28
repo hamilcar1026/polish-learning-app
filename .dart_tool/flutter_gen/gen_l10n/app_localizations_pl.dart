@@ -430,10 +430,19 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get suggestionErrorFallback => 'Error displaying suggestion.';
+  String get suggestionErrorFallback => 'Nie można załadować sugestii.';
 
   @override
-  String get impersonalAccuracyWarning => 'Może nie być dokładne';
+  String get noRelevantAnalysisForNumeral => 'Nie znaleziono odpowiedniej analizy dla liczebnika.';
+
+  @override
+  String get removeFromFavorites => 'Usuń z ulubionych';
+
+  @override
+  String get addToFavorites => 'Dodaj do ulubionych';
+
+  @override
+  String get impersonalAccuracyWarning => 'Formy bezosobowe mogą być mniej dokładne';
 
   @override
   String get impersonalPresentForm => 'Impersonal present form (imperf)';

@@ -921,16 +921,34 @@ abstract class AppLocalizations {
   /// **'Did you mean \"{suggestedWord}\"?'**
   String suggestionDidYouMean(String suggestedWord);
 
-  /// Error message shown when suggestion status is received but suggested word is missing.
+  /// Fallback message if suggestion status received but word is null.
   ///
   /// In en, this message translates to:
-  /// **'Error displaying suggestion.'**
+  /// **'Suggestion could not be loaded.'**
   String get suggestionErrorFallback;
 
-  /// No description provided for @impersonalAccuracyWarning.
+  /// Message shown when a numeral is detected but no 'num' tagged analysis is found after filtering.
   ///
   /// In en, this message translates to:
-  /// **'May not be accurate'**
+  /// **'No relevant analysis for numeral found.'**
+  String get noRelevantAnalysisForNumeral;
+
+  /// Tooltip for the button to remove a word from favorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from favorites'**
+  String get removeFromFavorites;
+
+  /// Tooltip for the button to add a word to favorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to favorites'**
+  String get addToFavorites;
+
+  /// Warning text displayed next to impersonal conjugation titles.
+  ///
+  /// In en, this message translates to:
+  /// **'Impersonal forms may be less accurate'**
   String get impersonalAccuracyWarning;
 
   /// Description for the impersonal present form

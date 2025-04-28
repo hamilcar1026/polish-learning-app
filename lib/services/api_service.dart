@@ -15,6 +15,7 @@ class ApiResponse<T> {
   final String? translation_en; // Add translation field
   final String? suggested_word; // Field for suggestion status
   final String? original_word; // Field for suggestion status
+  final bool? is_numeral_input; // Field to indicate if the input was a numeral
 
   ApiResponse({
     required this.status,
@@ -22,7 +23,8 @@ class ApiResponse<T> {
     this.message,
     this.translation_en,
     this.suggested_word, // Add to constructor
-    this.original_word // Add to constructor
+    this.original_word, // Add to constructor
+    this.is_numeral_input // Add to constructor
   });
 }
 
@@ -117,9 +119,10 @@ class ApiService {
         final Map<String, dynamic> decodedJson = json.decode(utf8.decode(response.bodyBytes));
         final String status = decodedJson['status'] as String? ?? 'error';
         final String? message = decodedJson['message'] as String?;
-        final String? translationEn = decodedJson['translation_en'] as String?; 
+        final String? translationEn = decodedJson['translation_en'] as String?;
         final String? suggestedWord = decodedJson['suggested_word'] as String?;
         final String? originalWord = decodedJson['original_word'] as String?;
+        final bool? isNumeralInput = decodedJson['is_numeral_input'] as bool?;
 
         if (status == 'success') {
           final List<dynamic> dataList = decodedJson['data'] as List<dynamic>? ?? [];
@@ -127,10 +130,11 @@ class ApiService {
               .map((item) => AnalysisResult.fromJson(item as Map<String, dynamic>))
               .toList();
           return ApiResponse(
-              status: status, 
-              data: parsedData, 
-              message: message, 
-              translation_en: translationEn
+              status: status,
+              data: parsedData,
+              message: message,
+              translation_en: translationEn,
+              is_numeral_input: isNumeralInput
           );
         } else if (status == 'suggestion') {
              // Return suggestion response

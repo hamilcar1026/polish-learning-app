@@ -235,7 +235,7 @@
     }
   },
   "translationLabel": "Tłumaczenie",
-  "impersonalAccuracyWarning": "Może nie być dokładne",
+  "impersonalAccuracyWarning": "Formy bezosobowe mogą być mniej dokładne",
   "settingsLanguage": "Język",
   "@settingsLanguage": {
     "description": "Etykieta wyboru języka w ustawieniach"
@@ -255,5 +255,24 @@
   "genderLabelNonM1Pl": "niemęskoosob.",
   "@genderLabelNonM1Pl": {
     "description": "Etykieta rodzaju niemęskoosobowego liczby mnogiej (łączy f, n, m2, m3)"
+  },
+  "suggestionErrorFallback": "Nie można załadować sugestii.",
+  "@suggestionErrorFallback": {
+    "description": "Komunikat zastępczy, jeśli otrzymano status sugestii, ale brakuje sugerowanego słowa."
+  },
+  "noRelevantAnalysisForNumeral": "Nie znaleziono odpowiedniej analizy dla liczebnika.",
+  "@noRelevantAnalysisForNumeral": {
+    "description": "Komunikat wyświetlany, gdy wykryto liczebnik, ale po filtrowaniu nie znaleziono analizy z tagiem 'num'."
+  },
+  "removeFromFavorites": "Usuń z ulubionych",
+  "@removeFromFavorites": {
+    "description": "Podpowiedź dla przycisku usuwającego słowo z ulubionych."
+  },
+  "addToFavorites": "Dodaj do ulubionych",
+  "@addToFavorites": {
+    "description": "Podpowiedź dla przycisku dodającego słowo do ulubionych."
+  },
+  "@impersonalAccuracyWarning": {
+    "description": "Tekst ostrzegawczy wyświetlany obok tytułów koniugacji bezosobowych."
   }
 } 

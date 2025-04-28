@@ -10,7 +10,7 @@ import '../models/conjugation_result.dart'; // Import ConjugationResult model
 import '../models/declension_result.dart'; // Import DeclensionResult model
 import '../services/api_service.dart'; // Import ApiResponse
 import 'settings_screen.dart'; // Import the settings screen
-import '../providers/favorites_provider.dart'; // Import favorites provider (will be needed soon)
+import '../providers/favorites_provider.dart'; // Import favorites provider
 import '../widgets/app_drawer.dart'; // Import the AppDrawer widget
 
 // StateProvider to hold the current search term entered by the user
@@ -27,10 +27,16 @@ class SearchScreen extends ConsumerStatefulWidget {
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends ConsumerState<SearchScreen> {
+// --- Add TickerProviderStateMixin for TabController ---
+class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProviderStateMixin {
   final TextEditingController _controller = TextEditingController();
   late FlutterTts flutterTts; // Declare FlutterTts instance
   bool _isTtsInitialized = false;
+  TabController? _tabController; // Declare TabController
+
+  // --- State variables to control tab visibility reliably ---
+  bool _shouldShowDeclensionTab = false;
+  bool _shouldShowConjugationTab = false;
 
   // Map to manage the expansion state of conjugation categories
   final Map<String, bool> _expandedCategories = {};
@@ -44,19 +50,32 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   // --- Helper functions to check POS based on analysis data ---
-  // (These mimic the logic from the Python backend)
-  bool _isVerbBasedOnAnalysis(List<AnalysisResult>? analysisData) {
-    if (analysisData == null || analysisData.isEmpty) return false;
+  // (REMOVED duplicate functions from below)
+  bool _isVerbBasedOnAnalysis(List<AnalysisResult> analysisData) {
+    if (analysisData.isEmpty) return false; // ADD EMPTY CHECK
     // Check if any analysis result has a verb tag
-    const verbTags = {'fin', 'bedzie', 'impt', 'imps', 'inf', 'pact', 'pant', 'pcon', 'ppas'};
-    return analysisData.any((result) => verbTags.contains(result.tag));
+    // Use startsWith for broader matching (fin:..., praet:...)
+    return analysisData.any((result) => result.tag.startsWith('fin') || result.tag.startsWith('praet') || result.tag.startsWith('impt') || result.tag.startsWith('imps') || result.tag.startsWith('inf') || result.tag.startsWith('pcon') || result.tag.startsWith('pant') || result.tag.startsWith('ger') || result.tag.startsWith('pact') || result.tag.startsWith('ppas') || result.tag.startsWith('bedzie') || result.tag.startsWith('cond'));
   }
 
-  bool _isDeclinableBasedOnAnalysis(List<AnalysisResult>? analysisData) {
-    if (analysisData == null || analysisData.isEmpty) return false;
+  bool _isDeclinableBasedOnAnalysis(List<AnalysisResult> analysisData) {
+    if (analysisData.isEmpty) return false; // ADD EMPTY CHECK
     // Check if any analysis result has a declinable tag
-    const declinableTags = {'subst', 'depr', 'adj', 'adja', 'adjp', 'ppron12', 'siebie', 'num'}; // <<< ADDED 'num'
-    return analysisData.any((result) => declinableTags.contains(result.tag));
+    // Use startsWith for broader matching
+    return analysisData.any((result) =>
+        result.tag.startsWith('subst') || // Noun
+        result.tag.startsWith('depr') ||  // Depreciative noun
+        result.tag.startsWith('adj') ||   // Adjective
+        result.tag.startsWith('adja') ||  // Adjectival participle (act)
+        result.tag.startsWith('adjp') ||  // Adjectival participle (pass) - often decl like adj
+        result.tag.startsWith('num') ||   // Numeral (cardinal, collective) - declined
+        result.tag.startsWith('numcol') || // Collective numeral - declined
+        result.tag.startsWith('ppron12') || // Personal pronoun 1st/2nd person - declined
+        result.tag.startsWith('ppron3') || // Personal pronoun 3rd person - declined
+        result.tag.startsWith('siebie') ||   // Reflexive pronoun - declined
+        result.tag.startsWith('pact') ||   // Present Active Participle - declines like adj
+        result.tag.startsWith('ppas')      // Past Passive Participle - declines like adj
+    );
   }
 
   @override
@@ -64,12 +83,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     super.initState();
     _initializeTts(); // Initialize TTS
     // Listen to the searchTermProvider and update the text field controller
-    // This is useful if the search term can be updated from elsewhere (e.g., history)
     ref.listenManual(searchTermProvider, (previous, next) {
        if (next != _controller.text) {
-         // Use WidgetsBinding to schedule update after build
          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) { // Ensure the widget is still in the tree
+            if (mounted) {
                _controller.text = next;
                _controller.selection = TextSelection.fromPosition(TextPosition(offset: _controller.text.length));
             }
@@ -89,11 +106,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       // --- END DEBUG ---
 
        // Set language to Polish
-       var result = await flutterTts.setLanguage("pl-PL"); 
+       var result = await flutterTts.setLanguage("pl-PL");
        print("Set language result: $result"); // Check if setting language was successful
 
        // Optional: Adjust speech rate (0.0 to 1.0)
-       await flutterTts.setSpeechRate(0.5); 
+       await flutterTts.setSpeechRate(0.5);
        // Optional: Adjust pitch (0.5 to 2.0)
        await flutterTts.setPitch(1.0);
 
@@ -112,7 +129,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   void dispose() {
     _controller.dispose();
-    flutterTts.stop(); // Stop TTS when widget is disposed
+    _tabController?.dispose(); // Dispose TabController
+    flutterTts.stop();
     super.dispose();
   }
 
@@ -152,14 +170,42 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
+  // --- Function to update TabController ---
+  void _updateTabController(int length) {
+    bool controllerChanged = false; // ADD flag back
+
+    // Dispose the old controller if it exists and length changes
+    if (_tabController != null && _tabController!.length != length) {
+      _tabController!.dispose();
+      _tabController = null;
+      controllerChanged = true; // ADD flag update back
+    }
+    // Create a new controller if needed
+    if (_tabController == null && length > 0) {
+      _tabController = TabController(length: length, vsync: this);
+      controllerChanged = true; // ADD flag update back
+    }
+    // If length becomes 0, dispose the controller
+    else if (_tabController != null && length == 0) {
+       _tabController!.dispose();
+      _tabController = null;
+      controllerChanged = true; // ADD flag update back
+    }
+
+    // --- ADD setState block back --- 
+    if (controllerChanged && mounted) { 
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final submittedWord = ref.watch(submittedWordProvider);
-    final l10n = AppLocalizations.of(context)!; // Get localizations instance
-    print("[build] Current submittedWord: ${submittedWord == null ? "null" : "\"$submittedWord\""}");
+    final l10n = AppLocalizations.of(context)!;
+    // Corrected print statement with simpler quoting
+    print("[build] Current submittedWord: ${submittedWord == null ? 'null' : '"$submittedWord"'}");
 
-    // REMOVE DefaultTabController from here
-    return Scaffold( // Start directly with Scaffold
+    return Scaffold(
       appBar: AppBar(
         leading: Builder( // Use Builder to get context for Scaffold
           builder: (context) => IconButton(
@@ -193,13 +239,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ),
         ],
       ),
-      drawer: const AppDrawer(), // Add the drawer here
+      drawer: const AppDrawer(),
+      // --- REVERT to Expanded > Consumer > Column(max) layout ---
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
+        child: Column( // Keep the outer Column
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Search TextField
+            // Search TextField (remains the same)
             TextField(
               controller: _controller,
               decoration: InputDecoration(
@@ -217,159 +264,165 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Results area with improved scrolling
-            Expanded(
+            // Results area: Wrap the Consumer with Expanded
+            Expanded( // Add Expanded back
               child: submittedWord == null
-                ? Center(child: Text(l10n.searchHint))
+                ? Center(child: Text(l10n.searchHint)) // Initial hint text
                 : Consumer(
                     builder: (context, ref, child) {
-                      print("[Consumer builder] Watching analysisProvider for: \"$submittedWord\"");
-                      final currentLang = ref.watch(languageCodeProvider);
-                      final analysisParams = AnalysisParams(word: submittedWord, targetLang: currentLang);
-                      final analysisAsyncValue = ref.watch(analysisProvider(analysisParams));
+                      final analysisAsyncValue = ref.watch(analysisProvider(AnalysisParams(word: submittedWord, targetLang: ref.watch(languageCodeProvider))));
 
+                      // --- .when logic ---
                       return analysisAsyncValue.when(
                         data: (analysisResponse) {
-                          print("[Consumer builder - data] Analysis received with status: ${analysisResponse.status}");
-
-                          // --- Handle Suggestion Status --- 
+                          // --- Handle Suggestion Status ---
                           if (analysisResponse.status == 'suggestion') {
-                            // Check if suggested_word is actually available
                             if (analysisResponse.suggested_word != null) {
-                               final suggested = analysisResponse.suggested_word!;
-                                // --- FIX: Restore clickable suggestion --- 
-                                return Center(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(l10n.suggestionDidYouMean(suggested)),
-                                      const SizedBox(height: 8), // Add some space
-                                      TextButton(
-                                        onPressed: () {
-                                          print("Suggestion '$suggested' tapped. Submitting new search.");
-                                          _controller.text = suggested;
-                                          _controller.selection = TextSelection.fromPosition(TextPosition(offset: suggested.length));
-                                          ref.read(searchTermProvider.notifier).state = suggested;
-                                          _submitSearch(suggested);
-                                        },
-                                        child: Text("'$suggested'"), // Make the word itself clickable
-                                      ),
-                                    ],
-                                  ),
-                                );
-                                // --------------------------------------
+                              final suggested = analysisResponse.suggested_word!;
+                              // Simplified suggestion display
+                              return Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(analysisResponse.message ?? l10n.suggestionDidYouMean(suggested)),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        ref.read(searchTermProvider.notifier).state = suggested;
+                                        _submitSearch(suggested);
+                                        print("[Suggestion Accepted] Submitted: \"$suggested\"");
+                                      },
+                                      child: Text('"$suggested"'),
+                                    ),
+                                  ],
+                                ),
+                              );
                             } else {
-                               // Fallback if suggestion status is received but suggested_word is null
-                               return Center(child: Text(analysisResponse.message ?? l10n.suggestionErrorFallback));
-                            }
-                          } // --- End Suggestion Handling ---
-
-                          // --- Handle Non-Suggestion Statuses (Success or Failure) --- 
-                          final bool isAnalysisSuccess = analysisResponse.status == 'success' &&
-                                                       analysisResponse.data != null &&
-                                                       analysisResponse.data!.isNotEmpty;
-                          final bool isVerb = isAnalysisSuccess && _isVerbBasedOnAnalysis(analysisResponse.data);
-                          final bool isDeclinable = isAnalysisSuccess && _isDeclinableBasedOnAnalysis(analysisResponse.data);
-
-                          // --- Dynamically Build Tabs and Views (Only if analysis succeeded) --- 
-                          List<Widget> tabs = [];
-                          List<Widget> tabViews = [];
-                          if (isAnalysisSuccess) { // Only build tabs if analysis was a success
-                            if (isDeclinable) {
-                              tabs.add(Tab(text: l10n.declensionTitle));
-                              tabViews.add(_buildDeclensionTab(submittedWord!, l10n)); // Use submittedWord!
-                            }
-                            if (isVerb) {
-                              tabs.add(Tab(text: l10n.conjugationTitle));
-                              tabViews.add(_buildConjugationTab(submittedWord!, l10n)); // Use submittedWord!
+                              return Center(child: Text(analysisResponse.message ?? l10n.suggestionErrorFallback));
                             }
                           }
+                          // --- Handle Success Status ---
+                          else if (analysisResponse.status == 'success' && analysisResponse.data != null) {
+                            final primaryAnalysis = analysisResponse.data!.isNotEmpty ? analysisResponse.data!.first : null;
+                            final String? lemma = primaryAnalysis?.lemma;
 
-                          final int actualTabLength = tabs.length;
-                          print("[Consumer builder - data] Calculated actualTabLength: $actualTabLength for status: ${analysisResponse.status}");
+                            final bool isDeclinable = _isDeclinableBasedOnAnalysis(analysisResponse.data!);
+                            final bool isVerb = _isVerbBasedOnAnalysis(analysisResponse.data!);
+                            int tabLength = 0;
+                            if (isDeclinable) tabLength++;
+                            if (isVerb) tabLength++;
 
-                          // --- Build the final UI structure --- 
-                          if (actualTabLength > 0) {
-                            // --- Success with Tabs --- 
-                            return DefaultTabController(
-                              length: actualTabLength,
+                            // Schedule TabController update
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) { _updateTabController(tabLength); }
+                            });
+
+                            // <<< REVERT: Use Column > Card > TabBar > Expanded > TabBarView >>>
+                            // Remove the outer SingleChildScrollView
+                            return SingleChildScrollView(
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  _buildAnalysisInfo(analysisResponse, submittedWord!, l10n), // Use submittedWord!
-                                  const SizedBox(height: 16),
-                                  TabBar(
-                                    tabs: tabs,
-                                    labelColor: Theme.of(context).colorScheme.primary,
-                                    unselectedLabelColor: Colors.grey,
-                                    indicatorColor: Theme.of(context).colorScheme.primary,
-                                    isScrollable: tabs.length > 3,
+                                  // --- Analysis Info Card (directly in the Column) ---
+                                  _buildAnalysisInfoCard(
+                                    context, ref, l10n,
+                                    submittedWord, // Pass submittedWord directly
+                                    analysisResponse, analysisResponse.data!, lemma
                                   ),
-                                  Expanded(
-                                    child: TabBarView(
-                                      children: tabViews,
+                                  // --- TabBar (directly in the Column) ---
+                                  if (_tabController != null && _tabController!.length > 0)
+                                    TabBar(
+                                      controller: _tabController,
+                                      tabs: [
+                                        if (isDeclinable) Tab(text: l10n.declensionTitle),
+                                        if (isVerb) Tab(text: l10n.conjugationTitle),
+                                      ],
+                                      labelColor: Theme.of(context).colorScheme.primary,
+                                      unselectedLabelColor: Colors.grey,
+                                      indicatorColor: Theme.of(context).colorScheme.primary,
                                     ),
-                                  ),
+                                  // --- TabBarView (fixed height container) ---
+                                  if (_tabController != null && _tabController!.length > 0)
+                                    SizedBox(
+                                      height: MediaQuery.of(context).size.height * 0.6, // 화면 높이의 60%로 고정
+                                      child: TabBarView(
+                                        controller: _tabController,
+                                        physics: const NeverScrollableScrollPhysics(), // Keep swipe disabled
+                                        children: [
+                                          if (isDeclinable) _buildDeclensionTab(submittedWord, l10n),
+                                          if (isVerb) _buildConjugationTab(submittedWord, l10n),
+                                        ],
+                                      ),
+                                    ),
                                 ],
                               ),
-                            );
-                          } else {
-                            // --- Success without Tabs OR Failure --- 
-                            // Display Analysis Info + Message (Handles both analysis success without tabs AND analysis failure)
-                            return Column(
-                              children: [
-                                // Always show analysis info section, even on failure, if possible
-                                _buildAnalysisInfo(analysisResponse, submittedWord!, l10n), // Use submittedWord!
-                                Expanded(
-                                  child: Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: Text(
-                                        // Show specific message from backend or generic fallback
-                                        analysisResponse.message ?? (isAnalysisSuccess ? l10n.noAnalysisFound(submittedWord!) : l10n.noAnalysisFound(submittedWord!)), 
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
+                            ); // <<< End SingleChildScrollView >>>
                           }
-                        }, // End data callback
+                          // --- Handle Error/No Data Status ---
+                          else {
+                            return Center(child: Text(analysisResponse.message ?? l10n.noAnalysisFound(submittedWord)));
+                          }
+                        },
+                        // --- Loading Callback ---
                         loading: () {
                           return const Center(child: CircularProgressIndicator());
                         },
+                        // --- Error Callback ---
                         error: (error, stackTrace) {
-                          // Use localized error message
+                          print("Error in analysisProvider: $error\\n$stackTrace");
                           return Center(child: Text(l10n.loadingError(error.toString())));
                         },
                       );
                     },
                   ),
-            ),
+            ), // End Expanded (This is the outer Expanded for the whole results area)
           ],
         ),
       ),
     );
   }
 
-  // --- Builder for the Analysis Info section ---
-  Widget _buildAnalysisInfo(ApiResponse<List<AnalysisResult>> analysisResponse, String word, AppLocalizations l10n) {
-    if (analysisResponse.status != 'success' || analysisResponse.data == null || analysisResponse.data!.isEmpty) {
-       return Padding(
-         padding: const EdgeInsets.symmetric(vertical: 8.0),
-         child: Text(analysisResponse.message ?? l10n.noAnalysisFound(word), textAlign: TextAlign.center),
-       );
-    }
-    
-    // Assuming the first result represents the primary analysis
-    final primaryAnalysis = analysisResponse.data!.first;
-    final String lemma = primaryAnalysis.lemma;
-    
-    // Watch favorite status for the current lemma
-    final isFavorite = ref.watch(favoritesProvider).contains(lemma);
-    final favoritesNotifier = ref.read(favoritesProvider.notifier);
-    
+  // --- _SliverAppBarDelegate for pinning TabBar --- 
+  // (Needs to be added to the class)
+
+  // --- Builder for Analysis Info Card ---
+  Widget _buildAnalysisInfoCard(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+    String word, // Use submitted word passed down
+    ApiResponse analysisResponse, // Keep original response for translation
+    List<AnalysisResult> displayData, // Use ORIGINAL data for display now
+    String? lemma // Lemma for favorites (from original data)
+  ) {
+    // --- REVERTED: Remove specific check for empty data due to numeral filtering ---
+    // if (displayData.isEmpty && analysisResponse.is_numeral_input == true) { // Be specific about the empty case
+    //   return Card(
+    //     elevation: 2.0,
+    //     margin: const EdgeInsets.symmetric(vertical: 8.0),
+    //     child: Padding(
+    //       padding: const EdgeInsets.all(12.0),
+    //       // Use the NEW localization key
+    //       child: Text(l10n.noRelevantAnalysisForNumeral, textAlign: TextAlign.center),
+    //     ),
+    //   );
+    // }
+    // Handle general empty data case (e.g., API returned success but empty data list)
+     if (displayData.isEmpty) { // This check remains, now uses the original data passed in
+        return Card(
+           elevation: 2.0,
+           margin: const EdgeInsets.symmetric(vertical: 8.0),
+           child: Padding(
+             padding: const EdgeInsets.all(12.0),
+             // Use the existing noAnalysisFound key
+             child: Text(l10n.noAnalysisFound(word), textAlign: TextAlign.center),
+           ),
+        );
+     }
+
+
+    // Watch favorite status for the current lemma (only if lemma exists)
+    final bool isFavorite = lemma != null ? ref.watch(favoritesProvider).contains(lemma) : false;
+    final favoritesNotifier = lemma != null ? ref.read(favoritesProvider.notifier) : null;
+
     return Card(
       elevation: 2.0,
       margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -377,16 +430,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min, 
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Flexible( 
+                Flexible(
                   child: Text(
-                    '"$word" - ${l10n.analysisTitle}', 
+                    '"$word" - ${l10n.analysisTitle}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                    overflow: TextOverflow.ellipsis, 
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 // Row for action buttons (TTS and Favorite)
@@ -396,42 +449,44 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     if (_isTtsInitialized)
                       IconButton(
                         icon: const Icon(Icons.volume_up),
-                        onPressed: () => _speak(word), // Speak the original searched word
-                        tooltip: l10n.pronounceWordTooltip, 
-                        iconSize: 20, 
-                        padding: const EdgeInsets.only(left: 8), // Add some padding
-                        constraints: const BoxConstraints(), 
+                        onPressed: () => _speak(word),
+                        tooltip: l10n.pronounceWordTooltip,
+                        iconSize: 20,
+                        padding: const EdgeInsets.only(left: 8),
+                        constraints: const BoxConstraints(),
                       ),
-                    // Favorite Button
-                    IconButton(
-                      icon: Icon(
-                        isFavorite ? Icons.star : Icons.star_border,
-                        color: isFavorite ? Colors.amber : null,
+                    // Favorite Button (only show if lemma is available)
+                    if (lemma != null && favoritesNotifier != null)
+                      IconButton(
+                        icon: Icon(
+                          isFavorite ? Icons.star : Icons.star_border,
+                          color: isFavorite ? Colors.amber : null,
+                        ),
+                        // Use the NEW localization keys
+                        tooltip: isFavorite ? l10n.removeFromFavorites : l10n.addToFavorites,
+                        onPressed: () {
+                           favoritesNotifier.toggleFavorite(lemma);
+                        },
+                        iconSize: 22,
+                        padding: const EdgeInsets.only(left: 8),
+                        constraints: const BoxConstraints(),
                       ),
-                      tooltip: isFavorite ? 'Remove from favorites' : 'Add to favorites', // Localize later if needed
-                      onPressed: () {
-                        favoritesNotifier.toggleFavorite(lemma); // Toggle favorite for the lemma
-                      },
-                      iconSize: 22, // Slightly larger star
-                      padding: const EdgeInsets.only(left: 8), // Add some padding
-                      constraints: const BoxConstraints(), 
-                    ),
                   ],
                 )
               ],
             ),
-            // Display the translation here if available
+            // Display the translation here if available (from original response)
             if (analysisResponse.translation_en != null && analysisResponse.translation_en!.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: 8.0, bottom: 4.0), // Add some spacing
+                padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
                 child: Text(
-                  "${l10n.translationLabel}: ${analysisResponse.translation_en!}", // Display label + translation
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontStyle: FontStyle.italic, color: Colors.deepPurple), // Style the translation
+                  "${l10n.translationLabel}: ${analysisResponse.translation_en!}",
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontStyle: FontStyle.italic, color: Colors.deepPurple),
                 ),
               ),
             const SizedBox(height: 8),
-            // Use the helper function to display localized analysis strings
-            ...analysisResponse.data!.map((result) { 
+            // Use the helper function to display localized analysis strings using ORIGINAL data
+            ...displayData.map((result) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 4.0),
                 child: Text(
@@ -451,16 +506,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return Consumer(
       builder: (context, ref, _) {
         final declensionAsyncValue = ref.watch(declensionProvider(word));
-        
+
         return declensionAsyncValue.when(
-          data: (d) => d.status == 'success' && d.data != null && d.data!.isNotEmpty
-              ? SingleChildScrollView( // Ensure tab content is scrollable
-                  padding: const EdgeInsets.symmetric(vertical: 8.0), // Add padding within scroll view
-                  child: _buildDeclensionResults(d.data!.first, l10n),
-                )
-              : Center(
+          data: (d) {
+            if (d.status == 'success' && d.data != null && d.data!.isNotEmpty) {
+              // <<< ADD SingleChildScrollView back INSIDE the tab content >>>
+              return SingleChildScrollView(
+                 padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                 child: _buildDeclensionResults(d.data!.first, l10n),
+              );
+            } else {
+              return Center(
                   child: Text(d.message ?? l10n.noDeclensionData),
-                ),
+                );
+            }
+          },
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, s) => Center(child: Text(l10n.loadingError(e.toString()))),
         );
@@ -473,28 +533,28 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return Consumer(
       builder: (context, ref, _) {
         final conjugationAsyncValue = ref.watch(conjugationProvider(word));
-        
+
         return conjugationAsyncValue.when(
           data: (c) {
             if (c.status == 'success' && c.data != null && c.data!.isNotEmpty) {
-              final lemmaData = c.data!.first; // lemmaData is now ConjugationResult
-              // final groupedForms = _prepareGroupedConjugationForms(lemmaData); // REMOVED: No longer need to prepare
-              final groupedForms = lemmaData.grouped_forms; // NEW: Directly access the map
-              
+              final lemmaData = c.data!.first;
+              final groupedForms = lemmaData.grouped_forms;
+
               if (groupedForms.isEmpty) {
                  return Center(child: Text(l10n.noConjugationData));
               }
-              
-              return SingleChildScrollView( 
-                 padding: const EdgeInsets.symmetric(vertical: 8.0), 
+
+              // <<< ADD SingleChildScrollView back INSIDE the tab content >>>
+              return SingleChildScrollView(
+                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                  child: Card(
                     elevation: 2.0,
-                    margin: EdgeInsets.zero, 
+                    margin: EdgeInsets.zero,
                     child: Padding(
                        padding: const EdgeInsets.all(12.0),
                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min, 
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                              Text(
                                 l10n.conjugationTableTitle(lemmaData.lemma),
@@ -502,7 +562,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                              ),
                              const SizedBox(height: 10),
                              const Divider(),
-                             // Pass the already grouped forms directly
                              ..._buildConjugationSections(context, groupedForms, l10n),
                           ],
                        ),
@@ -2585,3 +2644,29 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 } 
+
+// --- Helper class for SliverPersistentHeaderDelegate to pin the TabBar ---
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  _SliverAppBarDelegate(this._tabBar);
+
+  final TabBar _tabBar;
+
+  @override
+  double get minExtent => _tabBar.preferredSize.height;
+  @override
+  double get maxExtent => _tabBar.preferredSize.height;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor, // Match background
+      child: _tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
+    return false; // TabBar itself doesn't change
+  }
+}

@@ -430,10 +430,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get suggestionErrorFallback => 'Error displaying suggestion.';
+  String get suggestionErrorFallback => 'Suggestion could not be loaded.';
 
   @override
-  String get impersonalAccuracyWarning => 'May not be accurate';
+  String get noRelevantAnalysisForNumeral => 'No relevant analysis for numeral found.';
+
+  @override
+  String get removeFromFavorites => 'Remove from favorites';
+
+  @override
+  String get addToFavorites => 'Add to favorites';
+
+  @override
+  String get impersonalAccuracyWarning => 'Impersonal forms may be less accurate';
 
   @override
   String get impersonalPresentForm => 'Impersonal present form (imperf)';
