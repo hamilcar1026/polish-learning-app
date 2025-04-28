@@ -55,7 +55,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   bool _isDeclinableBasedOnAnalysis(List<AnalysisResult>? analysisData) {
     if (analysisData == null || analysisData.isEmpty) return false;
     // Check if any analysis result has a declinable tag
-    const declinableTags = {'subst', 'depr', 'adj', 'adja', 'adjp'};
+    const declinableTags = {'subst', 'depr', 'adj', 'adja', 'adjp', 'ppron12', 'siebie', 'num'}; // <<< ADDED 'num'
     return analysisData.any((result) => declinableTags.contains(result.tag));
   }
 
@@ -157,276 +157,197 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final submittedWord = ref.watch(submittedWordProvider);
     final l10n = AppLocalizations.of(context)!; // Get localizations instance
     print("[build] Current submittedWord: ${submittedWord == null ? "null" : "\"$submittedWord\""}");
-    
-    // Determine the number of tabs needed based on analysis (initial guess or based on state)
-    // This needs refinement, maybe calculate dynamically after analysis
-    int tabLength = 3; // Default to 3 (Declension, Conjugation, Grammar) - adjust later if needed
 
-    return DefaultTabController(
-      length: tabLength, // Adjust length dynamically based on analysis results if possible
-      child: Scaffold(
-        appBar: AppBar(
-          leading: Builder( // Use Builder to get context for Scaffold
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.menu),
-              tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip, // Standard tooltip
-              onPressed: () => Scaffold.of(context).openDrawer(), // Open the drawer
-            ),
+    // REMOVE DefaultTabController from here
+    return Scaffold( // Start directly with Scaffold
+      appBar: AppBar(
+        leading: Builder( // Use Builder to get context for Scaffold
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip, // Standard tooltip
+            onPressed: () => Scaffold.of(context).openDrawer(), // Open the drawer
           ),
-          title: InkWell( // Wrap Title with InkWell
-            onTap: () {
-              // Clear the text field
-              _controller.clear();
-              // Reset the search term provider
-              ref.read(searchTermProvider.notifier).state = '';
-              // Reset the submitted word provider to clear results
-              ref.read(submittedWordProvider.notifier).state = null;
-              print("[AppBar Title Tap] Search state reset.");
-            },
-            child: Text(l10n.appTitle), // Use localized title
-          ),
-          actions: [ // Add actions for the AppBar
-            IconButton(
-              icon: const Icon(Icons.settings),
-              tooltip: l10n.settingsTitle, // Use localized tooltip
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
-                );
-              },
-            ),
-          ],
         ),
-        drawer: const AppDrawer(), // Add the drawer here
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Search TextField
-              TextField(
-                controller: _controller,
-                decoration: InputDecoration(
-                  labelText: l10n.searchHint, // Use localized hint
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.search),
-                    tooltip: l10n.searchButtonTooltip, // Use localized tooltip
-                    onPressed: () => _submitSearch(_controller.text),
-                  ),
+        title: InkWell( // Wrap Title with InkWell
+          onTap: () {
+            // Clear the text field
+            _controller.clear();
+            // Reset the search term provider
+            ref.read(searchTermProvider.notifier).state = '';
+            // Reset the submitted word provider to clear results
+            ref.read(submittedWordProvider.notifier).state = null;
+            print("[AppBar Title Tap] Search state reset.");
+          },
+          child: Text(l10n.appTitle), // Use localized title
+        ),
+        actions: [ // Add actions for the AppBar
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: l10n.settingsTitle, // Use localized tooltip
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
+          ),
+        ],
+      ),
+      drawer: const AppDrawer(), // Add the drawer here
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Search TextField
+            TextField(
+              controller: _controller,
+              decoration: InputDecoration(
+                labelText: l10n.searchHint, // Use localized hint
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.search),
+                  tooltip: l10n.searchButtonTooltip, // Use localized tooltip
+                  onPressed: () => _submitSearch(_controller.text),
                 ),
-                onChanged: (value) {
-                  ref.read(searchTermProvider.notifier).state = value;
-                },
-                onSubmitted: _submitSearch,
               ),
-              const SizedBox(height: 20),
-              
-              // Results area with improved scrolling
-              Expanded(
-                child: submittedWord == null
-                  ? Center(child: Text(l10n.searchHint))
-                  : Consumer(
-                      builder: (context, ref, child) {
-                        print("[Consumer builder] Watching analysisProvider for: \"$submittedWord\"");
-                        // Get the current language code from settings
-                        final currentLang = ref.watch(languageCodeProvider); 
-                        // Create params object
-                        final analysisParams = AnalysisParams(word: submittedWord, targetLang: currentLang);
-                        // Watch the provider with the params object
-                        final analysisAsyncValue = ref.watch(analysisProvider(analysisParams));
-                        
-                        return analysisAsyncValue.when(
-                          data: (analysisResponse) {
-                            print("[Consumer builder - data] Analysis received with status: ${analysisResponse.status}");
+              onChanged: (value) {
+                ref.read(searchTermProvider.notifier).state = value;
+              },
+              onSubmitted: _submitSearch,
+            ),
+            const SizedBox(height: 20),
 
-                            // --- Handle Suggestion Status --- 
-                            if (analysisResponse.status == 'suggestion') {
-                              // Ensure suggested_word is not null before showing suggestion UI
-                              if (analysisResponse.suggested_word != null) {
-                                final suggested = analysisResponse.suggested_word!;
+            // Results area with improved scrolling
+            Expanded(
+              child: submittedWord == null
+                ? Center(child: Text(l10n.searchHint))
+                : Consumer(
+                    builder: (context, ref, child) {
+                      print("[Consumer builder] Watching analysisProvider for: \"$submittedWord\"");
+                      final currentLang = ref.watch(languageCodeProvider);
+                      final analysisParams = AnalysisParams(word: submittedWord, targetLang: currentLang);
+                      final analysisAsyncValue = ref.watch(analysisProvider(analysisParams));
+
+                      return analysisAsyncValue.when(
+                        data: (analysisResponse) {
+                          print("[Consumer builder - data] Analysis received with status: ${analysisResponse.status}");
+
+                          // --- Handle Suggestion Status --- 
+                          if (analysisResponse.status == 'suggestion') {
+                            // Check if suggested_word is actually available
+                            if (analysisResponse.suggested_word != null) {
+                               final suggested = analysisResponse.suggested_word!;
+                                // --- FIX: Restore clickable suggestion --- 
                                 return Center(
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      // Use localized string for the suggestion message
-                                      Text(l10n.suggestionDidYouMean(suggested)), 
+                                      Text(l10n.suggestionDidYouMean(suggested)),
+                                      const SizedBox(height: 8), // Add some space
                                       TextButton(
                                         onPressed: () {
                                           print("Suggestion '$suggested' tapped. Submitting new search.");
-                                          // Update the text field and providers for the new search
                                           _controller.text = suggested;
                                           _controller.selection = TextSelection.fromPosition(TextPosition(offset: suggested.length));
                                           ref.read(searchTermProvider.notifier).state = suggested;
                                           _submitSearch(suggested);
                                         },
-                                        child: Text("'$suggested'"), // Show clickable suggestion word
+                                        child: Text("'$suggested'"), // Make the word itself clickable
                                       ),
                                     ],
                                   ),
                                 );
-                              } else {
-                                // Fallback if suggestion status is received but suggested_word is null (shouldn't happen ideally)
-                                // Use the new localized fallback message
-                                return Center(child: Text(analysisResponse.message ?? l10n.suggestionErrorFallback)); 
-                              }
+                                // --------------------------------------
+                            } else {
+                               // Fallback if suggestion status is received but suggested_word is null
+                               return Center(child: Text(analysisResponse.message ?? l10n.suggestionErrorFallback));
                             }
+                          } // --- End Suggestion Handling ---
 
-                            // --- Handle Success Status (existing logic) --- 
-                            final bool isAnalysisSuccess = analysisResponse.status == 'success' &&
-                                                         analysisResponse.data != null &&
-                                                         analysisResponse.data!.isNotEmpty;
-                            final bool isVerb = isAnalysisSuccess && _isVerbBasedOnAnalysis(analysisResponse.data);
-                            final bool isDeclinable = isAnalysisSuccess && _isDeclinableBasedOnAnalysis(analysisResponse.data);
-                            
-                            if (!isAnalysisSuccess) {
-                              // --- Handle Analysis Failure --- 
-                              // Even if analysis fails, we might have a translation or message from the backend.
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  // Show a simplified header with title, buttons, and potential translation
-                                  Card(
-                                    elevation: 2.0,
-                                    margin: const EdgeInsets.symmetric(vertical: 8.0),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Flexible(
-                                                child: Text(
-                                                  // Use submittedWord directly as analysisResponse.word doesn't exist
-                                                  '"${submittedWord ?? ''}" - ${l10n.analysisTitle}', 
-                                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                                                  overflow: TextOverflow.ellipsis, 
-                                                ),
-                                              ),
-                                              // Only show TTS button if submittedWord is available
-                                              if (_isTtsInitialized && submittedWord != null)
-                                                IconButton(
-                                                  icon: const Icon(Icons.volume_up),
-                                                  // Speak submittedWord
-                                                  onPressed: () => _speak(submittedWord!), 
-                                                  tooltip: l10n.pronounceWordTooltip, 
-                                                  iconSize: 20, 
-                                                  padding: const EdgeInsets.only(left: 8),
-                                                  constraints: const BoxConstraints(),
-                                                ),
-                                              // Consider disabling favorite button here as there's no lemma
-                                            ],
-                                          ),
-                                          // Display translation if available (even on failure)
-                                          if (analysisResponse.translation_en != null && analysisResponse.translation_en!.isNotEmpty)
-                                            Padding(
-                                              padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
-                                              child: Text(
-                                                "${l10n.translationLabel}: ${analysisResponse.translation_en!}",
-                                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontStyle: FontStyle.italic, color: Colors.deepPurple),
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  // Display the specific failure message from the backend or the generic one
-                                  Center(
-                                    child: Text(
-                                      analysisResponse.message ?? l10n.noAnalysisFound(submittedWord ?? ''),
-                                      textAlign: TextAlign.center,
-                                    )
-                                  ),
-                                ],
-                              );
-                            }
+                          // --- Handle Non-Suggestion Statuses (Success or Failure) --- 
+                          final bool isAnalysisSuccess = analysisResponse.status == 'success' &&
+                                                       analysisResponse.data != null &&
+                                                       analysisResponse.data!.isNotEmpty;
+                          final bool isVerb = isAnalysisSuccess && _isVerbBasedOnAnalysis(analysisResponse.data);
+                          final bool isDeclinable = isAnalysisSuccess && _isDeclinableBasedOnAnalysis(analysisResponse.data);
 
-                            // Dynamically build tabs
-                            List<Widget> tabs = [];
-                            List<Widget> tabViews = [];
-
+                          // --- Dynamically Build Tabs and Views (Only if analysis succeeded) --- 
+                          List<Widget> tabs = [];
+                          List<Widget> tabViews = [];
+                          if (isAnalysisSuccess) { // Only build tabs if analysis was a success
                             if (isDeclinable) {
                               tabs.add(Tab(text: l10n.declensionTitle));
-                              tabViews.add(_buildDeclensionTab(submittedWord, l10n));
+                              tabViews.add(_buildDeclensionTab(submittedWord!, l10n)); // Use submittedWord!
                             }
-                             if (isVerb) {
+                            if (isVerb) {
                               tabs.add(Tab(text: l10n.conjugationTitle));
-                              tabViews.add(_buildConjugationTab(submittedWord, l10n));
+                              tabViews.add(_buildConjugationTab(submittedWord!, l10n)); // Use submittedWord!
                             }
-                             // REMOVE Grammar tab and view
-                             // tabs.add(Tab(text: l10n.grammarTitle));
-                             // tabViews.add(Center(child: Text('Grammar info for "$submittedWord" coming soon')));
+                          }
 
-                            // Need to rebuild TabController if length changes - this is complex with DefaultTabController
-                            // For simplicity, let's assume 3 tabs if either verb or declinable, else 1 tab (Analysis only view?)
-                            // A more robust solution might involve a custom TabController managed in the state.
+                          final int actualTabLength = tabs.length;
+                          print("[Consumer builder - data] Calculated actualTabLength: $actualTabLength for status: ${analysisResponse.status}");
 
-                            if (tabs.isEmpty) {
-                                return Column(
-                                  children: [
-                                     _buildAnalysisInfo(analysisResponse, submittedWord, l10n),
-                                     Expanded(child: Center(child: Text(l10n.noAnalysisFound(submittedWord)))),
-                                  ],
-                                );
-                            }
-
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                // Analysis section - always visible
-                                _buildAnalysisInfo(analysisResponse, submittedWord, l10n),
-                                const SizedBox(height: 16),
-                                
-                                // TabBar (only if there are specific tabs)
-                                if (isVerb || isDeclinable)
+                          // --- Build the final UI structure --- 
+                          if (actualTabLength > 0) {
+                            // --- Success with Tabs --- 
+                            return DefaultTabController(
+                              length: actualTabLength,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  _buildAnalysisInfo(analysisResponse, submittedWord!, l10n), // Use submittedWord!
+                                  const SizedBox(height: 16),
                                   TabBar(
-                                    controller: DefaultTabController.of(context), // Use context's controller
                                     tabs: tabs,
                                     labelColor: Theme.of(context).colorScheme.primary,
                                     unselectedLabelColor: Colors.grey,
                                     indicatorColor: Theme.of(context).colorScheme.primary,
-                                    isScrollable: tabs.length > 3, // Allow scroll if many tabs
+                                    isScrollable: tabs.length > 3,
                                   ),
-                                
-                                // TabBarView for content
-                                if (isVerb || isDeclinable)
                                   Expanded(
                                     child: TabBarView(
-                                      controller: DefaultTabController.of(context), // Use context's controller
                                       children: tabViews,
                                     ),
                                   ),
-                                  
-                                // If neither verb nor declinable but analysis succeeded
-                                if (!isVerb && !isDeclinable && isAnalysisSuccess)
-                                  Expanded(
-                                    child: Center(
+                                ],
+                              ),
+                            );
+                          } else {
+                            // --- Success without Tabs OR Failure --- 
+                            // Display Analysis Info + Message (Handles both analysis success without tabs AND analysis failure)
+                            return Column(
+                              children: [
+                                // Always show analysis info section, even on failure, if possible
+                                _buildAnalysisInfo(analysisResponse, submittedWord!, l10n), // Use submittedWord!
+                                Expanded(
+                                  child: Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
                                       child: Text(
-                                        // Use localized message
-                                        l10n.noAnalysisFound(submittedWord),
+                                        // Show specific message from backend or generic fallback
+                                        analysisResponse.message ?? (isAnalysisSuccess ? l10n.noAnalysisFound(submittedWord!) : l10n.noAnalysisFound(submittedWord!)), 
                                         textAlign: TextAlign.center,
                                       ),
                                     ),
                                   ),
+                                ),
                               ],
                             );
-                          },
-                          loading: () {
-                            return const Center(child: CircularProgressIndicator());
-                          },
-                          error: (error, stackTrace) {
-                            // Use localized error message
-                            return Center(child: Text(l10n.loadingError(error.toString())));
-                          },
-                        );
-                      },
-                    ),
-              ),
-            ],
-          ),
+                          }
+                        }, // End data callback
+                        loading: () {
+                          return const Center(child: CircularProgressIndicator());
+                        },
+                        error: (error, stackTrace) {
+                          // Use localized error message
+                          return Center(child: Text(l10n.loadingError(error.toString())));
+                        },
+                      );
+                    },
+                  ),
+            ),
+          ],
         ),
       ),
     );
@@ -605,205 +526,391 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   // --- Builder for Declension Results --- 
   Widget _buildDeclensionResults(DeclensionResult lemmaData, AppLocalizations l10n) {
     print("[_buildDeclensionResults] Building declension widget for: ${lemmaData.lemma}");
+    // Use the new flag name
+    print("[_buildDeclensionResults] is_detailed_numeral_table: ${lemmaData.is_detailed_numeral_table}"); 
+    print("[_buildDeclensionResults] grouped_forms type: ${lemmaData.grouped_forms.runtimeType}");
+    print("[_buildDeclensionResults] grouped_forms data: ${lemmaData.grouped_forms}");
 
-    bool isAdjective = lemmaData.grouped_forms.keys.any((key) => key.startsWith('declensionCategoryAdjective'));
-    print("[_buildDeclensionResults] Is adjective? $isAdjective");
+    // Check the new flag name
+    if (lemmaData.is_detailed_numeral_table) { 
+      // --- 복합 수사 상세 테이블 생성 (격 x 성별) ---
+      // --- Keep existing logic for detailed table ---
+      final compositeData = Map<String, Map<String, String>>.from(lemmaData.grouped_forms); 
+      // --- DEBUG PRINTS START ---
+      print("[_buildDeclensionResults - Detailed Numeral] Attempting to build detailed table.");
+      print("[_buildDeclensionResults - Detailed Numeral] compositeData type: ${compositeData.runtimeType}");
+      print("[_buildDeclensionResults - Detailed Numeral] compositeData content: $compositeData");
+      compositeData.forEach((caseKey, genderMap) {
+        print("[_buildDeclensionResults - Detailed Numeral] Case: $caseKey, GenderMap: $genderMap");
+        if (genderMap is! Map<String, String>) {
+            print("[_buildDeclensionResults - Detailed Numeral] WARNING: GenderMap for case '$caseKey' is NOT Map<String, String>, it is: ${genderMap.runtimeType}");
+        }
+      });
+      // --- DEBUG PRINTS END ---
+      final casesOrder = ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc'];
+      final genderOrder = ['m1', 'm2/m3', 'f', 'n']; 
+      final genderHeaders = {
+        'm1': l10n.tableHeaderM1,
+        'm2/m3': l10n.tableHeaderMOther,
+        'f': l10n.tableHeaderF,
+        'n': l10n.tableHeaderN,
+      };
 
-    // --- 수정: 테이블 데이터 구조 변경 (형용사용) ---
-    dynamic declensionTable; // Use dynamic to hold different map types
-    if (isAdjective) {
-      // Case -> Number -> Gender -> Form
-      declensionTable = <String, Map<String, Map<String, String>>>{}; 
-    } else {
-      declensionTable = <String, Map<String, String>>{}; // Case -> Number -> Form
-    }
-    // ---------------------------------------------
-
-    final casesOrder = ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc'];
-    // --- 추가: 형용사 표 성별 표시 순서 ---
-    final sgGenderOrder = ['m', 'f', 'n']; // 단수 성별 표시 순서
-    final plGenderOrder = ['m1pl', 'non_m1']; // 복수 성별 표시 순서
-    // -----------------------------------
-
-    final List<DeclensionForm> formsToDisplay = lemmaData.grouped_forms['declensionCategoryAdjectivePositive'] ??
-                                                lemmaData.grouped_forms['declensionCategoryNoun'] ??
-                                                lemmaData.grouped_forms['declensionCategoryPronoun'] ??
-                                                [];
-    print("[_buildDeclensionResults] Found ${formsToDisplay.length} forms to display.");
-
-
-    for (var formInfo in formsToDisplay) {
-      final tagMap = _parseTag(formInfo.tag);
-      final casePart = tagMap['case'];
-      final numberCode = tagMap['number'];
-      final genderCode = tagMap['gender']; // 성별 정보 추출
-
-      if (casePart != null && numberCode != null) {
-        final individualCases = casePart.split('.');
-
-        for (var caseCode in individualCases) {
-          if (casesOrder.contains(caseCode)) {
-            if (!declensionTable.containsKey(caseCode)) {
-              if (isAdjective) {
-                declensionTable[caseCode] = <String, Map<String, String>>{'sg': {}, 'pl': {}}; // Initialize gender maps
-              } else {
-                declensionTable[caseCode] = <String, String>{}; // Initialize form map
-              }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Builder(
+            builder: (context) {
+              final l10n = AppLocalizations.of(context)!;
+              return Text(
+                l10n.declensionTableTitle(lemmaData.lemma), // "{lemma}" 곡용
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              );
             }
+          ),
+          const SizedBox(height: 16),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Table(
+                  border: TableBorder.all(color: Colors.grey.shade300),
+                  // 열 너비 자동 조절 -> 모든 열 내용에 맞게 되돌림
+                  columnWidths: Map.fromIterable(
+                     [-1, ...genderOrder.asMap().keys], // -1 for Case column index, 0,1,2,3 for gender indices
+                     key: (k) => k == -1 ? 0 : k + 1, // Map to actual column indices 0, 1, 2, 3, 4
+                     value: (_) => IntrinsicColumnWidth(), // All columns intrinsic
+                  ),
+                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  children: [
+                    // 헤더 행
+                    TableRow(
+                      decoration: BoxDecoration(color: Colors.grey.shade100),
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(l10n.tableHeaderCase, style: TextStyle(fontWeight: FontWeight.bold)), // 격
+                        ),
+                        // 성별 헤더
+                        ...genderOrder.map((genderKey) => Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(genderHeaders[genderKey]!, style: TextStyle(fontWeight: FontWeight.bold)),
+                            )).toList(),
+                      ],
+                    ),
+                    // 데이터 행
+                    ...casesOrder.map((caseCode) {
+                      return TableRow(
+                        children: [
+                          // 격 이름
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(_getCaseName(caseCode, l10n)),
+                          ),
+                          // 각 성별에 대한 형태
+                          ...genderOrder.map((genderKey) {
+                            final form = compositeData[caseCode]?[genderKey] ?? '-';
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(form),
+                            );
+                          }).toList(),
+                        ],
+                      );
+                    }).toList(),
+                  ],
+                ),
+            ),
+          ),
+        ],
+      );
+      // --- END 복합 수사 테이블 --- 
+    } else {
+      // --- 기존 단수/복수 테이블 로직 --- 
+        // --- 수정: 형용사 또는 수사인지 확인 (기존 방식) ---
+        // grouped_forms는 Map<String, List<DeclensionForm>> 형태여야 함
+        bool isAdjectiveOrNumeral = false;
+        List<DeclensionForm> formsToDisplay = [];
+        // --- DEBUG PRINTS START ---
+        print("[_buildDeclensionResults - Standard] Entered standard declension block.");
+        print("[_buildDeclensionResults - Standard] grouped_forms type: ${lemmaData.grouped_forms.runtimeType}");
+        // --- DEBUG PRINTS END ---
+        
+        // --- FIX: REMOVE problematic type check and directly cast ---
+        // if (lemmaData.grouped_forms is Map<String, List<DeclensionForm>>) { 
+        try { // Add try-catch for safety during casting
+             final standardGroupedForms = lemmaData.grouped_forms.map(
+               (key, value) => MapEntry(key, value as List<DeclensionForm>)
+             ); // Cast the values directly
+             
+             // --- DEBUG PRINT --- 
+             print("[_buildDeclensionResults - Standard] Successfully cast to Map<String, List<DeclensionForm>>.");
+             print("[_buildDeclensionResults - Standard] Available categories: ${standardGroupedForms.keys.join(', ')}");
+             // --- DEBUG PRINT END ---
+             isAdjectiveOrNumeral = standardGroupedForms.keys.any((key) => 
+                 key.startsWith('declensionCategoryAdjective') || key == 'declensionCategoryNumeral'
+             );
+            // --- 수정: 표시할 형태 목록 선택 로직 보강 (기존 방식) --- 
+            formsToDisplay = 
+                standardGroupedForms['declensionCategoryAdjectivePositive'] ??
+                standardGroupedForms['declensionCategoryAdjectiveComparative'] ??
+                standardGroupedForms['declensionCategoryAdjectiveSuperlative'] ??
+                standardGroupedForms['declensionCategoryNoun'] ??
+                standardGroupedForms['declensionCategoryPronoun'] ??
+                standardGroupedForms['declensionCategoryNumeral'] ??
+                [];
+             // --- DEBUG PRINT --- 
+             print("[_buildDeclensionResults - Standard] formsToDisplay length: ${formsToDisplay.length}");
+             // --- DEBUG PRINT END ---
+        } catch (e, stacktrace) {
+             print("[_buildDeclensionResults - Standard] ERROR casting grouped_forms to Map<String, List<DeclensionForm>>: $e");
+             print(stacktrace); // Log stacktrace for detailed error info
+             formsToDisplay = []; // Ensure list is empty on error
+        }
+        // --- END FIX ---
 
-            if (numberCode == 'sg') {
-              if (isAdjective && genderCode != null) {
-                // --- 수정: 형용사 단수 - 성별 키에 따라 저장 ---
-                String displayGenderKey = '';
-                if (genderCode.contains('m')) displayGenderKey = 'm';
-                else if (genderCode == 'f') displayGenderKey = 'f';
-                else if (genderCode.contains('n')) displayGenderKey = 'n';
+        bool isAdjective = isAdjectiveOrNumeral && lemmaData.grouped_forms.keys.any((key) => key.startsWith('declensionCategoryAdjective'));
+        bool isNumeral = isAdjectiveOrNumeral && lemmaData.grouped_forms.keys.any((key) => key == 'declensionCategoryNumeral');
+        // -------------------------------------
 
-                if (displayGenderKey.isNotEmpty && declensionTable[caseCode]!['sg'][displayGenderKey] == null) {
-                  declensionTable[caseCode]!['sg'][displayGenderKey] = formInfo.form;
-                   print("          Assigned sg form (adj): $displayGenderKey -> ${formInfo.form}");
+        // --- 테이블 데이터 구조 (기존 방식: String 저장) ---
+        dynamic declensionTable; // Use dynamic to avoid type errors before assignment
+        if (isAdjectiveOrNumeral) { // 형용사 또는 수사
+          declensionTable = <String, Map<String, Map<String, String>>>{};
+        } else { // 명사, 대명사 등
+          declensionTable = <String, Map<String, String>>{}; // Case -> Number -> Form
+        }
+        // --------------------------------------------- 
+
+        final casesOrder = ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc'];
+        final sgGenderOrder = ['m', 'f', 'n', 'all'];
+        final plGenderOrder = ['m1pl', 'non_m1', 'all'];
+
+        print("[_buildDeclensionResults - Standard] Found ${formsToDisplay.length} forms to display.");
+
+        // --- 데이터 채우기 (기존 방식: String 저장) ---
+        // --- DEBUG PRINT --- 
+        print("[_buildDeclensionResults - Standard] Starting loop to populate declensionTable...");
+        // --- DEBUG PRINT END ---
+        for (var formInfo in formsToDisplay) {
+          final tagMap = _parseTag(formInfo.tag);
+          final casePart = tagMap['case'];
+          final numberCode = tagMap['number'];
+          final genderCode = tagMap['gender'];
+
+          if (casePart != null && numberCode != null) {
+            final individualCases = casePart.split('.');
+
+            for (var caseCode in individualCases) {
+              if (casesOrder.contains(caseCode)) {
+                // --- 초기화 (기존 방식) ---
+                if (!declensionTable.containsKey(caseCode)) {
+                  if (isAdjectiveOrNumeral) {
+                    declensionTable[caseCode] = <String, Map<String, String>>{'sg': {}, 'pl': {}};
+                  } else {
+                    declensionTable[caseCode] = <String, String>{};
+                  }
                 }
-                // -----------------------------------------
-              } else { // Not adjective or null gender
-                if (declensionTable[caseCode]!['sg'] == null) {
-                  declensionTable[caseCode]!['sg'] = formInfo.form;
+                // ------------------------
+
+                if (numberCode == 'sg') {
+                  if (isAdjectiveOrNumeral) {
+                      String displayGenderKey = 'all';
+                      if (isAdjective || (isNumeral && genderCode != null && genderCode.isNotEmpty)) {
+                        if (genderCode != null) {
+                           // --- DEBUG PRINT START ---
+                           print("[_buildDeclensionResults - Standard Adj/Num SG] Processing form: ${formInfo.form}, genderCode: $genderCode");
+                           // --- DEBUG PRINT END ---
+                          if (genderCode.contains('.')) {
+                            displayGenderKey = 'all';
+                          } else if (genderCode.contains('m')) { // Covers m1, m2, m3
+                            displayGenderKey = 'm';
+                          } else if (genderCode == 'f') {
+                            displayGenderKey = 'f';
+                          } else if (genderCode.contains('n')) { // Covers n, n1, n2
+                            displayGenderKey = 'n';
+                          }
+                           // --- DEBUG PRINT START ---
+                           print("[_buildDeclensionResults - Standard Adj/Num SG] Calculated displayGenderKey: $displayGenderKey");
+                           // --- DEBUG PRINT END ---
+                        }
+                      }
+                      declensionTable[caseCode]!['sg'][displayGenderKey] = formInfo.form;
+                  } else { 
+                      declensionTable[caseCode]!['sg'] = formInfo.form;
+                  }
+                } else if (numberCode == 'pl') {
+                   if (isAdjectiveOrNumeral) {
+                      String displayGenderKey = 'all'; // Default to 'all'
+                       if (isAdjective || (isNumeral && genderCode != null && genderCode.isNotEmpty)) {
+                         if (genderCode != null) {
+                           // --- FIX: Map dot-containing plurals (m2.m3.f.n) to non_m1 --- 
+                           // Comment out the old logic mapping '.' to 'all'
+                           // if (genderCode.contains('.')) {
+                           //   displayGenderKey = 'all'; 
+                           // }
+                           if (genderCode == 'm1') {
+                             displayGenderKey = 'm1pl';
+                           } else if (genderCode.contains('.') || // Treat m2.m3.f.n etc. as non_m1
+                                      genderCode == 'f' || 
+                                      genderCode.contains('n') || // Includes n1, n2
+                                      genderCode == 'm2' || 
+                                      genderCode == 'm3') {
+                             displayGenderKey = 'non_m1'; // Map f, n, m2, m3 and composite tags to non_m1
+                           } else {
+                             // Keep default 'all' only if none of the above match
+                             displayGenderKey = 'all'; 
+                           }
+                           // --- END FIX ---
+                         }
+                       }
+                       // --- DEBUG PRINT for PLURAL --- 
+                       print("[_buildDeclensionResults - Standard Adj/Num PL] Processing form: ${formInfo.form}, genderCode: $genderCode, Calculated displayGenderKey: $displayGenderKey"); 
+                       // --- END DEBUG PRINT ---
+                       declensionTable[caseCode]!['pl'][displayGenderKey] = formInfo.form;
+                   } else { 
+                       declensionTable[caseCode]!['pl'] = formInfo.form;
+                   }
                 }
-              }
-            } else if (numberCode == 'pl') {
-              if (isAdjective && genderCode != null) {
-                 // --- 수정: 형용사 복수 - 성별 키에 따라 저장 ---
-                String displayGenderKey = '';
-                if (genderCode == 'm1') displayGenderKey = 'm1pl';
-                else if (genderCode == 'f' || genderCode.contains('n') || genderCode == 'm2' || genderCode == 'm3' || genderCode.contains('.')) {
-                   // Handle m2.m3.f.n and other non-m1 cases
-                   displayGenderKey = 'non_m1'; 
-                }
-                
-                if (displayGenderKey.isNotEmpty && declensionTable[caseCode]!['pl'][displayGenderKey] == null) {
-                  declensionTable[caseCode]!['pl'][displayGenderKey] = formInfo.form;
-                  print("          Assigned pl form (adj): $displayGenderKey -> ${formInfo.form}");
-                }
-                 // -----------------------------------------
-              } else { // Not adjective or null gender
-                 if (declensionTable[caseCode]!['pl'] == null) {
-                   declensionTable[caseCode]!['pl'] = formInfo.form;
-                 }
               }
             }
           }
         }
-      }
-    }
+        // --- END 데이터 채우기 ---
 
-    print("[_buildDeclensionResults] Final declensionTable data: $declensionTable");
+        print("[_buildDeclensionResults - Standard] Final declensionTable data: $declensionTable");
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Builder(
-          builder: (context) {
-            final l10n = AppLocalizations.of(context)!;
-            return Text(
-              l10n.declensionTableTitle(lemmaData.lemma),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            );
-          }
-        ),
-        const SizedBox(height: 16),
-
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Table(
-                border: TableBorder.all(color: Colors.grey.shade300),
-                columnWidths: const {
-                  0: IntrinsicColumnWidth(), // Case column
-                  1: IntrinsicColumnWidth(), // Singular column
-                  2: IntrinsicColumnWidth(), // Plural column
-                },
-                defaultVerticalAlignment: TableCellVerticalAlignment.top, // Align top for multi-line cells
-                children: [
-                  TableRow(
-                    decoration: BoxDecoration(color: Colors.grey.shade100),
+        // --- 기존 테이블 UI 생성 --- 
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Builder(
+              builder: (context) {
+                final l10n = AppLocalizations.of(context)!;
+                return Text(
+                  l10n.declensionTableTitle(lemmaData.lemma),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                );
+              }
+            ),
+            const SizedBox(height: 16),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Table(
+                    border: TableBorder.all(color: Colors.grey.shade300),
+                    columnWidths: const {
+                      0: IntrinsicColumnWidth(), // Case column
+                      1: IntrinsicColumnWidth(), // Singular column
+                      2: IntrinsicColumnWidth(), // Plural column
+                    },
+                    defaultVerticalAlignment: TableCellVerticalAlignment.top,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(l10n.tableHeaderCase, style: TextStyle(fontWeight: FontWeight.bold)),
+                      // 헤더 행 (기존)
+                      TableRow(
+                        decoration: BoxDecoration(color: Colors.grey.shade100),
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(l10n.tableHeaderCase, style: TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(l10n.tableHeaderSingular, style: TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(l10n.tableHeaderPlural, style: TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                        ],
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(l10n.tableHeaderSingular, style: TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(l10n.tableHeaderPlural, style: TextStyle(fontWeight: FontWeight.bold)),
-                      ),
+                      // 데이터 행 (기존 표시 로직)
+                      ...casesOrder.map((caseCode) {
+                        final formsMap = declensionTable[caseCode];
+                        Widget sgCellContent = const Text('-');
+                        Widget plCellContent = const Text('-');
+
+                        if (formsMap != null) {
+                          if (isAdjectiveOrNumeral) {
+                            List<Widget> sgWidgets = [];
+                            // --- Initialize set OUTSIDE the loop --- 
+                            Set<String> displayedForms = {}; 
+                            // --- DEBUG PRINT START ---
+                            print("[_buildDeclensionResults - Standard Adj/Num Build SG Cell] Checking case: $caseCode, sg map: ${formsMap['sg']}");
+                            // --- DEBUG PRINT END ---
+                            for (var genderKey in sgGenderOrder.where((k) => k != 'all')) {
+                              // --- FIX: Check 'all' key as fallback for specific genders ---
+                              var form = formsMap['sg']?[genderKey];
+                              if (form == null || (form is String && form.isEmpty)) {
+                                  if (genderKey == 'm' || genderKey == 'f' || genderKey == 'n') {
+                                    form = formsMap['sg']?['all'];
+                                    print("[_buildDeclensionResults - Standard Adj/Num Build SG Cell] Fallback check for key '$genderKey', using 'all' key, found form: $form");
+                                  }
+                              }
+                              // --- END FIX ---
+
+                              // --- DEBUG PRINT START ---
+                              print("[_buildDeclensionResults - Standard Adj/Num Build SG Cell] Checking genderKey: $genderKey, final form: $form");
+                              // --- DEBUG PRINT END ---
+                              if (form != null && form is String && form.isNotEmpty) {
+                                bool showLabel = ['m', 'f', 'n'].contains(genderKey);
+                                // Use a temporary set to avoid duplicate entries 
+                                if (!displayedForms.contains(form)) { // Check BEFORE adding
+                                  sgWidgets.add(Text(showLabel ? '$form (${_getGenderLabel(genderKey, l10n)})' : form));
+                                  displayedForms.add(form); // Add AFTER adding widget
+                                }
+                              }
+                            }
+                            if (sgWidgets.isNotEmpty) {
+                               sgCellContent = Column(crossAxisAlignment: CrossAxisAlignment.start, children: sgWidgets);
+                            }
+
+                            List<Widget> plWidgets = [];
+                            for (var genderKey in plGenderOrder.where((k) => k != 'all')) {
+                              final form = formsMap['pl']?[genderKey];
+                              if (form != null && form is String && form.isNotEmpty) {
+                                 bool showLabel = ['m1pl', 'non_m1'].contains(genderKey);
+                                plWidgets.add(Text(showLabel ? '$form (${_getGenderLabel(genderKey, l10n)})' : form));
+                              }
+                            }
+                            if (plWidgets.isNotEmpty) {
+                               plCellContent = Column(crossAxisAlignment: CrossAxisAlignment.start, children: plWidgets);
+                             }
+                          } else {
+                            // 명사/대명사: 단일 String 표시
+                            sgCellContent = Text(formsMap['sg'] ?? '-'); 
+                            plCellContent = Text(formsMap['pl'] ?? '-');
+                          }
+                        }
+
+                        return TableRow(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(_getCaseName(caseCode, l10n)),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: sgCellContent,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: plCellContent,
+                            ),
+                          ],
+                        );
+                      }).toList(),
                     ],
                   ),
-                  // Data rows
-                  ...casesOrder.map((caseCode) {
-                    final formsMap = declensionTable[caseCode];
-
-                    Widget sgCellContent = const Text('-');
-                    Widget plCellContent = const Text('-');
-
-                    if (formsMap != null) {
-                      if (isAdjective) {
-                        // --- 수정: 형용사 셀 - Column으로 성별별 표시 ---
-                        List<Widget> sgWidgets = [];
-                        for (var genderKey in sgGenderOrder) {
-                          final form = formsMap['sg']?[genderKey];
-                          if (form != null) {
-                            sgWidgets.add(Text('$form (${_getGenderLabel(genderKey, l10n)})'));
-                          }
-                        }
-                        if (sgWidgets.isNotEmpty) {
-                           sgCellContent = Column(crossAxisAlignment: CrossAxisAlignment.start, children: sgWidgets);
-                        }
-
-                        List<Widget> plWidgets = [];
-                        for (var genderKey in plGenderOrder) {
-                          final form = formsMap['pl']?[genderKey];
-                          if (form != null) {
-                            plWidgets.add(Text('$form (${_getGenderLabel(genderKey, l10n)})'));
-                          }
-                        }
-                         if (plWidgets.isNotEmpty) {
-                           plCellContent = Column(crossAxisAlignment: CrossAxisAlignment.start, children: plWidgets);
-                        }
-                        // -------------------------------------------
-                      } else {
-                        // For non-adjectives, display single form
-                        sgCellContent = Text(formsMap['sg'] ?? '-');
-                        plCellContent = Text(formsMap['pl'] ?? '-');
-                      }
-                    }
-
-                    return TableRow(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(_getCaseName(caseCode, l10n)),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: sgCellContent, // Display generated cell content
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: plCellContent, // Display generated cell content
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ],
               ),
-          ),
-        ),
-      ],
-    );
+            ),
+          ],
+        );
+        // --- END 기존 테이블 로직 ---
+    }
   }
 
   // --- Helper Widget to build the conjugation Table (replaced DataTable) ---
@@ -975,6 +1082,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case 'pos': return l10n.qualifier_pos;
       case 'com': return l10n.qualifier_com;
       case 'sup': return l10n.qualifier_sup;
+      // --- 추가: congr, ncol --- 
+      case 'congr': return l10n.qualifier_congr;
+      case 'ncol': return l10n.qualifier_ncol;
+      // --- 추가: rec --- 
+      case 'rec': return l10n.qualifier_rec; 
+      // ------------------------
       default: return term; // Return original term if no translation found
     }
   }
@@ -2097,6 +2210,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         break;
        // Add other base tags as needed (num, pron, adv, prep, conj etc.)
        // ...
+      case 'ppron12': // Personal pronoun (1st/2nd)
+      case 'ppron3':  // Personal pronoun (3rd)
+      case 'siebie':  // Reflexive pronoun
+        if (parts.length > 1) tagMap['number'] = parts[1]; // Usually 'sg' or 'pl'
+        if (parts.length > 2) tagMap['case'] = parts[2];   // Case is typically the 3rd part
+        if (parts.length > 3) tagMap['gender'] = parts[3]; // Gender/person might be 4th
+        if (parts.length > 4) tagMap['person'] = parts[4]; // Or person might be 5th
+        // Refine based on specific pronoun if needed
+        break;
+      case 'num': // Numeral
+        if (parts.length > 1) tagMap['number'] = parts[1];
+        if (parts.length > 2) tagMap['case'] = parts[2];   // Case is typically 3rd part for numerals
+        if (parts.length > 3) tagMap['gender'] = parts[3]; // Gender might be 4th
+        // Degree/cardinal/ordinal info might follow
+        break;
     }
 
     // --- Refined extraction based on identified fields ---

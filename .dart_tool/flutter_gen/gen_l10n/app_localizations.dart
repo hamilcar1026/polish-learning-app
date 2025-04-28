@@ -95,8 +95,8 @@ abstract class AppLocalizations {
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
     Locale('ko'),
-    Locale('pl'),
-    Locale('ru')
+    Locale('ru'),
+    Locale('pl')
   ];
 
   /// No description provided for @appTitle.
@@ -546,8 +546,26 @@ abstract class AppLocalizations {
   /// No description provided for @qualifier_sup.
   ///
   /// In en, this message translates to:
-  /// **'sup'**
+  /// **'superlative'**
   String get qualifier_sup;
+
+  /// No description provided for @qualifier_congr.
+  ///
+  /// In en, this message translates to:
+  /// **'congruence'**
+  String get qualifier_congr;
+
+  /// Qualifier: non-collective (e.g., for numerals not requiring genitive plural)
+  ///
+  /// In en, this message translates to:
+  /// **'non-collective'**
+  String get qualifier_ncol;
+
+  /// Qualifier: rective/governing (e.g., numerals governing the case of the noun)
+  ///
+  /// In en, this message translates to:
+  /// **'governing'**
+  String get qualifier_rec;
 
   /// No description provided for @conjugationCategoryPresentIndicative.
   ///
@@ -741,11 +759,35 @@ abstract class AppLocalizations {
   /// **'Singular'**
   String get tableHeaderSingular;
 
-  /// Header for the Plural column in tables
+  /// No description provided for @tableHeaderPlural.
   ///
   /// In en, this message translates to:
   /// **'Plural'**
   String get tableHeaderPlural;
+
+  /// No description provided for @tableHeaderM1.
+  ///
+  /// In en, this message translates to:
+  /// **'Masc. Pers.'**
+  String get tableHeaderM1;
+
+  /// No description provided for @tableHeaderMOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Masc. Other'**
+  String get tableHeaderMOther;
+
+  /// No description provided for @tableHeaderF.
+  ///
+  /// In en, this message translates to:
+  /// **'Feminine'**
+  String get tableHeaderF;
+
+  /// No description provided for @tableHeaderN.
+  ///
+  /// In en, this message translates to:
+  /// **'Neuter'**
+  String get tableHeaderN;
 
   /// Header for the Person column in conjugation tables
   ///

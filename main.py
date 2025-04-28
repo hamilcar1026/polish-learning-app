@@ -247,9 +247,407 @@ hardcoded_declensions = {
             ]
         },
         "translation_en": "they (non-masc. pers.)"
+    },
+    # --- Numerals --- 
+    "zero": {
+        "lemma": "zero",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                # Often treated as indeclinable or neuter noun
+                {"form": "zero", "tag": "num:sg:nom:n:card"}, 
+                {"form": "zera", "tag": "num:sg:gen:n:card"},
+                {"form": "zeru", "tag": "num:sg:dat:n:card"},
+                {"form": "zero", "tag": "num:sg:acc:n:card"},
+                {"form": "zerem", "tag": "num:sg:inst:n:card"},
+                {"form": "zerze", "tag": "num:sg:loc:n:card"},
+                # Plural forms might exist in specific contexts but are less common for '0'
+            ]
+        },
+        "translation_en": "zero"
+    },
+    "jeden": { # Also covers jedna, jedno - lemma is masculine form
+        "lemma": "jeden",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                # Masculine (m1, m2, m3 often same for cardinal 1)
+                {"form": "jeden", "tag": "num:sg:nom:m1:card"},
+                {"form": "jednego", "tag": "num:sg:gen:m1:card"},
+                {"form": "jednemu", "tag": "num:sg:dat:m1:card"},
+                {"form": "jeden", "tag": "num:sg:acc:m1:card"},    # Acc m1 (animate)
+                {"form": "jednego", "tag": "num:sg:acc:m2:card"},  # Acc m2 (animate)
+                {"form": "jeden", "tag": "num:sg:acc:m3:card"},    # Acc m3 (inanimate)
+                {"form": "jednym", "tag": "num:sg:inst:m1:card"},
+                {"form": "jednym", "tag": "num:sg:loc:m1:card"},
+                # Feminine
+                {"form": "jedna", "tag": "num:sg:nom:f:card"},
+                {"form": "jednej", "tag": "num:sg:gen:f:card"},
+                {"form": "jednej", "tag": "num:sg:dat:f:card"},
+                {"form": "jedną", "tag": "num:sg:acc:f:card"},
+                {"form": "jedną", "tag": "num:sg:inst:f:card"},
+                {"form": "jednej", "tag": "num:sg:loc:f:card"},
+                # Neuter
+                {"form": "jedno", "tag": "num:sg:nom:n:card"},
+                {"form": "jednego", "tag": "num:sg:gen:n:card"},
+                {"form": "jednemu", "tag": "num:sg:dat:n:card"},
+                {"form": "jedno", "tag": "num:sg:acc:n:card"},
+                {"form": "jednym", "tag": "num:sg:inst:n:card"},
+                {"form": "jednym", "tag": "num:sg:loc:n:card"},
+            ]
+        },
+        "translation_en": "one"
+    },
+    # --- Numerals 2-19 --- 
+    "dwa": { # Also covers dwie
+        "lemma": "dwa",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                # Masculine Personal (special case)
+                {"form": "dwaj", "tag": "num:pl:nom:m1:card"},
+                {"form": "dwóch", "tag": "num:pl:acc:m1:card"},
+                # Other genders Nom/Acc
+                {"form": "dwa", "tag": "num:pl:nom.acc:m2.m3:card"}, # m2/m3 non-personal
+                {"form": "dwie", "tag": "num:pl:nom.acc:f:card"},
+                {"form": "dwa", "tag": "num:pl:nom.acc:n:card"},
+                # Common forms for other cases
+                {"form": "dwóch", "tag": "num:pl:gen:m1.m2.m3.f.n:card"},
+                {"form": "dwom", "tag": "num:pl:dat:m1.m2.m3.f.n:card"},
+                {"form": "dwoma", "tag": "num:pl:inst:m1.m2.m3.f.n:card"},
+                {"form": "dwóch", "tag": "num:pl:loc:m1.m2.m3.f.n:card"},
+            ]
+        },
+        "translation_en": "two"
+    },
+    "trzy": {
+        "lemma": "trzy",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                # Masculine Personal (special case)
+                {"form": "trzej", "tag": "num:pl:nom:m1:card"},
+                {"form": "trzech", "tag": "num:pl:acc:m1:card"},
+                # Other genders Nom/Acc
+                {"form": "trzy", "tag": "num:pl:nom.acc:m2.m3.f.n:card"},
+                # Common forms for other cases
+                {"form": "trzech", "tag": "num:pl:gen:m1.m2.m3.f.n:card"},
+                {"form": "trzem", "tag": "num:pl:dat:m1.m2.m3.f.n:card"},
+                {"form": "trzema", "tag": "num:pl:inst:m1.m2.m3.f.n:card"},
+                {"form": "trzech", "tag": "num:pl:loc:m1.m2.m3.f.n:card"},
+            ]
+        },
+        "translation_en": "three"
+    },
+    "cztery": {
+        "lemma": "cztery",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                # Masculine Personal (special case)
+                {"form": "czterej", "tag": "num:pl:nom:m1:card"},
+                {"form": "czterech", "tag": "num:pl:acc:m1:card"},
+                # Other genders Nom/Acc
+                {"form": "cztery", "tag": "num:pl:nom.acc:m2.m3.f.n:card"},
+                # Common forms for other cases
+                {"form": "czterech", "tag": "num:pl:gen:m1.m2.m3.f.n:card"},
+                {"form": "czterem", "tag": "num:pl:dat:m1.m2.m3.f.n:card"},
+                {"form": "czterema", "tag": "num:pl:inst:m1.m2.m3.f.n:card"},
+                {"form": "czterech", "tag": "num:pl:loc:m1.m2.m3.f.n:card"},
+            ]
+        },
+        "translation_en": "four"
+    },
+    "pięć": {
+        "lemma": "pięć",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "pięć", "tag": "num:pl:nom.acc:card"}, # Gender distinction usually lost for 5+
+                {"form": "pięciu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "pięcioma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "five"
+    },
+    "sześć": {
+        "lemma": "sześć",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "sześć", "tag": "num:pl:nom.acc:card"},
+                {"form": "sześciu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "sześcioma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "six"
+    },
+     "siedem": {
+        "lemma": "siedem",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "siedem", "tag": "num:pl:nom.acc:card"},
+                {"form": "siedmiu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "siedmioma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "seven"
+    },
+    "osiem": {
+        "lemma": "osiem",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "osiem", "tag": "num:pl:nom.acc:card"},
+                {"form": "ośmiu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "ośmioma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "eight"
+    },
+    "dziewięć": {
+        "lemma": "dziewięć",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "dziewięć", "tag": "num:pl:nom.acc:card"},
+                {"form": "dziewięciu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "dziewięcioma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "nine"
+    },
+    "dziesięć": {
+        "lemma": "dziesięć",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "dziesięć", "tag": "num:pl:nom.acc:card"},
+                {"form": "dziesięciu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "dziesięcioma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "ten"
+    },
+    "jedenaście": {
+        "lemma": "jedenaście",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "jedenaście", "tag": "num:pl:nom.acc:card"},
+                {"form": "jedenastu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "jedenastoma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "eleven"
+    },
+    "dwanaście": {
+        "lemma": "dwanaście",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "dwanaście", "tag": "num:pl:nom.acc:card"},
+                {"form": "dwunastu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "dwunastoma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "twelve"
+    },
+    "trzynaście": {
+        "lemma": "trzynaście",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "trzynaście", "tag": "num:pl:nom.acc:card"},
+                {"form": "trzynastu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "trzynastoma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "thirteen"
+    },
+    "czternaście": {
+        "lemma": "czternaście",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "czternaście", "tag": "num:pl:nom.acc:card"},
+                {"form": "czternastu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "czternastoma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "fourteen"
+    },
+    "piętnaście": {
+        "lemma": "piętnaście",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "piętnaście", "tag": "num:pl:nom.acc:card"},
+                {"form": "piętnastu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "piętnastoma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "fifteen"
+    },
+    "szesnaście": {
+        "lemma": "szesnaście",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "szesnaście", "tag": "num:pl:nom.acc:card"},
+                {"form": "szesnastu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "szesnastoma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "sixteen"
+    },
+    "siedemnaście": {
+        "lemma": "siedemnaście",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "siedemnaście", "tag": "num:pl:nom.acc:card"},
+                {"form": "siedemnastu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "siedemnastoma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "seventeen"
+    },
+    "osiemnaście": {
+        "lemma": "osiemnaście",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "osiemnaście", "tag": "num:pl:nom.acc:card"},
+                {"form": "osiemnastu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "osiemnastoma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "eighteen"
+    },
+    "dziewiętnaście": {
+        "lemma": "dziewiętnaście",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "dziewiętnaście", "tag": "num:pl:nom.acc:card"},
+                {"form": "dziewiętnastu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "dziewiętnastoma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "nineteen"
+    },
+    # --- Tens and Hundred ---
+    "dwadzieścia": {
+        "lemma": "dwadzieścia",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "dwadzieścia", "tag": "num:pl:nom.acc:card"},
+                {"form": "dwudziestu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "dwudziestoma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "twenty"
+    },
+    "trzydzieści": {
+        "lemma": "trzydzieści",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "trzydzieści", "tag": "num:pl:nom.acc:card"},
+                {"form": "trzydziestu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "trzydziestoma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "thirty"
+    },
+    "czterdzieści": {
+        "lemma": "czterdzieści",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "czterdzieści", "tag": "num:pl:nom.acc:card"},
+                {"form": "czterdziestu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "czterdziestoma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "forty"
+    },
+    "pięćdziesiąt": {
+        "lemma": "pięćdziesiąt",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "pięćdziesiąt", "tag": "num:pl:nom.acc:card"},
+                {"form": "pięćdziesięciu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "pięćdziesięcioma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "fifty"
+    },
+    "sześćdziesiąt": {
+        "lemma": "sześćdziesiąt",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "sześćdziesiąt", "tag": "num:pl:nom.acc:card"},
+                {"form": "sześćdziesięciu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "sześćdziesięcioma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "sixty"
+    },
+    "siedemdziesiąt": {
+        "lemma": "siedemdziesiąt",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "siedemdziesiąt", "tag": "num:pl:nom.acc:card"},
+                {"form": "siedemdziesięciu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "siedemdziesięcioma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "seventy"
+    },
+    "osiemdziesiąt": {
+        "lemma": "osiemdziesiąt",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "osiemdziesiąt", "tag": "num:pl:nom.acc:card"},
+                {"form": "osiemdziesięciu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "osiemdziesięcioma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "eighty"
+    },
+    "dziewięćdziesiąt": {
+        "lemma": "dziewięćdziesiąt",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "dziewięćdziesiąt", "tag": "num:pl:nom.acc:card"},
+                {"form": "dziewięćdziesięciu", "tag": "num:pl:gen.dat.loc:card"},
+                {"form": "dziewięćdziesięcioma", "tag": "num:pl:inst:card"},
+            ]
+        },
+        "translation_en": "ninety"
+    },
+    "sto": {
+        "lemma": "sto",
+        "grouped_forms": {
+            "declensionCategoryNumeral": [
+                {"form": "sto", "tag": "num:sg:nom.acc:n:card"}, # Typically neuter sg
+                {"form": "stu", "tag": "num:sg:gen.dat.loc:n:card"},
+                {"form": "stu", "tag": "num:sg:inst:n:card"},
+                # Plural forms like 'sta' exist but are complex, omitted for simplicity
+            ]
+        },
+        "translation_en": "one hundred"
     }
 }
 # ----------------------------
+
+# --- Numeral to Word Mapping (1-100) ---
+# Base words needed for construction
+_NUM_WORDS_BASE = {
+    1: "jeden", 2: "dwa", 3: "trzy", 4: "cztery", 5: "pięć", 6: "sześć", 7: "siedem", 8: "osiem", 9: "dziewięć",
+    10: "dziesięć", 11: "jedenaście", 12: "dwanaście", 13: "trzynaście", 14: "czternaście", 15: "piętnaście",
+    16: "szesnaście", 17: "siedemnaście", 18: "osiemnaście", 19: "dziewiętnaście",
+    20: "dwadzieścia", 30: "trzydzieści", 40: "czterdzieści", 50: "pięćdziesiąt", 60: "sześćdziesiąt",
+    70: "siedemdziesiąt", 80: "osiemdziesiąt", 90: "dziewięćdziesiąt", 100: "sto"
+}
+
+NUMERAL_WORD_MAP = {}
+# Populate 1-19
+for i in range(1, 20):
+    NUMERAL_WORD_MAP[str(i)] = _NUM_WORDS_BASE[i]
+# Populate tens and 100
+for i in range(20, 101, 10):
+    NUMERAL_WORD_MAP[str(i)] = _NUM_WORDS_BASE[i]
+# Populate composites (21-99)
+for i in range(21, 100):
+    if i % 10 == 0: continue # Skip tens
+    tens_part = i // 10 * 10
+    ones_part = i % 10
+    NUMERAL_WORD_MAP[str(i)] = f"{_NUM_WORDS_BASE[tens_part]} {_NUM_WORDS_BASE[ones_part]}"
+
+print(f"Numeral map created with {len(NUMERAL_WORD_MAP)} entries.")
+# --------------------------------------
 
 # --- Lingvanex Translation Function ---
 def translate_text_lingvanex(text, target_language):
@@ -391,6 +789,14 @@ def analyze_word(word):
     if morf is None:
         return jsonify({"status": "error", "message": "Morfeusz2 analyzer not available."}), 500
     
+    # --- 입력값 숫자 -> 단어 매핑 --- 
+    original_input = word # Store original input for potential messages
+    if word in NUMERAL_WORD_MAP:
+        mapped_word = NUMERAL_WORD_MAP[word]
+        print(f"[analyze_word] Input '{word}' detected, mapping to '{mapped_word}'.")
+        word = mapped_word
+    # ------------------------------
+
     target_lang = request.args.get('target_lang', default='en', type=str)
     print(f"[analyze_word] Target language requested: {target_lang} for word: {word}")
 
@@ -538,7 +944,7 @@ def _clean_lemma(lemma):
 # Helper function to check if a tag represents a verb
 def is_verb(tag):
     # Add more verb tags if needed based on Morfeusz tagset
-    return tag in ['fin', 'impt', 'imps', 'inf', 'pact', 'pant', 'pcon', 'ppas', 'praet', 'bedzie', 'ger', 'imps', 'cond']
+    return tag in ['fin', 'impt', 'imps', 'inf', 'pact', 'pant', 'pcon', 'ppas', 'praet', 'bedzie', 'ger', 'cond', 'impt_periph', 'fut_imps', 'cond_imps', 'impt_imps']
 
 # Helper function to check if a tag represents a declinable word (noun, adjective, etc.)
 def is_declinable(tag):
@@ -1206,11 +1612,369 @@ def get_declension_category_key(base_tag, full_tag):
         else: return 'declensionCategoryAdjective' # Fallback if degree not found
         # ---------------------------
     elif base_tag == 'depr': return 'declensionCategoryPronoun' # Assuming depr is pronoun
+    # --- Add Numeral Category --- 
+    elif base_tag == 'num': return 'declensionCategoryNumeral'
     else: return 'declensionCategoryOtherForms'
 # --------------------------------------------------
 
+# --- NEW: Composite Numeral Declension Generation (Pilot 21-25) ---
+def _generate_composite_numeral_declensions(num_str):
+    """
+    Generates detailed declension forms for composite numerals (21-99).
+    Returns a structured dictionary: {'case': {'gender': 'form', ...}}
+    Handles genitive construction rules based on the ones digit.
+    """
+    try:
+        num = int(num_str)
+        # --- REMOVE Pilot Range Check --- 
+        # if not (21 <= num <= 25):
+        #     print(f"[_generate_composite] Num {num} is outside pilot range (21-25).")
+        #     return None
+        # --- Ensure it's a two-digit composite number (excluding tens) ---
+        if not (21 <= num <= 99 and num % 10 != 0):
+            print(f"[_generate_composite] Num {num} is not a composite numeral in the 21-99 range (excluding tens).")
+            return None
+
+        tens_digit_val = num // 10 * 10
+        ones_digit_val = num % 10
+
+        # Get component words
+        tens_word = _NUM_WORDS_BASE.get(tens_digit_val)
+        ones_word_lemma = _NUM_WORDS_BASE.get(ones_digit_val) # Lemma form of the ones digit
+
+        if not tens_word or not ones_word_lemma:
+            print(f"[_generate_composite] Error: Base words not found for {num}")
+            return None
+
+        # Get declension data for components from hardcoded data
+        tens_decl_raw = hardcoded_declensions.get(tens_word)
+        ones_decl_raw = hardcoded_declensions.get(ones_word_lemma)
+
+        if not tens_decl_raw or not ones_decl_raw:
+             print(f"[_generate_composite] Error: Raw declension data missing for components of {num} ('{tens_word}', '{ones_word_lemma}')")
+             return None
+
+        tens_decl = tens_decl_raw.get("grouped_forms", {}).get("declensionCategoryNumeral", [])
+        ones_decl = ones_decl_raw.get("grouped_forms", {}).get("declensionCategoryNumeral", [])
+
+        if not tens_decl or not ones_decl:
+            print(f"[_generate_composite] Error: Declension list data not found for components of {num}")
+            return None
+
+        # Helper to find specific form based on tag components (Keep the existing helper)
+        def find_form(decl_list, case, gender=None, number='pl', exact_case_match=False):
+            # ... (Keep the existing find_form implementation) ...
+            target_parts = {number, case}
+            gender_map = {
+                'm1': {'m1'},
+                'm_other': {'m2', 'm3'},
+                'f': {'f'},
+                'n': {'n', 'n1', 'n2'}
+            }
+            target_gender_tags = gender_map.get(gender, set()) if gender else set()
+
+            best_match_form = None
+            best_match_specificity = -1 # 0: case/num, 1: case/num/gender_in_tag, 2: exact_case/num/gender
+
+            for item in decl_list:
+                form = item['form']
+                tag_parts = set(item['tag'].split(':'))
+                item_genders = {'m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2'} & tag_parts
+                item_cases_raw = ""
+                for part in item['tag'].split(':'):
+                     if any(c in part for c in ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc']):
+                         item_cases_raw = part
+                         break
+                item_cases = set(item_cases_raw.split('.'))
+
+                # Check 1: Basic number and case match
+                if number not in tag_parts or not (case in item_cases or (exact_case_match and case == item_cases_raw)):
+                     continue # Skip if number or case doesn't match at all
+
+                current_specificity = 0
+                gender_match = False
+                if gender:
+                    if target_gender_tags & item_genders: # Direct gender match
+                        gender_match = True
+                        current_specificity = 1
+                    elif not item_genders and not target_gender_tags: # No gender specified on either side
+                        gender_match = True
+                    elif not item_genders and target_gender_tags: # Item has no gender, applies generally
+                         gender_match = True
+                    elif item_genders and not target_gender_tags: # Item has gender, target doesn't, applies generally
+                         gender_match = True
+                else: # No specific gender required
+                    gender_match = True
+
+                if not gender_match:
+                     continue # Skip if gender is required and doesn't match
+
+                # Check 2: Prioritize exact case match if required
+                if exact_case_match and case != item_cases_raw:
+                     continue
+
+                # Check 3: Prioritize specific gender matches
+                if gender and (target_gender_tags & item_genders):
+                     current_specificity = 2 # Higher specificity for direct gender match
+
+                # Update best match if current is better or equally specific but preferred (e.g., m3 over m2 for acc)
+                if current_specificity > best_match_specificity:
+                    best_match_specificity = current_specificity
+                    best_match_form = form
+                elif current_specificity == best_match_specificity:
+                     # Preference rules for ties (e.g., prefer m3 inanimate acc over m2 animate acc)
+                     if case == 'acc' and gender == 'm_other':
+                         if 'm3' in item_genders: # Prefer m3 if available
+                             best_match_form = form
+                     # Could add more tie-breaking if needed, otherwise first found wins
+                     if best_match_form is None: best_match_form = form # Take first match in case of equal specificity
+
+            # Fallback for combined cases like gen.dat.loc if no specific match found
+            if best_match_form is None and not exact_case_match:
+                 for item in decl_list:
+                     form = item['form']
+                     tag_parts = set(item['tag'].split(':'))
+                     item_genders = {'m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2'} & tag_parts
+                     item_cases_raw = ""
+                     for part in item['tag'].split(':'):
+                         if any(c in part for c in ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc']):
+                             item_cases_raw = part
+                             break
+                     item_cases = set(item_cases_raw.split('.'))
+
+                     if number in tag_parts and case in item_cases:
+                         # Check gender compatibility loosely
+                         compatible = True
+                         if gender and item_genders and not (target_gender_tags & item_genders): # If gender required and item has different gender
+                             compatible = False
+
+                         if compatible:
+                             return form # Return first compatible form found in combined tag
+
+            return best_match_form
+
+        # --- Define Structure and Genders --- 
+        cases = ['nom', 'gen', 'dat', 'acc', 'inst', 'loc']
+        genders_map = {'m1': 'm1', 'm_other': 'm2/m3', 'f': 'f', 'n': 'n'} # For display/grouping keys
+        composite_declensions = {case: {g_key: "-" for g_key in genders_map.values()} for case in cases}
+        composite_declensions['voc'] = {g_key: "-" for g_key in genders_map.values()} # Add vocative row
+
+        # --- Combination Rules --- 
+        for case in cases:
+            # Find tens form - handle variations like gen/dat/loc and inst
+            tens_form = find_form(tens_decl, case, exact_case_match=True) # Try exact case first
+            if not tens_form:
+                 # Common fallbacks for tens (50, 60, etc.)
+                 if case in ['gen', 'dat', 'loc']:
+                     tens_form = find_form(tens_decl, 'gen') # Try genitive form
+                 elif case == 'inst':
+                     tens_form = find_form(tens_decl, 'inst') # Try instrumental
+                 # Fallback to nominative/accusative form if still not found
+                 if not tens_form:
+                      tens_form = find_form(tens_decl, 'nom')
+                      
+            tens_form = tens_form or _NUM_WORDS_BASE.get(tens_digit_val, '?') # Ultimate fallback
+
+            # Iterate through display genders
+            for gender_key, display_key in genders_map.items():
+                ones_form = None
+                # Determine number for 'ones' part (1 is sg, 2+ are pl)
+                ones_number = 'sg' if ones_digit_val == 1 else 'pl'
+
+                # --- Special Rule: Genitive construction --- 
+                # Generalized: Use genitive construction for...
+                # - m1 nom/acc when ones digit is 2, 3, 4 
+                # - m1 acc when ones digit is 1
+                # - gen/dat/loc for ALL genders when ones digit is 5, 6, 7, 8, 9
+                use_genitive_construction = False
+                if ones_digit_val in [2, 3, 4]:
+                    if gender_key == 'm1' and case in ['nom', 'acc']:
+                         use_genitive_construction = True
+                elif ones_digit_val == 1:
+                     if gender_key == 'm1' and case == 'acc':
+                          use_genitive_construction = True
+                elif ones_digit_val in [5, 6, 7, 8, 9]:
+                     if case in ['gen', 'dat', 'loc']:
+                         use_genitive_construction = True
+
+                if use_genitive_construction:
+                    # Use genitive form of the tens part
+                    tens_form_gen = find_form(tens_decl, 'gen') or tens_form # Fallback to base if genitive missing
+                    # Determine the case needed for the 'ones' part in genitive constructions
+                    # For m1 nom/acc (with 2,3,4), use nom/acc of the ones part
+                    # For m1 acc (with 1), use acc of the ones part (which is genitive)
+                    # For gen/dat/loc (with 5-9), use genitive of the ones part
+                    ones_case_for_gen_constr = 'gen' # Default for 5-9
+                    if ones_digit_val in [2, 3, 4] and gender_key == 'm1' and case in ['nom', 'acc']:
+                        ones_case_for_gen_constr = case # Use nom or acc
+                    elif ones_digit_val == 1 and gender_key == 'm1' and case == 'acc':
+                        ones_case_for_gen_constr = 'gen' # Accusative of m1 'jeden' is genitive 'jednego'
+                    
+                    ones_form = find_form(ones_decl, ones_case_for_gen_constr, gender_key, number=ones_number)
+                    ones_form = ones_form or find_form(ones_decl, 'gen', gender_key, number=ones_number) # Fallback to genitive
+                    if ones_form:
+                         composite_declensions[case][display_key] = f"{tens_form_gen} {ones_form}"
+                    else:
+                         composite_declensions[case][display_key] = f"{tens_form_gen} ?"
+                else:
+                     # --- Standard construction --- 
+                     # Find ones form for the current case and gender
+                     ones_form = find_form(ones_decl, case, gender_key, number=ones_number)
+                     # Fallback logic for missing forms (e.g., acc might use nom for non-m1)
+                     if not ones_form and case == 'acc' and gender_key != 'm1':
+                         ones_form = find_form(ones_decl, 'nom', gender_key, number=ones_number)
+                     # Further fallback if still missing
+                     ones_form = ones_form or find_form(ones_decl, 'nom', gender='f', number=ones_number) # Try common fem form
+                     ones_form = ones_form or _NUM_WORDS_BASE.get(ones_digit_val, '?') # Ultimate fallback
+
+                     if tens_form and ones_form:
+                         composite_declensions[case][display_key] = f"{tens_form} {ones_form}"
+                     else:
+                         composite_declensions[case][display_key] = f"{tens_form or '?'} {ones_form or '?'}"
+
+        # Set Vocative same as Nominative
+        composite_declensions['voc'] = composite_declensions['nom'].copy()
+
+        print(f"[_generate_composite] Generated composite declensions for {num_str}: {composite_declensions}")
+        return composite_declensions
+
+    except Exception as e:
+        print(f"[_generate_composite] Error generating composite declensions for '{num_str}': {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+# ------------------------------------------------------------------
+
+# --- NEW Helper: Convert hardcoded simple numeral data to detailed format --- 
+def _convert_simple_numeral_to_detailed(numeral_word, hardcoded_forms_list):
+    """
+    Converts the list-based hardcoded declension data for simple numerals 
+    (like 'dwadzieścia', 'sto') into the detailed Case x Gender map format.
+    Returns a structured dictionary: {'case': {'gender_key': 'form', ...}} or None.
+    """
+    if not hardcoded_forms_list or not isinstance(hardcoded_forms_list, list):
+        print(f"[_convert_simple] Invalid input: hardcoded_forms_list is not a list for {numeral_word}.")
+        return None
+
+    cases = ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc']
+    # Use the same gender keys as the composite generator for consistency
+    genders_map = {'m1': 'm1', 'm_other': 'm2/m3', 'f': 'f', 'n': 'n'}
+    detailed_declensions = {case: {g_key: "-" for g_key in genders_map.values()} for case in cases}
+
+    # Process the list of forms
+    for item in hardcoded_forms_list:
+        form = item.get('form')
+        tag = item.get('tag')
+        if not form or not tag:
+            continue
+
+        tag_parts = tag.split(':')
+        item_number = None
+        item_cases_raw = ""
+        item_genders_raw = ""
+
+        # Extract case, number, gender from the tag parts
+        for part in tag_parts:
+            if part in ['sg', 'pl']: item_number = part
+            if any(c in part for c in ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc']):
+                item_cases_raw = part
+            if any(g in part for g in ['m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2']):
+                 item_genders_raw = part # Potentially includes dots like m2.m3.f.n
+        
+        item_cases = set(item_cases_raw.split('.'))
+        item_genders = set(item_genders_raw.split('.'))
+
+        # Determine target display gender keys based on parsed tag genders
+        target_display_keys = set()
+        if 'm1' in item_genders:
+            target_display_keys.add('m1')
+        if 'm2' in item_genders or 'm3' in item_genders:
+            target_display_keys.add('m2/m3')
+        if 'f' in item_genders:
+            target_display_keys.add('f')
+        if 'n' in item_genders or 'n1' in item_genders or 'n2' in item_genders:
+            target_display_keys.add('n')
+            
+        # If no specific gender tag found, assume it applies to all relevant genders (common for 5+)
+        if not target_display_keys and tag.startswith('num:') and len(tag_parts) >= 3: 
+             # For numerals 5+ (pięć, sześć...), forms often apply to all non-m1 plurals, or all genders in gen/dat/loc/inst
+             if item_number == 'pl':
+                  target_display_keys.update(['m1', 'm2/m3', 'f', 'n']) # Assume applies to all genders for simplicity if tag doesn't specify
+             elif item_number == 'sg': # Like 'sto'
+                  target_display_keys.add('n') # Default 'sto' to neuter if no other info
+
+        # Populate the detailed map
+        for case_code in item_cases:
+            if case_code in detailed_declensions:
+                for display_key in target_display_keys:
+                    # Only fill if currently empty or default '-', avoid overwriting specific forms
+                    if detailed_declensions[case_code][display_key] == "-":
+                        detailed_declensions[case_code][display_key] = form
+                    else:
+                        # Handle potential conflicts/overwrites if needed, e.g., prefer more specific tag?
+                        # For now, simple overwrite or keep first wins.
+                        pass 
+                        
+    # Fill remaining '-' with likely forms (e.g., vocative = nominative)
+    if 'nom' in detailed_declensions:
+         detailed_declensions['voc'] = detailed_declensions['nom'].copy()
+         for g_key in genders_map.values():
+             if detailed_declensions['voc'][g_key] == "-":
+                 detailed_declensions['voc'][g_key] = detailed_declensions['nom'][g_key]
+
+    # Special handling for numbers 5+ (pięć, sześć...) where most forms are the same across genders
+    # Ensure consistency for gen, dat, loc, inst if specific gender forms are missing
+    numeral_val_approx = 0 # Need a way to roughly know the number value if possible, maybe from numeral_word?
+    if numeral_word in ["pięć", "sześć", "siedem", "osiem", "dziewięć", "dziesięć", "jedenaście", "dwanaście", "trzynaście", "czternaście", "piętnaście", "szesnaście", "siedemnaście", "osiemnaście", "dziewiętnaście", "dwadzieścia", "trzydzieści", "czterdzieści", "pięćdziesiąt", "sześćdziesiąt", "siedemdziesiąt", "osiemdziesiąt", "dziewięćdziesiąt"]:
+         numeral_val_approx = 5 # Mark as 5+ for rule application
+         
+    if numeral_val_approx >= 5:
+         common_gen_form = None
+         common_dat_form = None
+         common_loc_form = None
+         common_inst_form = None
+         
+         # Find the most common form for these cases
+         for g_key in genders_map.values():
+             if detailed_declensions['gen'][g_key] != '-': common_gen_form = detailed_declensions['gen'][g_key]
+             if detailed_declensions['dat'][g_key] != '-': common_dat_form = detailed_declensions['dat'][g_key]
+             if detailed_declensions['loc'][g_key] != '-': common_loc_form = detailed_declensions['loc'][g_key]
+             if detailed_declensions['inst'][g_key] != '-': common_inst_form = detailed_declensions['inst'][g_key]
+             
+         # Apply the common form if found
+         for case_code in ['gen', 'dat', 'loc', 'inst']:
+             common_form = None
+             if case_code == 'gen': common_form = common_gen_form
+             elif case_code == 'dat': common_form = common_dat_form
+             elif case_code == 'loc': common_form = common_loc_form
+             elif case_code == 'inst': common_form = common_inst_form
+             
+             if common_form:
+                 for g_key in genders_map.values():
+                     detailed_declensions[case_code][g_key] = common_form
+                     
+    # Special handling for 'sto' (typically neuter)
+    if numeral_word == 'sto':
+        for case_code in cases:
+             neuter_form = detailed_declensions[case_code]['n']
+             if neuter_form != '-':
+                 for g_key in genders_map.values():
+                     detailed_declensions[case_code][g_key] = neuter_form
+
+    print(f"[_convert_simple] Converted data for {numeral_word}: {detailed_declensions}")
+    return detailed_declensions
+# --- END NEW Helper --- 
+
 @app.route('/conjugate/<word>', methods=['GET'])
 def conjugate_word(word):
+    # --- 입력값 숫자 -> 단어 매핑 --- 
+    original_input = word
+    if word in NUMERAL_WORD_MAP:
+        mapped_word = NUMERAL_WORD_MAP[word]
+        print(f"[/conjugate] Input '{word}' detected, mapping to '{mapped_word}'.")
+        word = mapped_word
+    # ------------------------------
+
     # generate_and_format_forms returns a dict (if successful) or None
     result_data = generate_and_format_forms(word, is_verb, get_conjugation_category_key)
 
@@ -1239,30 +2003,124 @@ def conjugate_word(word):
 
 @app.route('/decline/<word>', methods=['GET'])
 def decline_word(word):
-    # generate_and_format_forms returns a dict (if successful) or None
-    result_data = generate_and_format_forms(word, is_declinable, get_declension_category_key)
+    original_input = word
+    # --- Flags to indicate response format ---
+    is_detailed_numeral_table = False # NEW flag for detailed Case x Gender table
+    # -----------------------------------------
 
+    # --- Numeral Handling --- 
+    is_numeral = False
+    numeral_value = None
+    mapped_word = word # Default to original input
+    if word.isdigit():
+        is_numeral = True
+        numeral_value = int(word)
+        if word in NUMERAL_WORD_MAP:
+            mapped_word = NUMERAL_WORD_MAP[word]
+            print(f"[/decline] Input '{word}' detected as numeral, mapping to '{mapped_word}'.")
+        else:
+            print(f"[/decline] Input '{word}' is a numeral but not found in NUMERAL_WORD_MAP.")
+            # Decide how to handle numerals outside the 1-100 map? Return error or try analysis?
+            # For now, let it proceed to generate_and_format_forms which will likely fail.
+            pass 
+    # -----------------------
+
+    result_data = None
+
+    # --- Detailed Numeral Table Generation (Composite & Simple Tens/100) --- 
+    if is_numeral: 
+        # 1. Composite Numerals (21-99 excluding tens)
+        if 21 <= numeral_value <= 99 and numeral_value % 10 != 0:
+            print(f"[/decline] Processing composite numeral '{original_input}' ({mapped_word}).")
+            structured_declensions = _generate_composite_numeral_declensions(original_input) 
+            if structured_declensions:
+                result_data = {
+                    "lemma": mapped_word,
+                    "grouped_forms": structured_declensions,
+                    "is_detailed_numeral_table": True 
+                }
+                is_detailed_numeral_table = True # Set flag
+            else:
+                 print(f"[/decline] Failed to generate composite declensions for '{original_input}'.")
+        
+        # 2. Simple Tens (20-90) and 100
+        elif numeral_value in [20, 30, 40, 50, 60, 70, 80, 90, 100]:
+            print(f"[/decline] Processing simple numeral '{original_input}' ({mapped_word}) for detailed table.")
+            # Fetch hardcoded data (list format)
+            hardcoded_data = hardcoded_declensions.get(mapped_word)
+            if hardcoded_data and "grouped_forms" in hardcoded_data and "declensionCategoryNumeral" in hardcoded_data["grouped_forms"]:
+                 hardcoded_forms_list = hardcoded_data["grouped_forms"]["declensionCategoryNumeral"]
+                 # Convert to detailed format using the new helper
+                 structured_declensions = _convert_simple_numeral_to_detailed(mapped_word, hardcoded_forms_list)
+                 if structured_declensions:
+                     result_data = {
+                         "lemma": mapped_word,
+                         "grouped_forms": structured_declensions,
+                         "is_detailed_numeral_table": True
+                     }
+                     is_detailed_numeral_table = True # Set flag
+                 else:
+                     print(f"[/decline] Failed to convert simple numeral data for '{mapped_word}'.")
+            else:
+                 print(f"[/decline] Hardcoded data not found or invalid for simple numeral '{mapped_word}'.")
+
+        # 3. Other Numerals (1-19) - Use standard declension path
+        else: 
+             print(f"[/decline] Numeral '{original_input}' is not handled by detailed generation. Using standard path.")
+             # Let it fall through to the standard generate_and_format_forms below
+             pass 
+             
+    # --- Standard Declension (Non-numerals or numerals 1-19) --- 
+    if result_data is None: # Only proceed if detailed generation didn't happen or failed
+        target_word = mapped_word # Use the potentially mapped word
+        print(f"[/decline] Processing standard declension for: '{target_word}' (Original: '{original_input}')")
+        # generate_and_format_forms returns a dict (if successful) or None
+        generated_data = generate_and_format_forms(target_word, is_declinable, get_declension_category_key)
+
+        if generated_data and isinstance(generated_data, dict):
+            result_data = generated_data
+            result_data["is_detailed_numeral_table"] = False # Ensure flag is false for standard path
+            
+            # Special check: If the standard path processed a simple numeral (1-19, or failed tens/100 conversion)
+            # We might still want the detailed table if conversion is possible from its output
+            if is_numeral and not is_detailed_numeral_table: 
+                 category_key = get_declension_category_key('num', '') # Assume 'num' category
+                 if category_key in result_data.get("grouped_forms", {}):
+                     forms_list = result_data["grouped_forms"][category_key]
+                     converted_detailed = _convert_simple_numeral_to_detailed(target_word, forms_list)
+                     if converted_detailed:
+                         print(f"[/decline] Successfully converted standard numeral result for '{target_word}' to detailed format.")
+                         result_data["grouped_forms"] = converted_detailed
+                         result_data["is_detailed_numeral_table"] = True
+                         is_detailed_numeral_table = True # Update flag
+                     else:
+                         print(f"[/decline] Failed to convert standard numeral result for '{target_word}' to detailed format.")
+        else:
+             print(f"[/decline] generate_and_format_forms failed for '{target_word}'.")
+
+
+    # --- Final Response Formatting --- 
     if result_data is None:
-         # Handle case where generation failed or no matching forms found
-        print(f"[/decline] No valid declension data found for '{word}'.")
+        print(f"[/decline] No valid declension data could be generated for '{original_input}'.")
         return jsonify({
-            "status": "success", # Still return success, but with empty data
-            "word": word,
+            "status": "success",
+            "word": original_input, # Return original input word
             "data": [],
-            "message": f"No declension data found for '{word}' or word type mismatch."
+            "message": f"No declension data found for '{original_input}'.",
+            "is_detailed_numeral_table": False # Ensure flag is false on complete failure
         }), 200
     elif isinstance(result_data, dict):
-        # Success: Wrap the result dict in a list for the API response
         response_payload = {
             "status": "success",
-            "word": word,
-            "data": [result_data] # Wrap the dict in a list
+            "word": original_input, # Return original input word
+            # IMPORTANT: Wrap the result_data in a list for frontend compatibility
+            "data": [result_data] 
         }
-        print(f"[/decline] Returning successful data structure for '{word}'.")
+        print(f"[/decline] Returning successful data structure for '{original_input}'. Detailed table: {result_data.get('is_detailed_numeral_table')}")
         return jsonify(response_payload)
     else:
         # Should not happen normally
-        print(f"[/decline] Unexpected result type from generate_and_format_forms for '{word}': {type(result_data)}")
+        print(f"[/decline] Unexpected result type for '{original_input}': {type(result_data)}")
         return jsonify({"status": "error", "message": "Internal server error processing declension."}), 500
 
 # --- 간단한 테스트 경로 추가 ---

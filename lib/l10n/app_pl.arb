@@ -74,7 +74,16 @@
   "qualifier_skrot": "skrót",
   "qualifier_pos": "st. równy",
   "qualifier_com": "st. wyższy",
-  "qualifier_sup": "st. najwyższy",
+  "qualifier_sup": "stopień najwyższy",
+  "qualifier_congr": "kongruencja",
+  "qualifier_ncol": "niezbiorowy",
+  "@qualifier_ncol": {
+    "description": "Qualifier: non-collective (e.g., for numerals not requiring genitive plural)"
+  },
+  "qualifier_rec": "rządzący",
+  "@qualifier_rec": {
+    "description": "Qualifier: rective/governing (e.g., numerals governing the case of the noun)"
+  },
   "conjugationCategoryPresentIndicative": "Czas teraźniejszy",
   "conjugationCategoryFuturePerfectiveIndicative": "Czas przyszły dokonany",
   "conjugationCategoryFutureImperfectiveIndicative": "Czas przyszły niedokonany",
@@ -169,6 +178,10 @@
   "@tableHeaderPlural": {
     "description": "Nagłówek kolumny Liczba mnoga w tabelach"
   },
+  "tableHeaderM1": "Męskoos.",
+  "tableHeaderMOther": "Inne męskie",
+  "tableHeaderF": "Żeński",
+  "tableHeaderN": "Nijaki",
   "tableHeaderPerson": "Osoba",
   "@tableHeaderPerson": {
     "description": "Nagłówek kolumny Osoba w tabelach koniugacji"

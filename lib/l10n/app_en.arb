@@ -90,7 +90,16 @@
    "qualifier_skrot": "abbr.",
    "qualifier_pos": "pos",
    "qualifier_com": "com",
-   "qualifier_sup": "sup",
+   "qualifier_sup": "superlative",
+   "qualifier_congr": "congruence",
+   "qualifier_ncol": "non-collective",
+   "@qualifier_ncol": {
+     "description": "Qualifier: non-collective (e.g., for numerals not requiring genitive plural)"
+   },
+   "qualifier_rec": "governing",
+   "@qualifier_rec": {
+     "description": "Qualifier: rective/governing (e.g., numerals governing the case of the noun)"
+   },
    "conjugationCategoryPresentIndicative": "Present Indicative",
    "conjugationCategoryFuturePerfectiveIndicative": "Future Perfective Indicative",
    "conjugationCategoryFutureImperfectiveIndicative": "Future Imperfective Indicative",
@@ -139,9 +148,10 @@
      "description": "Header for the Singular column in tables"
    },
    "tableHeaderPlural": "Plural",
-   "@tableHeaderPlural": {
-     "description": "Header for the Plural column in tables"
-   },
+   "tableHeaderM1": "Masc. Pers.",
+   "tableHeaderMOther": "Masc. Other",
+   "tableHeaderF": "Feminine",
+   "tableHeaderN": "Neuter",
    "tableHeaderPerson": "Person",
    "@tableHeaderPerson": {
      "description": "Header for the Person column in conjugation tables"

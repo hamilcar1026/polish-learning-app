@@ -90,7 +90,16 @@
   "qualifier_skrot": "сокр.",
   "qualifier_pos": "положит.",
   "qualifier_com": "сравн.",
-  "qualifier_sup": "превосх.",
+  "qualifier_sup": "превосходная степень",
+  "qualifier_congr": "согласование",
+  "qualifier_ncol": "несобирательное",
+  "@qualifier_ncol": {
+    "description": "Qualifier: non-collective (e.g., for numerals not requiring genitive plural)"
+  },
+  "qualifier_rec": "управляющий",
+  "@qualifier_rec": {
+    "description": "Qualifier: rective/governing (e.g., numerals governing the case of the noun)"
+  },
   "conjugationCategoryPresentIndicative": "Настоящее время (изъяв.)",
   "conjugationCategoryFuturePerfectiveIndicative": "Будущее время (соверш., изъяв.)",
   "conjugationCategoryFutureImperfectiveIndicative": "Будущее время (несоверш., изъяв.)",
@@ -136,14 +145,15 @@
     "description": "Заголовок для столбца Ед. ч. в таблицах"
   },
   "tableHeaderPlural": "Мн. ч.",
-  "@tableHeaderPlural": {
-    "description": "Заголовок для столбца Мн. ч. в таблицах"
-  },
+  "tableHeaderM1": "Муж. лиц.",
+  "tableHeaderMOther": "Муж. др.",
+  "tableHeaderF": "Женский",
+  "tableHeaderN": "Средний",
   "tableHeaderPerson": "Лицо",
   "@tableHeaderPerson": {
     "description": "Заголовок для столбца Лицо в таблицах спряжения"
   },
-  "caseNominative": "Именительный",
+  "caseNominative": "Именительный падеж",
   "@caseNominative": {
     "description": "Nominative case name"
   },

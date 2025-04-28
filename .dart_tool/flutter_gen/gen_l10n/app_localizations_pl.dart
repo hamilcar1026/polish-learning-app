@@ -235,7 +235,16 @@ class AppLocalizationsPl extends AppLocalizations {
   String get qualifier_com => 'st. wyższy';
 
   @override
-  String get qualifier_sup => 'st. najwyższy';
+  String get qualifier_sup => 'stopień najwyższy';
+
+  @override
+  String get qualifier_congr => 'kongruencja';
+
+  @override
+  String get qualifier_ncol => 'niezbiorowy';
+
+  @override
+  String get qualifier_rec => 'rządzący';
 
   @override
   String get conjugationCategoryPresentIndicative => 'Czas teraźniejszy';
@@ -335,6 +344,18 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get tableHeaderPlural => 'Liczba mnoga';
+
+  @override
+  String get tableHeaderM1 => 'Męskoos.';
+
+  @override
+  String get tableHeaderMOther => 'Inne męskie';
+
+  @override
+  String get tableHeaderF => 'Żeński';
+
+  @override
+  String get tableHeaderN => 'Nijaki';
 
   @override
   String get tableHeaderPerson => 'Osoba';

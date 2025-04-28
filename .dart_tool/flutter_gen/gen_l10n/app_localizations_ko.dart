@@ -238,6 +238,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get qualifier_sup => '최상급';
 
   @override
+  String get qualifier_congr => '일치';
+
+  @override
+  String get qualifier_ncol => '비집합';
+
+  @override
+  String get qualifier_rec => '격 지배';
+
+  @override
   String get conjugationCategoryPresentIndicative => '현재 시제 (직설법)';
 
   @override
@@ -335,6 +344,18 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get tableHeaderPlural => '복수';
+
+  @override
+  String get tableHeaderM1 => '남성 인격';
+
+  @override
+  String get tableHeaderMOther => '남성 비인격';
+
+  @override
+  String get tableHeaderF => '여성';
+
+  @override
+  String get tableHeaderN => '중성';
 
   @override
   String get tableHeaderPerson => '인칭';

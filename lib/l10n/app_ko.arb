@@ -75,6 +75,15 @@
   "qualifier_pos": "원급",
   "qualifier_com": "비교급",
   "qualifier_sup": "최상급",
+  "qualifier_congr": "일치",
+  "qualifier_ncol": "비집합",
+  "@qualifier_ncol": {
+    "description": "Qualifier: non-collective (e.g., for numerals not requiring genitive plural)"
+  },
+  "qualifier_rec": "격 지배",
+  "@qualifier_rec": {
+    "description": "Qualifier: rective/governing (e.g., numerals governing the case of the noun)"
+  },
   "conjugationCategoryPresentIndicative": "현재 시제 (직설법)",
   "conjugationCategoryFuturePerfectiveIndicative": "미래 완료 시제 (직설법)",
   "conjugationCategoryFutureImperfectiveIndicative": "미래 미완료 시제 (직설법)",
@@ -125,6 +134,22 @@
   "tableHeaderPlural": "복수",
   "@tableHeaderPlural": {
     "description": "테이블의 복수 열 헤더"
+  },
+  "tableHeaderM1": "남성 인격",
+  "@tableHeaderM1": {
+    "description": "테이블의 남성 인격 열 헤더"
+  },
+  "tableHeaderMOther": "남성 비인격",
+  "@tableHeaderMOther": {
+    "description": "테이블의 남성 비인격 열 헤더"
+  },
+  "tableHeaderF": "여성",
+  "@tableHeaderF": {
+    "description": "테이블의 여성 열 헤더"
+  },
+  "tableHeaderN": "중성",
+  "@tableHeaderN": {
+    "description": "테이블의 중성 열 헤더"
   },
   "tableHeaderPerson": "인칭",
   "@tableHeaderPerson": {

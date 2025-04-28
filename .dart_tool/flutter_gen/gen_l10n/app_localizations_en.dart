@@ -235,7 +235,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qualifier_com => 'com';
 
   @override
-  String get qualifier_sup => 'sup';
+  String get qualifier_sup => 'superlative';
+
+  @override
+  String get qualifier_congr => 'congruence';
+
+  @override
+  String get qualifier_ncol => 'non-collective';
+
+  @override
+  String get qualifier_rec => 'governing';
 
   @override
   String get conjugationCategoryPresentIndicative => 'Present Indicative';
@@ -335,6 +344,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tableHeaderPlural => 'Plural';
+
+  @override
+  String get tableHeaderM1 => 'Masc. Pers.';
+
+  @override
+  String get tableHeaderMOther => 'Masc. Other';
+
+  @override
+  String get tableHeaderF => 'Feminine';
+
+  @override
+  String get tableHeaderN => 'Neuter';
 
   @override
   String get tableHeaderPerson => 'Person';

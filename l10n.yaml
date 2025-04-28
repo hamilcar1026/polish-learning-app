@@ -1,6 +1,7 @@
 arb-dir: lib/l10n
 template-arb-file: app_en.arb
 output-localization-file: app_localizations.dart
-# Add 'ru' to the list of supported locales
+# Add 'ru' and 'pl' to the list of supported locales
 nullable-getter: false
-untranslated-messages-file: untranslated_messages.txt 
+untranslated-messages-file: untranslated_messages.txt
+preferred-supported-locales: [en, ko, ru, pl] 

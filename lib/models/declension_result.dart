@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+// import 'declension_form.dart'; // REMOVED: Class is defined below
 
 // Note: This structure is very similar to ConjugationForm.
 // Consider creating a shared 'WordForm' model if desired.
@@ -33,28 +34,63 @@ class DeclensionForm {
 @immutable
 class DeclensionResult {
   final String lemma;
-  final Map<String, List<DeclensionForm>> grouped_forms;
+  final Map<String, dynamic> grouped_forms;
+  final bool is_detailed_numeral_table;
 
   const DeclensionResult({
     required this.lemma,
     required this.grouped_forms,
+    required this.is_detailed_numeral_table,
   });
 
   factory DeclensionResult.fromJson(Map<String, dynamic> json) {
-    final Map<String, List<DeclensionForm>> parsedGroupedForms = {};
-    final Map<String, dynamic> rawGroupedForms = json['grouped_forms'] as Map<String, dynamic>? ?? {};
+    print("[DeclensionResult.fromJson] Parsing JSON: $json");
+    
+    dynamic rawGroupedForms = json['grouped_forms'];
+    Map<String, dynamic> parsedGroupedForms;
 
-    rawGroupedForms.forEach((categoryKey, formList) {
-      if (formList is List) {
-        parsedGroupedForms[categoryKey] = formList
-            .map((item) => DeclensionForm.fromJson(item as Map<String, dynamic>))
-            .toList();
+    bool isDetailed = json['is_detailed_numeral_table'] ?? false;
+    print("[DeclensionResult.fromJson] is_detailed_numeral_table: $isDetailed");
+
+    if (isDetailed) {
+      if (rawGroupedForms is Map<String, dynamic>) {
+         try {
+             parsedGroupedForms = rawGroupedForms.map(
+                 (caseKey, genderMap) => MapEntry(
+                     caseKey,
+                     Map<String, String>.from(genderMap as Map)
+                 )
+             );
+              print("[DeclensionResult.fromJson] Parsed detailed numeral table forms: $parsedGroupedForms");
+         } catch (e) {
+             print("[DeclensionResult.fromJson] Error parsing detailed numeral table forms: $e. Falling back to empty map.");
+             parsedGroupedForms = {};
+         }
+      } else {
+          print("[DeclensionResult.fromJson] Unexpected format for detailed numeral table forms. Expected Map<String, dynamic>, got ${rawGroupedForms.runtimeType}. Falling back to empty map.");
+          parsedGroupedForms = {};
       }
-    });
+    } else {
+      if (rawGroupedForms is Map<String, dynamic>) {
+        parsedGroupedForms = rawGroupedForms.map(
+          (category, formsJson) => MapEntry(
+            category,
+            formsJson is List
+                ? formsJson.map((formJson) => DeclensionForm.fromJson(formJson as Map<String, dynamic>)).toList()
+                : <DeclensionForm>[],
+          ),
+        );
+         print("[DeclensionResult.fromJson] Parsed standard forms: Keys=${parsedGroupedForms.keys}");
+      } else {
+         print("[DeclensionResult.fromJson] Unexpected format for standard forms. Expected Map<String, dynamic>, got ${rawGroupedForms.runtimeType}. Falling back to empty map.");
+         parsedGroupedForms = {};
+      }
+    }
 
     return DeclensionResult(
-      lemma: json['lemma'] as String? ?? '',
+      lemma: json['lemma'] as String,
       grouped_forms: parsedGroupedForms,
+      is_detailed_numeral_table: isDetailed,
     );
   }
 
