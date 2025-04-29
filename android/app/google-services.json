@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:529152975346:android:f562f45b344fdd85144b6b",
+        "mobilesdk_app_id": "1:529152975346:android:f5b4daa250e2def5144b6b",
         "android_client_info": {
-          "package_name": "com.hamilcar1026.PolishApp"
+          "package_name": "com.hamilcar1026.polish_learning_app"
         }
       },
       "oauth_client": [],
