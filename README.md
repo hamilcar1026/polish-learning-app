@@ -1,1 +1,1 @@
-Hello hi nice
+Hello, this application was made for students who is learning Polish language and having trouble with declension/conjegation.
