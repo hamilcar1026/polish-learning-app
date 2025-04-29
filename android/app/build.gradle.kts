@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -7,11 +10,28 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Read properties from key.properties file
+val keyPropertiesFile = rootProject.file("../android/key.properties") // Adjusted path relative to rootProject
+val keyProperties = Properties()
+if (keyPropertiesFile.exists()) {
+    keyProperties.load(FileInputStream(keyPropertiesFile))
+}
+
 android {
     namespace = "com.example.polish_learning_app"
     compileSdk = flutter.compileSdkVersion
     // ndkVersion = flutter.ndkVersion // Comment out or remove the old line
     ndkVersion = "27.0.12077973" // Set the required NDK version
+
+    // Add signingConfigs block
+    signingConfigs {
+        create("release") {
+            keyAlias = keyProperties["keyAlias"] as String?
+            keyPassword = keyProperties["keyPassword"] as String?
+            storeFile = keyProperties["storeFile"]?.let { file(it) }
+            storePassword = keyProperties["storePassword"] as String?
+        }
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -35,9 +55,8 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Use the release signing config
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }
