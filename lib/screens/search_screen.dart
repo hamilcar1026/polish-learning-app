@@ -249,20 +249,46 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
             // Search TextField (remains the same)
             TextField(
               controller: _controller,
+              // Apply M3 decoration
               decoration: InputDecoration(
-                labelText: l10n.searchHint, // Use localized hint
+                hintText: l10n.searchHint, // Use localized hint text
+                // M3 Filled style
+                filled: true,
+                // Use colors from the theme's color scheme
+                fillColor: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5), // Slight transparency
+                // M3 default border style (rounded corners)
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0), // Adjust radius as needed
+                  borderSide: BorderSide.none, // No visible border unless focused/error
+                ),
+                enabledBorder: OutlineInputBorder( // Border when enabled and not focused
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder( // Border when focused
+                   borderRadius: BorderRadius.circular(12.0),
+                   // Use primary color for focus indicator
+                   borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0),
+                ),
+                // Add a clear button to the text field
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.search),
-                  tooltip: l10n.searchButtonTooltip, // Use localized tooltip
-                  onPressed: () => _submitSearch(_controller.text),
+                  icon: const Icon(Icons.clear),
+                  tooltip: l10n.clearTooltip, // Use localized tooltip
+                  onPressed: () {
+                    _controller.clear();
+                    ref.read(searchTermProvider.notifier).state = '';
+                    // Optionally clear results as well
+                    // ref.read(submittedWordProvider.notifier).state = null;
+                    print("[Clear Button] Text field cleared.");
+                  },
                 ),
               ),
-              onChanged: (value) {
-                ref.read(searchTermProvider.notifier).state = value;
-              },
+              // Update the search term provider on change
+              onChanged: (value) => ref.read(searchTermProvider.notifier).state = value,
+              // Submit search on Enter key press
               onSubmitted: _submitSearch,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16.0), // Add space below the text field
 
             // Results area: Wrap the Consumer with Expanded
             Expanded( // Add Expanded back
@@ -335,9 +361,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
                                         if (isDeclinable) Tab(text: l10n.declensionTitle),
                                         if (isVerb) Tab(text: l10n.conjugationTitle),
                                       ],
-                                      labelColor: Theme.of(context).colorScheme.primary,
-                                      unselectedLabelColor: Colors.grey,
-                                      indicatorColor: Theme.of(context).colorScheme.primary,
+                                      // M3 Style Adjustments
+                                      labelColor: Theme.of(context).colorScheme.primary, // Use primary color for selected label
+                                      unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant, // Use a less prominent color for unselected
+                                      indicatorColor: Theme.of(context).colorScheme.primary, // Use primary for indicator
+                                      // M3 default indicator style (can customize further if needed)
+                                      indicatorSize: TabBarIndicatorSize.tab,
+                                      indicatorWeight: 3.0, // M3 default indicator weight
+                                      indicatorPadding: EdgeInsets.zero,
+                                      // Add M3 style splash/highlight colors if desired
+                                      // splashBorderRadius: BorderRadius.circular(8.0),
                                     ),
                                   // --- TabBarView (fixed height container) ---
                                   if (_tabController != null && _tabController!.length > 0)
@@ -427,11 +460,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
     final bool isFavorite = lemma != null ? ref.watch(favoritesProvider).contains(lemma) : false;
     final favoritesNotifier = lemma != null ? ref.read(favoritesProvider.notifier) : null;
 
+    // Use standard Card and apply M3 styles manually
     return Card(
-      elevation: 2.0,
+      elevation: 1.0, // M3 uses lower elevation for elevated cards
       margin: const EdgeInsets.symmetric(vertical: 8.0),
+      // clipBehavior: Clip.antiAlias, // Optional: improves clipping with shape
+      // shape: RoundedRectangleBorder( // Card.elevated uses default M3 shape
+      //   borderRadius: BorderRadius.circular(12.0),
+      // ),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(16.0), // Increased padding slightly for M3
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -553,11 +591,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
               // <<< ADD SingleChildScrollView back INSIDE the tab content >>>
               return SingleChildScrollView(
                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                 // Use standard Card and apply M3 styles manually (Re-apply)
                  child: Card(
-                    elevation: 2.0,
+                    elevation: 1.0, // M3 uses lower elevation
                     margin: EdgeInsets.zero,
+                    clipBehavior: Clip.antiAlias,
+                    shape: RoundedRectangleBorder(
+                       borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    color: ElevationOverlay.applySurfaceTint(
+                       Theme.of(context).colorScheme.surface,
+                       Theme.of(context).colorScheme.surfaceTint,
+                       1.0,
+                    ),
                     child: Padding(
-                       padding: const EdgeInsets.all(12.0),
+                       padding: const EdgeInsets.all(16.0), // Keep increased padding
                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
@@ -867,12 +915,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Table(
                     border: TableBorder.all(color: Colors.grey.shade300),
+                    // Make Singular and Plural columns equal width
                     columnWidths: const {
-                      0: IntrinsicColumnWidth(), // Case column
-                      1: IntrinsicColumnWidth(), // Singular column
-                      2: IntrinsicColumnWidth(), // Plural column
+                      0: IntrinsicColumnWidth(), // Person column
+                      1: IntrinsicColumnWidth(), // Singular column intrinsic width
+                      2: IntrinsicColumnWidth(), // Plural column intrinsic width
                     },
-                    defaultVerticalAlignment: TableCellVerticalAlignment.top,
+                    defaultVerticalAlignment: TableCellVerticalAlignment.top, // 다중 행 셀에 대해 상단 정렬
                     children: [
                       // 헤더 행 (기존)
                       TableRow(
@@ -1058,7 +1107,25 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(personKey), 
+                // Use RichText with TextSpan for newline and styled secondary text
+                child: Builder(builder: (context) {
+                  final defaultStyle = Theme.of(context).textTheme.bodyMedium;
+                  final secondaryStyle = defaultStyle?.copyWith(fontSize: 12, color: Colors.grey.shade600);
+                  // Use personKey directly which already contains the formatted label
+                  final label = personKey; 
+                  final parts = label.split('\n');
+                  return RichText(
+                    text: TextSpan(
+                      children: <TextSpan>[
+                        TextSpan(text: parts.isNotEmpty ? parts[0] : '', style: defaultStyle),
+                        if (parts.length > 1)
+                          const TextSpan(text: '\n'), // Newline
+                        if (parts.length > 1)
+                          TextSpan(text: parts[1], style: secondaryStyle), // Apply secondary style
+                      ],
+                    ),
+                  );
+                }),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -1263,9 +1330,27 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
           }
 
           sections.add(
+            // Apply M3 styles to ExpansionTile
             ExpansionTile(
               key: PageStorageKey<String>(key),
-              // --- MODIFIED: Wrap title Row children with Flexible/Expanded --- 
+              // M3 Style Adjustments
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), // Shape when expanded
+              collapsedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), // Shape when collapsed
+              backgroundColor: ElevationOverlay.applySurfaceTint(
+                  Theme.of(context).colorScheme.surface,
+                  Theme.of(context).colorScheme.surfaceTint,
+                  2.0, // Slightly more elevation when expanded
+              ), // Background when expanded (subtle tint)
+              collapsedBackgroundColor: ElevationOverlay.applySurfaceTint(
+                  Theme.of(context).colorScheme.surface,
+                  Theme.of(context).colorScheme.surfaceTint,
+                  1.0, // Lower elevation when collapsed
+              ),
+              iconColor: Theme.of(context).colorScheme.primary, // Icon color when expanded
+              collapsedIconColor: Theme.of(context).colorScheme.onSurfaceVariant, // Icon color when collapsed
+              // M3 style removes default dividers, manage spacing with SizedBox below
+              tilePadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // Adjust padding
+              // --- Title logic remains the same ---
               title: isImpersonalCategory ? 
                 Row(
                   children: [
@@ -1601,10 +1686,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
     // 테이블 위젯 구성: 인칭별 행, 수(단수/복수)별 열
     return Table(
       border: TableBorder.all(color: Colors.grey.shade300),
+      // Make Singular and Plural columns equal width
       columnWidths: const {
-        0: IntrinsicColumnWidth(), // Person column
-        1: IntrinsicColumnWidth(), // Singular column
-        2: IntrinsicColumnWidth(), // Plural column
+        0: IntrinsicColumnWidth(), // Keep Person column intrinsic
+        1: FlexColumnWidth(1),      // Give Singular column flex factor 1
+        2: FlexColumnWidth(1),      // Give Plural column flex factor 1
       },
       defaultVerticalAlignment: TableCellVerticalAlignment.top, // 다중 행 셀에 대해 상단 정렬
       children: [
@@ -1631,55 +1717,100 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
           final sgForms = tableData[personCode]?['sg'] ?? {};
           final plForms = tableData[personCode]?['pl'] ?? {};
 
-          // 성별 레이블로 셀 내용 형식 지정 - 적절한 줄 바꿈을 위해 Column 위젯 사용
+          // Format cell content with gender labels - using RichText for styling
           Widget buildSingularCell() {
-            print("==== [DEBUG] sgForms keys: "+sgForms.keys.toString());
-            print("==== [DEBUG] sgForms: "+sgForms.toString());
-            List<Widget> contentWidgets = [];
+            final defaultStyle = Theme.of(context).textTheme.bodyMedium;
+            final labelStyle = defaultStyle?.copyWith(fontSize: 12, color: Colors.grey.shade600);
             
-            if (sgForms['m'] != null) {
-              contentWidgets.add(Text("${sgForms['m']} (${l10n.genderLabelM1}/${l10n.genderLabelM2}/${l10n.genderLabelM3})"));
+            // Helper function to create RichText for a form and its label
+            Widget buildRich(String form, String label) {
+              return RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(text: form, style: defaultStyle), // Verb form
+                    const TextSpan(text: '\n'),                // Newline
+                    TextSpan(text: label, style: labelStyle), // Label (smaller, grey)
+                  ],
+                ),
+              );
+            }
+
+            List<Widget> contentWidgets = [];
+            // 남성 단수: m, m1, m2, m3, m1.m2.m3, m1.m2, m2.m3 등 모든 조합을 커버
+            final mascKeys = ['m', 'm1', 'm2', 'm3', 'm1.m2.m3', 'm1.m2', 'm2.m3'];
+            final foundMasc = mascKeys.where((k) => sgForms[k] != null).toList();
+            if (foundMasc.isNotEmpty) {
+              // Use the form from the first found masculine key
+              contentWidgets.add(buildRich(sgForms[foundMasc.first]!, "(${l10n.genderLabelM1}/${l10n.genderLabelM2}/${l10n.genderLabelM3})"));
             }
             if (sgForms['f'] != null) {
-              contentWidgets.add(Text("${sgForms['f']} (${l10n.genderLabelF})"));
+              contentWidgets.add(buildRich(sgForms['f']!, "(${l10n.genderLabelF})"));
             }
             if (sgForms['n'] != null) {
-              contentWidgets.add(Text("${sgForms['n']} (${l10n.genderLabelN1}/${l10n.genderLabelN2})"));
+              contentWidgets.add(buildRich(sgForms['n']!, "(${l10n.genderLabelN1}/${l10n.genderLabelN2})"));
             }
-            
             if (contentWidgets.isEmpty) {
-              return Text('-');
+              return Text('-', style: defaultStyle); // Keep default style for hyphen
             }
-            
+            // Add spacing between RichText widgets if there are multiple
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: contentWidgets,
+              children: List<Widget>.generate(contentWidgets.length * 2 - 1, (index) {
+                if (index.isEven) {
+                  return contentWidgets[index ~/ 2];
+                } else {
+                  return const SizedBox(height: 4.0); // Spacing
+                }
+              }),
             );
           }
           
           Widget buildPluralCell() {
+            final defaultStyle = Theme.of(context).textTheme.bodyMedium;
+            final labelStyle = defaultStyle?.copyWith(fontSize: 12, color: Colors.grey.shade600);
+
+            // Helper function to create RichText for a form and its label
+            Widget buildRich(String form, String label) {
+              return RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(text: form, style: defaultStyle),
+                    const TextSpan(text: '\n'),
+                    TextSpan(text: label, style: labelStyle),
+                  ],
+                ),
+              );
+            }
+
             List<Widget> contentWidgets = [];
-            
             if (plForms['m1'] != null) {
-              contentWidgets.add(Text("${plForms['m1']} (${l10n.genderLabelM1})"));
+              contentWidgets.add(buildRich(plForms['m1']!, "(${l10n.genderLabelM1})"));
             }
             if (plForms['f'] != null) {
-              contentWidgets.add(Text("${plForms['f']} (${l10n.genderLabelF})"));
+              contentWidgets.add(buildRich(plForms['f']!, "(${l10n.genderLabelF})"));
             }
             if (plForms['n'] != null) {
-              contentWidgets.add(Text("${plForms['n']} (${l10n.genderLabelN1}/${l10n.genderLabelN2})"));
+              contentWidgets.add(buildRich(plForms['n']!, "(${l10n.genderLabelN1}/${l10n.genderLabelN2})"));
             }
+            // Use non-m1 as fallback ONLY if f and n are both null
             if (plForms['non-m1'] != null && plForms['f'] == null && plForms['n'] == null) {
-              contentWidgets.add(Text("${plForms['non-m1']} (non-${l10n.genderLabelM1})"));
+               contentWidgets.add(buildRich(plForms['non-m1']!, "(non-${l10n.genderLabelM1})")); // Consider a better label?
             }
             
             if (contentWidgets.isEmpty) {
-              return Text('-');
+              return Text('-', style: defaultStyle); // Keep default style
             }
             
+            // Add spacing between RichText widgets if there are multiple
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: contentWidgets,
+              children: List<Widget>.generate(contentWidgets.length * 2 - 1, (index) {
+                if (index.isEven) {
+                  return contentWidgets[index ~/ 2];
+                } else {
+                  return const SizedBox(height: 4.0); // Spacing
+                }
+              }),
             );
           }
 
@@ -1687,7 +1818,24 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(_getPersonLabel(personCode, l10n)), // 인칭 레이블 열
+                // Use RichText with TextSpan for newline and styled secondary text
+                child: Builder(builder: (context) {
+                  final defaultStyle = Theme.of(context).textTheme.bodyMedium;
+                  final secondaryStyle = defaultStyle?.copyWith(fontSize: 12, color: Colors.grey.shade600);
+                  final label = _getPersonLabel(personCode, l10n);
+                  final parts = label.split('\n');
+                  return RichText(
+                    text: TextSpan(
+                      children: <TextSpan>[
+                        TextSpan(text: parts.isNotEmpty ? parts[0] : '', style: defaultStyle),
+                        if (parts.length > 1)
+                          const TextSpan(text: '\n'), // Newline
+                        if (parts.length > 1)
+                          TextSpan(text: parts[1], style: secondaryStyle), // Apply secondary style
+                      ],
+                    ),
+                  );
+                }),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -1991,6 +2139,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
 
   // --- Helper function to build Conditional Table ---
   Widget _buildConditionalTable(List<ConjugationForm> forms, AppLocalizations l10n) {
+    print("Conditional forms data: $forms"); // <<< DEBUG PRINT
     // Person order for table rows
     const personOrder = ['pri', 'sec', 'ter'];
     
@@ -2083,10 +2232,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
     // Build the Table widget
     return Table(
       border: TableBorder.all(color: Colors.grey.shade300),
+      // Make Singular and Plural columns equal width
       columnWidths: const {
         0: IntrinsicColumnWidth(), // Person column
-        1: IntrinsicColumnWidth(), // Singular column
-        2: IntrinsicColumnWidth(), // Plural column
+        1: FlexColumnWidth(1),      // Singular column equal width
+        2: FlexColumnWidth(1),      // Plural column equal width
       },
       defaultVerticalAlignment: TableCellVerticalAlignment.top, // Align content top
       children: [
@@ -2115,6 +2265,24 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
 
           // Format cell content with gender labels - using Column widget for proper line breaks
           Widget buildSingularCell() {
+            // --- ADD Styles and RichText helper ---
+            final defaultStyle = Theme.of(context).textTheme.bodyMedium;
+            final labelStyle = defaultStyle?.copyWith(fontSize: 12, color: Colors.grey.shade600);
+
+            // Helper function to create RichText for a form and its label
+            Widget buildRich(String form, String label) {
+              return RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(text: form, style: defaultStyle), // Verb form
+                    const TextSpan(text: '\n'),                // Newline
+                    TextSpan(text: label, style: labelStyle), // Label (smaller, grey)
+                  ],
+                ),
+              );
+            }
+            // --- END ADD ---
+
             print("==== [DEBUG][COND] sgForms keys: "+sgForms.keys.toString());
             print("==== [DEBUG][COND] sgForms: "+sgForms.toString());
             List<Widget> contentWidgets = [];
@@ -2122,56 +2290,116 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
             final mascKeys = ['m', 'm1', 'm2', 'm3', 'm1.m2.m3', 'm1.m2', 'm2.m3'];
             final foundMasc = mascKeys.where((k) => sgForms[k] != null).toList();
             if (foundMasc.isNotEmpty) {
-              for (var k in foundMasc) {
-                contentWidgets.add(Text("${sgForms[k]} (${l10n.genderLabelM1}/${l10n.genderLabelM2}/${l10n.genderLabelM3})"));
-              }
+              // --- MODIFY to use buildRich ---
+              // Use the form from the first found masculine key
+              contentWidgets.add(buildRich(sgForms[foundMasc.first]!, "(${l10n.genderLabelM1}/${l10n.genderLabelM2}/${l10n.genderLabelM3})"));
             }
             if (sgForms['f'] != null) {
-              contentWidgets.add(Text("${sgForms['f']} (${l10n.genderLabelF})"));
+              // --- MODIFY to use buildRich ---
+              contentWidgets.add(buildRich(sgForms['f']!, "(${l10n.genderLabelF})"));
             }
             if (sgForms['n'] != null) {
-              contentWidgets.add(Text("${sgForms['n']} (${l10n.genderLabelN1}/${l10n.genderLabelN2})"));
+              // --- MODIFY to use buildRich ---
+              contentWidgets.add(buildRich(sgForms['n']!, "(${l10n.genderLabelN1}/${l10n.genderLabelN2})"));
             }
+            // --- END MODIFY ---
             if (contentWidgets.isEmpty) {
-              return Text('-');
+              // --- MODIFY to use defaultStyle ---
+              return Text('-', style: defaultStyle);
             }
+            // --- MODIFY to use List.generate for spacing ---
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: contentWidgets,
+              children: List<Widget>.generate(contentWidgets.length * 2 - 1, (index) {
+                if (index.isEven) {
+                  return contentWidgets[index ~/ 2];
+                } else {
+                  return const SizedBox(height: 4.0); // Spacing
+                }
+              }),
             );
+            // --- END MODIFY ---
           }
           
           Widget buildPluralCell() {
+            // --- ADD Styles and RichText helper ---
+            final defaultStyle = Theme.of(context).textTheme.bodyMedium;
+            final labelStyle = defaultStyle?.copyWith(fontSize: 12, color: Colors.grey.shade600);
+
+            // Helper function to create RichText for a form and its label
+            Widget buildRich(String form, String label) {
+              return RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(text: form, style: defaultStyle),
+                    const TextSpan(text: '\n'),
+                    TextSpan(text: label, style: labelStyle),
+                  ],
+                ),
+              );
+            }
+            // --- END ADD ---
+
             List<Widget> contentWidgets = [];
-            
+
+            // --- MODIFY to use buildRich ---
             if (plForms['m1'] != null) {
-              contentWidgets.add(Text("${plForms['m1']} (${l10n.genderLabelM1})"));
+              contentWidgets.add(buildRich(plForms['m1']!, "(${l10n.genderLabelM1})"));
             }
             if (plForms['f'] != null) {
-              contentWidgets.add(Text("${plForms['f']} (${l10n.genderLabelF})"));
+              contentWidgets.add(buildRich(plForms['f']!, "(${l10n.genderLabelF})"));
             }
             if (plForms['n'] != null) {
-              contentWidgets.add(Text("${plForms['n']} (${l10n.genderLabelN1}/${l10n.genderLabelN2})"));
+              contentWidgets.add(buildRich(plForms['n']!, "(${l10n.genderLabelN1}/${l10n.genderLabelN2})"));
             }
+            // Use non-m1 as fallback ONLY if f and n are both null
             if (plForms['non-m1'] != null && plForms['f'] == null && plForms['n'] == null) {
-              contentWidgets.add(Text("${plForms['non-m1']} (non-${l10n.genderLabelM1})"));
+               contentWidgets.add(buildRich(plForms['non-m1']!, "(non-${l10n.genderLabelM1})")); // Consider a better label?
             }
-            
+            // --- END MODIFY ---
+
             if (contentWidgets.isEmpty) {
-              return Text('-');
+              // --- MODIFY to use defaultStyle ---
+              return Text('-', style: defaultStyle);
             }
-            
+
+            // --- MODIFY to use List.generate for spacing ---
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: contentWidgets,
+              children: List<Widget>.generate(contentWidgets.length * 2 - 1, (index) {
+                if (index.isEven) {
+                  return contentWidgets[index ~/ 2];
+                } else {
+                  return const SizedBox(height: 4.0); // Spacing
+                }
+              }),
             );
+            // --- END MODIFY ---
           }
 
           return TableRow(
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(_getPersonLabel(personCode, l10n)), // Person label column
+                // Use RichText with TextSpan for newline and styled secondary text
+                child: Builder(builder: (context) {
+                  final defaultStyle = Theme.of(context).textTheme.bodyMedium;
+                  final secondaryStyle = defaultStyle?.copyWith(fontSize: 12, color: Colors.grey.shade600);
+                  final label = _getPersonLabel(personCode, l10n);
+                  print("Conditional Person Label for $personCode: $label");
+                  final parts = label.split('\n');
+                  return RichText(
+                    text: TextSpan(
+                      children: <TextSpan>[
+                        TextSpan(text: parts.isNotEmpty ? parts[0] : '', style: defaultStyle),
+                        if (parts.length > 1)
+                          const TextSpan(text: '\n'), // Newline
+                        if (parts.length > 1)
+                          TextSpan(text: parts[1], style: secondaryStyle), // Apply secondary style
+                      ],
+                    ),
+                  );
+                }),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),

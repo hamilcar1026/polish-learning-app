@@ -1,4 +1,8 @@
 {
+  "ko": [
+    "searchErrorFallback"
+  ],
+
   "pl": [
     "conjugationCategoryImpersonal",
     "conjugationCategoryVerbalNoun",

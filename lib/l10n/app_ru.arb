@@ -188,15 +188,15 @@
   "@caseVocative": {
     "description": "Vocative case name"
   },
-  "personLabelFirst": "1-е л. (я/мы)",
+  "personLabelFirst": "1-е\\n(я/мы)",
   "@personLabelFirst": {
     "description": "Метка для первого лица в таблицах спряжения"
   },
-  "personLabelSecond": "2-е л. (ты/вы)",
+  "personLabelSecond": "2-е\\n(ты/вы)",
   "@personLabelSecond": {
     "description": "Метка для второго лица в таблицах спряжения"
   },
-  "personLabelThird": "3-е л. (он/она/оно/они)",
+  "personLabelThird": "3-е\\n(он/она/оно/они)",
   "@personLabelThird": {
     "description": "Метка для третьего лица в таблицах спряжения"
   },
@@ -287,5 +287,7 @@
   },
   "copyrightNotice": "Эта программа была создана с использованием API morfeusz2.",
   "qualifier_wok": "клитика (гласн.)",
-  "qualifier_nwok": "клитика (согл.)"
+  "qualifier_nwok": "клитика (согл.)",
+  "searchErrorFallback": "Не удалось выполнить поиск.",
+  "clearTooltip": "Очистить поле поиска"
 } 

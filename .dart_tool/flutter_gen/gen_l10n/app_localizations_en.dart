@@ -39,7 +39,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pronounceWordTooltip => 'Pronounce the word';
 
   @override
-  String get searchButtonTooltip => 'Search';
+  String get searchButtonTooltip => 'Search for the word';
 
   @override
   String noAnalysisFound(String word) {
@@ -385,13 +385,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsContributors => 'Contributors';
 
   @override
-  String get personLabelFirst => '1st (I/we)';
+  String get personLabelFirst => '1st\n(I/we)';
 
   @override
-  String get personLabelSecond => '2nd (you/you)';
+  String get personLabelSecond => '2nd\n(you/you)';
 
   @override
-  String get personLabelThird => '3rd (he/she/it/they)';
+  String get personLabelThird => '3rd\n(he/she/it/they)';
 
   @override
   String get genderLabelM1 => 'Masc. Personal';
@@ -491,4 +491,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get qualifier_nwok => 'clitic (non-vocalic)';
+
+  @override
+  String get searchErrorFallback => 'Could not perform search.';
+
+  @override
+  String get clearTooltip => 'Clear search text';
 }

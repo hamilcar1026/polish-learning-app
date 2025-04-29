@@ -126,15 +126,15 @@
   "@settingsContributors": {
     "description": "Element menu dla Współtwórców"
   },
-  "personLabelFirst": "1. os. (ja/my)",
+  "personLabelFirst": "1. os.\n(ja/my)",
   "@personLabelFirst": {
     "description": "Etykieta dla pierwszej osoby w tabelach koniugacji"
   },
-  "personLabelSecond": "2. os. (ty/wy)",
+  "personLabelSecond": "2. os.\n(ty/wy)",
   "@personLabelSecond": {
     "description": "Etykieta dla drugiej osoby w tabelach koniugacji"
   },
-  "personLabelThird": "3. os. (on/ona/ono/oni/one)",
+  "personLabelThird": "3. os.\n(on/ona/ono/oni/one)",
   "@personLabelThird": {
     "description": "Etykieta dla trzeciej osoby w tabelach koniugacji"
   },
@@ -282,5 +282,7 @@
   "fontSizeLarge": "Duży",
   "copyrightNotice": "Ten program został stworzony przy użyciu API morfeusz2.",
   "qualifier_wok": "klityka (wokaliczna)",
-  "qualifier_nwok": "klityka (niewokaliczna)"
+  "qualifier_nwok": "klityka (niewokaliczna)",
+  "searchErrorFallback": "Nie można przeprowadzić wyszukiwania.",
+  "clearTooltip": "Wyczyść tekst wyszukiwania"
 } 

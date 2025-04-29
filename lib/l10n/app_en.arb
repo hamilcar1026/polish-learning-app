@@ -13,7 +13,7 @@
   "conjugationTitle": "Conjugation",
   "grammarTitle": "Grammar",
   "pronounceWordTooltip": "Pronounce the word",
-  "searchButtonTooltip": "Search",
+  "searchButtonTooltip": "Search for the word",
   "noAnalysisFound": "No analysis found for \"{word}\".",
   "@noAnalysisFound": {
     "description": "Message shown when analysis fails or returns empty.",
@@ -191,15 +191,15 @@
    "@settingsContributors": {
      "description": "Menu item text for Contributors"
    },
-   "personLabelFirst": "1st (I/we)",
+   "personLabelFirst": "1st\n(I/we)",
    "@personLabelFirst": {
      "description": "Label for the first person in conjugation tables"
    },
-   "personLabelSecond": "2nd (you/you)",
+   "personLabelSecond": "2nd\n(you/you)",
    "@personLabelSecond": {
      "description": "Label for the second person in conjugation tables"
    },
-   "personLabelThird": "3rd (he/she/it/they)",
+   "personLabelThird": "3rd\n(he/she/it/they)",
    "@personLabelThird": {
      "description": "Label for the third person in conjugation tables"
    },
@@ -320,5 +320,7 @@
    "fontSizeLarge": "Large",
    "copyrightNotice": "This program was created using the morfeusz2 api.",
    "qualifier_wok": "clitic (vocalic)",
-   "qualifier_nwok": "clitic (non-vocalic)"
+   "qualifier_nwok": "clitic (non-vocalic)",
+   "searchErrorFallback": "Could not perform search.",
+   "clearTooltip": "Clear search text"
 } 

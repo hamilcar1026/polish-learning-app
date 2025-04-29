@@ -48,7 +48,12 @@ class SettingsScreen extends ConsumerWidget {
           }).toList(),
 
           const SizedBox(height: 24),
-          const Divider(),
+          // Apply M3 Divider style
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+          ),
           const SizedBox(height: 24),
 
           Text(
@@ -56,22 +61,40 @@ class SettingsScreen extends ConsumerWidget {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
-          // Font Size Slider
-          Slider(
-            value: settings.fontSizeFactor,
-            min: 0.8,
-            max: 1.5,
-            divisions: 7, // Creates steps like 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5
-            label: settings.fontSizeFactor.toStringAsFixed(1), // Show current factor
-            onChanged: (double value) {
-               // Update continuously while sliding
-               // Consider adding a debounce if performance is an issue
-               settingsNotifier.setFontSizeFactor(value);
-            },
-            // onChangeEnd: (double value) {
-            //   // Or only update when the user releases the slider
-            //   settingsNotifier.setFontSizeFactor(value);
-            // },
+          // Font Size Slider with M3 Theme
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              // Apply M3 specific theme customizations here if needed
+              // For example, track height, thumb shape, colors based on ColorScheme
+              trackHeight: 4.0, // M3 default track height
+              activeTrackColor: Theme.of(context).colorScheme.primary,
+              inactiveTrackColor: Theme.of(context).colorScheme.surfaceVariant,
+              thumbColor: Theme.of(context).colorScheme.primary,
+              overlayColor: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0), // M3 thumb shape
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 20.0), // M3 overlay shape
+              valueIndicatorShape: const PaddleSliderValueIndicatorShape(), // M3 value indicator
+              valueIndicatorColor: Theme.of(context).colorScheme.primary,
+              valueIndicatorTextStyle: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+            ),
+            child: Slider(
+              value: settings.fontSizeFactor,
+              min: 0.8,
+              max: 1.5,
+              divisions: 7, // Creates steps like 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5
+              label: settings.fontSizeFactor.toStringAsFixed(1), // Show current factor
+              onChanged: (double value) {
+                 // Update continuously while sliding
+                 // Consider adding a debounce if performance is an issue
+                 settingsNotifier.setFontSizeFactor(value);
+              },
+              // onChangeEnd: (double value) {
+              //   // Or only update when the user releases the slider
+              //   settingsNotifier.setFontSizeFactor(value);
+              // },
+            ),
           ),
            // Display current factor value
           Center(
@@ -82,7 +105,12 @@ class SettingsScreen extends ConsumerWidget {
           ),
 
           const SizedBox(height: 24),
-          const Divider(),
+          // Apply M3 Divider style
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+          ),
           const SizedBox(height: 24),
 
           // Contributors Link

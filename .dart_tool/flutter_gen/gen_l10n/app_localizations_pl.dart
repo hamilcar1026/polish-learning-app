@@ -385,13 +385,13 @@ class AppLocalizationsPl extends AppLocalizations {
   String get settingsContributors => 'Współtwórcy';
 
   @override
-  String get personLabelFirst => '1. os. (ja/my)';
+  String get personLabelFirst => '1. os.\n(ja/my)';
 
   @override
-  String get personLabelSecond => '2. os. (ty/wy)';
+  String get personLabelSecond => '2. os.\n(ty/wy)';
 
   @override
-  String get personLabelThird => '3. os. (on/ona/ono/oni/one)';
+  String get personLabelThird => '3. os.\n(on/ona/ono/oni/one)';
 
   @override
   String get genderLabelM1 => 'Męskoosobowy';
@@ -491,4 +491,10 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get qualifier_nwok => 'klityka (niewokaliczna)';
+
+  @override
+  String get searchErrorFallback => 'Nie można przeprowadzić wyszukiwania.';
+
+  @override
+  String get clearTooltip => 'Wyczyść tekst wyszukiwania';
 }

@@ -162,7 +162,7 @@ abstract class AppLocalizations {
   /// No description provided for @searchButtonTooltip.
   ///
   /// In en, this message translates to:
-  /// **'Search'**
+  /// **'Search for the word'**
   String get searchButtonTooltip;
 
   /// Message shown when analysis fails or returns empty.
@@ -846,19 +846,19 @@ abstract class AppLocalizations {
   /// Label for the first person in conjugation tables
   ///
   /// In en, this message translates to:
-  /// **'1st (I/we)'**
+  /// **'1st\n(I/we)'**
   String get personLabelFirst;
 
   /// Label for the second person in conjugation tables
   ///
   /// In en, this message translates to:
-  /// **'2nd (you/you)'**
+  /// **'2nd\n(you/you)'**
   String get personLabelSecond;
 
   /// Label for the third person in conjugation tables
   ///
   /// In en, this message translates to:
-  /// **'3rd (he/she/it/they)'**
+  /// **'3rd\n(he/she/it/they)'**
   String get personLabelThird;
 
   /// Label for masculine personal gender (m1)
@@ -1046,6 +1046,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'clitic (non-vocalic)'**
   String get qualifier_nwok;
+
+  /// No description provided for @searchErrorFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not perform search.'**
+  String get searchErrorFallback;
+
+  /// No description provided for @clearTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search text'**
+  String get clearTooltip;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

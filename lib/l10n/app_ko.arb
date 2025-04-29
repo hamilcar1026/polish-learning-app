@@ -11,6 +11,7 @@
   "grammarTitle": "문법",
   "pronounceWordTooltip": "단어 발음 듣기",
   "searchButtonTooltip": "검색",
+  "clearTooltip": "검색어 지우기",
   "noAnalysisFound": "\"{word}\"에 대한 분석을 찾을 수 없습니다.",
   "noDeclensionData": "격변화 데이터를 찾을 수 없습니다.",
   "noConjugationData": "활용 데이터를 찾을 수 없습니다.",
@@ -187,15 +188,15 @@
   "@settingsContributors": {
     "description": "기여자 메뉴 항목 텍스트"
   },
-  "personLabelFirst": "1인칭 (나/우리)",
+  "personLabelFirst": "1인칭\n(나/우리)",
   "@personLabelFirst": {
     "description": "활용표의 1인칭 레이블"
   },
-  "personLabelSecond": "2인칭 (너/너희)",
+  "personLabelSecond": "2인칭\n(너/너희)",
   "@personLabelSecond": {
     "description": "활용표의 2인칭 레이블"
   },
-  "personLabelThird": "3인칭 (그/그녀/그것/그들)",
+  "personLabelThird": "3인칭\n(그/그녀/그것/그들)",
   "@personLabelThird": {
     "description": "활용표의 3인칭 레이블"
   },

@@ -385,13 +385,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsContributors => '기여자';
 
   @override
-  String get personLabelFirst => '1인칭 (나/우리)';
+  String get personLabelFirst => '1인칭\n(나/우리)';
 
   @override
-  String get personLabelSecond => '2인칭 (너/너희)';
+  String get personLabelSecond => '2인칭\n(너/너희)';
 
   @override
-  String get personLabelThird => '3인칭 (그/그녀/그것/그들)';
+  String get personLabelThird => '3인칭\n(그/그녀/그것/그들)';
 
   @override
   String get genderLabelM1 => '남성 인물';
@@ -491,4 +491,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get qualifier_nwok => '비활음조';
+
+  @override
+  String get searchErrorFallback => 'Could not perform search.';
+
+  @override
+  String get clearTooltip => '검색어 지우기';
 }
