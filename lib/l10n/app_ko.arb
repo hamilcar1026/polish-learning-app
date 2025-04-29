@@ -125,7 +125,7 @@
   },
   "tableHeaderCase": "격",
   "@tableHeaderCase": {
-    "description": "곡용/분사 테이블의 격 열 헤더"
+    "description": "격변화/분사 테이블의 격 열 헤더"
   },
   "tableHeaderSingular": "단수",
   "@tableHeaderSingular": {
@@ -223,9 +223,9 @@
   "@genderLabelN2": {
     "description": "중성 2타입 성별(n2) 레이블"
   },
-  "declensionTableTitle": "\"{lemma}\" 곡용",
+  "declensionTableTitle": "\"{lemma}\" 격변화",
   "@declensionTableTitle": {
-    "description": "곡용 테이블 제목 형식, {lemma} 자리 표시자 포함",
+    "description": "격변화 테이블 제목 형식, {lemma} 자리 표시자 포함",
     "placeholders": {
       "lemma": {
         "type": "String",

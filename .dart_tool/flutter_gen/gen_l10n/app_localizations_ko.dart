@@ -413,7 +413,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String declensionTableTitle(String lemma) {
-    return '\"$lemma\" 곡용';
+    return '\"$lemma\" 격변화';
   }
 
   @override
