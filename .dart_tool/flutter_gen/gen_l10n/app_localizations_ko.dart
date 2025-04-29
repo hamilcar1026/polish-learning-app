@@ -27,7 +27,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get analysisTitle => '분석';
 
   @override
-  String get declensionTitle => '곡용';
+  String get declensionTitle => '격변화';
 
   @override
   String get conjugationTitle => '활용';
@@ -47,7 +47,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get noDeclensionData => '곡용 데이터를 찾을 수 없습니다.';
+  String get noDeclensionData => '격변화 데이터를 찾을 수 없습니다.';
 
   @override
   String get noConjugationData => '활용 데이터를 찾을 수 없습니다.';
@@ -485,4 +485,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get copyrightNotice => '이 프로그램은 morfeusz2 api를 이용하여 제작되었습니다.';
+
+  @override
+  String get qualifier_wok => '활음조';
+
+  @override
+  String get qualifier_nwok => '비활음조';
 }

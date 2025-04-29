@@ -1,6 +1,9 @@
 {
   "@@locale": "en",
   "appTitle": "Polish Learning App",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
   "searchHint": "Enter a Polish word",
   "settingsTitle": "Settings",
   "languageSettingTitle": "Language",

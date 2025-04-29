@@ -1864,208 +1864,130 @@ def conjugate_word(word):
 def decline_word(word):
     original_input = word
     # --- Flags to indicate response format ---
-    is_detailed_numeral_table = False # NEW flag for detailed Case x Gender table
+    is_detailed_numeral_table = False # Flag for detailed Case x Gender table
     # -----------------------------------------
 
-    # --- Numeral Handling --- 
+    # --- Numeral Identification --- 
     is_numeral = False
     numeral_value = None
     mapped_word = word # Default to original input
     if word.isdigit():
-        is_numeral = True
-        numeral_value = int(word)
-        if word in NUMERAL_WORD_MAP:
-            mapped_word = NUMERAL_WORD_MAP[word]
-            print(f"[/decline] Input '{word}' detected as numeral, mapping to '{mapped_word}'.")
-        else:
-            print(f"[/decline] Input '{word}' is a numeral but not found in NUMERAL_WORD_MAP.")
-            # Decide how to handle numerals outside the 1-100 map? Return error or try analysis?
-            # For now, let it proceed to generate_and_format_forms which will likely fail.
-            pass 
-    # -----------------------
+        try:
+            num_val = int(word)
+            if 1 <= num_val <= 100:
+                 is_numeral = True
+                 numeral_value = num_val
+                 # Get the base Polish word if available (for simple numerals)
+                 mapped_word = NUMERAL_WORD_MAP.get(word, word) 
+                 print(f"[/decline] Input '{word}' detected as numeral {numeral_value}, mapping to '{mapped_word}'.")
+            else:
+                 print(f"[/decline] Input '{word}' is a numeral but outside 1-100 range.")
+        except ValueError:
+             print(f"[/decline] Input '{word}' looks like a numeral but failed to parse.")
+             is_numeral = False # Treat as non-numeral if parsing fails
+    # ---------------------------
 
     result_data = None
+    error_message = None
 
-    # --- Detailed Numeral Table Generation (Composite & Simple Tens/100) --- 
-    if is_numeral: 
+    # --- Consolidated Numeral Declension Generation (1-100) --- 
+    if is_numeral and numeral_value is not None:
+        structured_declensions = None
+        lemma_for_result = mapped_word # Use mapped word as lemma for simple, composite generates own
+
         # 1. Composite Numerals (21-99 excluding tens)
         if 21 <= numeral_value <= 99 and numeral_value % 10 != 0:
-            print(f"[/decline] Processing composite numeral '{original_input}' ({mapped_word}).")
+            print(f"[/decline] Processing composite numeral '{original_input}' for detailed table.")
             structured_declensions = _generate_composite_numeral_declensions(original_input) 
             if structured_declensions:
-                result_data = {
-                    "lemma": mapped_word,
-                    "grouped_forms": structured_declensions,
-                    "is_detailed_numeral_table": True 
-                }
-                is_detailed_numeral_table = True # Set flag
+                 # Composite generator constructs the full word, use original input as lemma key maybe?
+                 lemma_for_result = original_input 
+                 is_detailed_numeral_table = True
             else:
-                 print(f"[/decline] Failed to generate composite declensions for '{original_input}'.")
+                 error_message = f"Failed to generate composite declensions for '{original_input}'."
+                 print(f"[/decline] {error_message}")
         
-        # 2. Simple Tens (20-90) and 100
-        elif numeral_value in [20, 30, 40, 50, 60, 70, 80, 90, 100]:
-            print(f"[/decline] Processing simple numeral '{original_input}' ({mapped_word}) for detailed table.")
-            # Fetch hardcoded data (list format)
-            hardcoded_data = hardcoded_declensions.get(mapped_word)
-            if hardcoded_data and "grouped_forms" in hardcoded_data and "declensionCategoryNumeral" in hardcoded_data["grouped_forms"]:
+        # 2. Simple Numerals (1-100 handled by NUMERAL_WORD_MAP)
+        elif word in NUMERAL_WORD_MAP:
+             print(f"[/decline] Processing simple numeral '{original_input}' ({mapped_word}) for detailed table.")
+             hardcoded_data = hardcoded_declensions.get(mapped_word)
+             if hardcoded_data and "grouped_forms" in hardcoded_data and "declensionCategoryNumeral" in hardcoded_data["grouped_forms"]:
                  hardcoded_forms_list = hardcoded_data["grouped_forms"]["declensionCategoryNumeral"]
-                 # Convert to detailed format using the new helper
+                 # --- ALWAYS Convert to detailed format --- 
                  structured_declensions = _convert_simple_numeral_to_detailed(mapped_word, hardcoded_forms_list)
                  if structured_declensions:
-                     result_data = {
-                         "lemma": mapped_word,
-                         "grouped_forms": structured_declensions,
-                         "is_detailed_numeral_table": True
-                     }
-                     is_detailed_numeral_table = True # Set flag
+                      is_detailed_numeral_table = True
                  else:
-                     print(f"[/decline] Failed to convert simple numeral data for '{mapped_word}'.")
-            else:
-                 print(f"[/decline] Hardcoded data not found or invalid for simple numeral '{mapped_word}'.")
+                      error_message = f"Failed to convert simple numeral data for '{mapped_word}'."
+                      print(f"[/decline] {error_message}")
+             else:
+                  error_message = f"Hardcoded data not found or invalid for simple numeral '{mapped_word}'."
+                  print(f"[/decline] {error_message}")
+        
+        else: # Should not happen if is_numeral is true and 1<=val<=100, but as a fallback
+            error_message = f"Numeral '{original_input}' is within 1-100 but not handled by specific logic."
+            print(f"[/decline] {error_message}")
 
-        # 3. Other Numerals (1-19) - Use standard declension path
-        else: 
-             print(f"[/decline] Numeral '{original_input}' is not handled by detailed generation. Using standard path.")
-             # Let it fall through to the standard generate_and_format_forms below
-             pass 
-             
-    # --- Standard Declension (Non-numerals or numerals 1-19) --- 
-    if result_data is None: # Only proceed if detailed generation didn't happen or failed
-        target_word = mapped_word # Use the potentially mapped word
-        print(f"[/decline] Processing standard declension for: '{target_word}' (Original: '{original_input}')")
-        # generate_and_format_forms returns a dict (if successful) or None
-        generated_data = generate_and_format_forms(target_word, is_declinable, get_declension_category_key)
+        # --- Construct result_data if successful --- 
+        if structured_declensions and is_detailed_numeral_table:
+            result_data = {
+                "lemma": lemma_for_result, 
+                "grouped_forms": structured_declensions,
+                "is_detailed_numeral_table": True 
+            }
+            print(f"[/decline] Successfully generated detailed table data for '{original_input}'. Flag set to True.")
+        elif error_message:
+             # If detailed generation failed, we might still want to return basic info
+             # For now, let it fall through to standard path OR return error?
+             # Let's try falling through to standard path if detailed fails.
+             print(f"[/decline] Detailed generation failed for numeral '{original_input}', will attempt standard path.")
+             result_data = None # Ensure it falls through
+             is_detailed_numeral_table = False # Reset flag
+        else: # No structured data generated, wasn't composite or known simple
+            print(f"[/decline] No specific detailed numeral logic applied or succeeded for '{original_input}', attempting standard path.")
+            result_data = None # Ensure it falls through
 
-        if generated_data and isinstance(generated_data, dict):
-            result_data = generated_data
-            result_data["is_detailed_numeral_table"] = False # Ensure flag is false for standard path
-            
-            # Special check: If the standard path processed a simple numeral (1-19, or failed tens/100 conversion)
-            # We might still want the detailed table if conversion is possible from its output
-            if is_numeral and not is_detailed_numeral_table: 
-                 category_key = get_declension_category_key('num', '') # Assume 'num' category
-                 if category_key in result_data.get("grouped_forms", {}):
-                     forms_list = result_data["grouped_forms"][category_key]
-                     converted_detailed = _convert_simple_numeral_to_detailed(target_word, forms_list)
-                     if converted_detailed:
-                         print(f"[/decline] Successfully converted standard numeral result for '{target_word}' to detailed format.")
-                         result_data["grouped_forms"] = converted_detailed
-                         result_data["is_detailed_numeral_table"] = True
-                         is_detailed_numeral_table = True # Update flag
-                     else:
-                         print(f"[/decline] Failed to convert standard numeral result for '{target_word}' to detailed format.")
-        else:
-             print(f"[/decline] generate_and_format_forms failed for '{target_word}'.")
-
-    # --- NEW: Proper Noun Handling ---
-    if result_data is None: # Only if not already handled as a detailed numeral
-        analysis_result = None
-        try:
-            analysis_result = morf.analyse(mapped_word) # Use the potentially mapped word
-        except Exception as e:
-            print(f"[/decline] Error analyzing word '{mapped_word}': {e}")
-            analysis_result = None # Ensure it's None on error
-
-        is_proper_noun = False
-        primary_tag = None # Keep track of the primary tag
-
-        # Check Morfeusz tags for proper noun indication
-        if analysis_result:
-            # Find the most likely analysis (e.g., the first one)
-            # TODO: You might need more sophisticated logic to choose the best analysis if multiple exist
-            if analysis_result: # Check if analysis_result is not empty
-                 first_analysis = analysis_result[0]
-                 interp_tuple = first_analysis[2] # (lemma, tag, qual1, qual2)
-                 tag_parts = interp_tuple[1].split(':')
-                 primary_tag = tag_parts[0] # e.g., 'subst', 'adj'
-                 
-                 # Check if primary tag is 'subst' and has a 'prop' component (proper noun)
-                 # Or check for specific proper noun categories like 'nazwisko' (surname), 'imię' (first name), 'geog' (geographical) etc. in qualifiers (qual2)
-                 # Morfeusz Python binding returns qualifiers as a list in the 5th element (index 4) of the interpretation tuple
-                 qualifiers = interp_tuple[4] if len(interp_tuple) > 4 else [] # Get qualifiers if they exist
-                 proper_noun_indicators = {'prop', 'nazwisko', 'imię', 'geog'} # Add more indicators if needed
-
-                 if primary_tag == 'subst' and ('prop' in tag_parts or any(q in proper_noun_indicators for q in qualifiers)):
-                      is_proper_noun = True
-                      print(f"[/decline] Detected '{mapped_word}' as a potential proper noun based on Morfeusz tag: {interp_tuple[1]} or qualifiers: {qualifiers}")
-
-                 # Optional: Add other checks like capitalization if Morfeusz tag isn't enough
-                 # elif mapped_word[0].isupper() and primary_tag == 'subst':
-                 #    print(f"[/decline] Potential proper noun '{mapped_word}' based on capitalization.")
-                 #    is_proper_noun = True # Be careful, this might misclassify sentence beginnings
-            else:
-                print(f"[/decline] Morfeusz analysis returned empty result for '{mapped_word}'.")
-
-
-        if is_proper_noun:
-            print(f"[/decline] Attempting specific declension logic for proper noun: '{mapped_word}'")
-            # Call the new function to generate declensions for proper nouns
-            proper_noun_declensions = generate_proper_noun_declensions(mapped_word, analysis_result) # Pass analysis results
-
-            if proper_noun_declensions:
-                 lemma_from_analysis = _clean_lemma(analysis_result[0][2][0]) if analysis_result else mapped_word # Get lemma from analysis
-                 result_data = {
-                    "lemma": lemma_from_analysis,
-                    "grouped_forms": proper_noun_declensions,
-                    "is_detailed_numeral_table": False # Proper nouns don't use the numeral table
-                 }
-                 print(f"[/decline] Successfully generated declensions for proper noun '{mapped_word}'.")
-            else:
-                 print(f"[/decline] Failed to generate specific declensions for proper noun '{mapped_word}'. Falling back to standard.")
-                 # Let it fall through to the standard declension below if specific logic fails
-
-
-    # --- Standard Declension (Non-numerals, non-handled proper nouns, or numerals 1-19) ---
-    if result_data is None: # Only proceed if detailed/proper noun generation didn't happen or failed
-        target_word = mapped_word # Use the potentially mapped word
-        print(f"[/decline] Processing standard declension for: '{target_word}' (Original: '{original_input}')")
-        # generate_and_format_forms returns a dict (if successful) or None
-        generated_data = generate_and_format_forms(target_word, is_declinable, get_declension_category_key)
-
-        if generated_data and isinstance(generated_data, dict):
-            result_data = generated_data
-            result_data["is_detailed_numeral_table"] = False # Ensure flag is false for standard path
-            
-            # Special check: If the standard path processed a simple numeral (1-19, or failed tens/100 conversion)
-            # We might still want the detailed table if conversion is possible from its output
-            if is_numeral and not is_detailed_numeral_table: 
-                 category_key = get_declension_category_key('num', '') # Assume 'num' category
-                 if category_key in result_data.get("grouped_forms", {}):
-                     forms_list = result_data["grouped_forms"][category_key]
-                     converted_detailed = _convert_simple_numeral_to_detailed(target_word, forms_list)
-                     if converted_detailed:
-                         print(f"[/decline] Successfully converted standard numeral result for '{target_word}' to detailed format.")
-                         result_data["grouped_forms"] = converted_detailed
-                         result_data["is_detailed_numeral_table"] = True
-                         is_detailed_numeral_table = True # Update flag
-                     else:
-                         print(f"[/decline] Failed to convert standard numeral result for '{target_word}' to detailed format.")
-        else:
-             print(f"[/decline] generate_and_format_forms failed for '{target_word}'.")
-
-    # --- Final Response Formatting --- 
+    # --- Standard Declension (Non-numerals OR Numerals where detailed generation failed) --- 
     if result_data is None:
-        print(f"[/decline] No valid declension data could be generated for '{original_input}'.")
-        return jsonify({
-            "status": "success",
-            "word": original_input, # Return original input word
-            "data": [],
-            "message": f"No declension data found for '{original_input}'.",
-            "is_detailed_numeral_table": False # Ensure flag is false on complete failure
-        }), 200
-    elif isinstance(result_data, dict):
-        response_payload = {
-            "status": "success",
-            "word": original_input, # Return original input word
-            # IMPORTANT: Wrap the result_data in a list for frontend compatibility
-            "data": [result_data] 
-        }
-        print(f"[/decline] Returning successful data structure for '{original_input}'. Detailed table: {result_data.get('is_detailed_numeral_table')}")
-        return jsonify(response_payload)
+        target_word = mapped_word if is_numeral else word # Use mapped word if it was a numeral initially
+        print(f"[/decline] Processing standard declension for: '{target_word}' (Original: '{original_input}')")
+        # generate_and_format_forms returns a dict (if successful) or None
+        generated_data = generate_and_format_forms(target_word, is_declinable, get_declension_category_key)
+
+        if generated_data and isinstance(generated_data, dict):
+            result_data = generated_data
+            # --- Ensure the flag is FALSE for standard path results --- 
+            result_data["is_detailed_numeral_table"] = False 
+            print(f"[/decline] Standard path successful for '{target_word}'. Detailed flag set to False.")
+            # --- REMOVED redundant conversion attempt here --- 
+        else:
+             print(f"[/decline] Standard declension path (generate_and_format_forms) failed for '{target_word}'.")
+             # If detailed num failed AND standard failed, set error message
+             if is_numeral and not error_message: 
+                  error_message = f"Could not generate declension data for numeral '{original_input}' via any method."
+
+    # --- Final Response Construction --- 
+    if result_data:
+         # Add translation (if available, from hardcoded) and other info
+         final_lemma = result_data.get('lemma', original_input if is_numeral else word)
+         translation_en = hardcoded_declensions.get(final_lemma, {}).get('translation_en')
+         result_data['translation_en'] = translation_en # Add translation if found
+         # Ensure the detailed flag is correctly set based on earlier logic
+         result_data['is_detailed_numeral_table'] = is_detailed_numeral_table 
+
+         print(f"[/decline] Returning successful data structure for '{original_input}'. Detailed table: {is_detailed_numeral_table}")
+         return jsonify({
+             "status": "success",
+             "word": original_input, 
+             "data": [result_data] # Wrap in a list to match expected API structure
+         })
     else:
-        # Should not happen normally
-        print(f"[/decline] Unexpected result type for '{original_input}': {type(result_data)}")
-        return jsonify({"status": "error", "message": "Internal server error processing declension."}), 500
+         print(f"[/decline] Failed to get any declension data for '{original_input}'. Error: {error_message}")
+         return jsonify({
+             "status": "error",
+             "word": original_input,
+             "message": error_message or f"No declension data found for '{original_input}'."
+         }), 404
 
 # --- NEW Placeholder Function for Proper Noun Declension ---
 def generate_proper_noun_declensions(word, analysis_result):

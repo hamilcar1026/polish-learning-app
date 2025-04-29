@@ -99,7 +99,7 @@ abstract class AppLocalizations {
     Locale('pl')
   ];
 
-  /// No description provided for @appTitle.
+  /// The title of the application
   ///
   /// In en, this message translates to:
   /// **'Polish Learning App'**
@@ -1034,6 +1034,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This program was created using the morfeusz2 api.'**
   String get copyrightNotice;
+
+  /// No description provided for @qualifier_wok.
+  ///
+  /// In en, this message translates to:
+  /// **'clitic (vocalic)'**
+  String get qualifier_wok;
+
+  /// No description provided for @qualifier_nwok.
+  ///
+  /// In en, this message translates to:
+  /// **'clitic (non-vocalic)'**
+  String get qualifier_nwok;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

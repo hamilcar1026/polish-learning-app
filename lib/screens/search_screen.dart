@@ -418,6 +418,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
         );
      }
 
+    // --- ADDED: Check if the input word is a numeral --- 
+    final bool isInputNumeral = int.tryParse(word) != null;
+    print("[_buildAnalysisInfoCard] Input word: '$word', isInputNumeral: $isInputNumeral");
+    // --- END ADDED ---
 
     // Watch favorite status for the current lemma (only if lemma exists)
     final bool isFavorite = lemma != null ? ref.watch(favoritesProvider).contains(lemma) : false;
@@ -475,8 +479,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
                 )
               ],
             ),
-            // Display the translation here if available (from original response)
-            if (analysisResponse.translation_en != null && analysisResponse.translation_en!.isNotEmpty)
+            // --- MODIFIED: Conditionally display translation --- 
+            // Only show translation if the input word is NOT a numeral
+            if (!isInputNumeral && analysisResponse.translation_en != null && analysisResponse.translation_en!.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
                 child: Text(
@@ -484,6 +489,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontStyle: FontStyle.italic, color: Colors.deepPurple),
                 ),
               ),
+            // --- END MODIFICATION ---
             const SizedBox(height: 8),
             // Use the helper function to display localized analysis strings using ORIGINAL data
             ...displayData.map((result) {
@@ -1141,12 +1147,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
       case 'pos': return l10n.qualifier_pos;
       case 'com': return l10n.qualifier_com;
       case 'sup': return l10n.qualifier_sup;
-      // --- 추가: congr, ncol --- 
       case 'congr': return l10n.qualifier_congr;
-      case 'ncol': return l10n.qualifier_ncol;
-      // --- 추가: rec --- 
       case 'rec': return l10n.qualifier_rec; 
-      // ------------------------
+      case 'ncol': return l10n.qualifier_ncol;
+      // --- ADDED: wok/nwok --- 
+      case 'wok': return l10n.qualifier_wok;
+      case 'nwok': return l10n.qualifier_nwok;
+      // --- END ADDED ---
       default: return term; // Return original term if no translation found
     }
   }
@@ -1258,17 +1265,31 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
           sections.add(
             ExpansionTile(
               key: PageStorageKey<String>(key),
+              // --- MODIFIED: Wrap title Row children with Flexible/Expanded --- 
               title: isImpersonalCategory ? 
                 Row(
                   children: [
-                    Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: Theme.of(context).textTheme.titleMedium!.fontSize! * ref.watch(fontSizeFactorProvider))),
+                    Expanded( // Wrap title Text with Expanded
+                      child: Text(
+                        title, 
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold, 
+                          fontSize: Theme.of(context).textTheme.titleMedium!.fontSize! * ref.watch(fontSizeFactorProvider)
+                        ),
+                        overflow: TextOverflow.ellipsis, // Add ellipsis for very long titles
+                      ),
+                    ),
                     const SizedBox(width: 8),
-                    Text(
-                      "(${l10n.impersonalAccuracyWarning})",
-                      style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12, color: Colors.grey),
+                    Flexible( // Wrap warning Text with Flexible
+                      child: Text(
+                        "(${l10n.impersonalAccuracyWarning})",
+                        style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12, color: Colors.grey),
+                        // overflow: TextOverflow.ellipsis, // Optional: Add ellipsis if warning can also be long
+                      ),
                     ),
                   ],
                 ) : 
+                // --- END MODIFICATION ---
                 Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: Theme.of(context).textTheme.titleMedium!.fontSize! * ref.watch(fontSizeFactorProvider))),
               initiallyExpanded: isExpanded,
               onExpansionChanged: (expanding) => setState(() {
@@ -2669,4 +2690,56 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
     return false; // TabBar itself doesn't change
   }
+}
+
+// --- Helper Function: Korean Number to Word (1-100) ---
+String _getNumberWordKorean(int number) {
+  if (number < 1 || number > 100) return "N/A"; // Handle out of range
+
+  const List<String> units = ["", "일", "이", "삼", "사", "오", "육", "칠", "팔", "구"];
+  const List<String> tens = ["", "십", "이십", "삼십", "사십", "오십", "육십", "칠십", "팔십", "구십"];
+  const String hundred = "백";
+
+  if (number == 100) return hundred;
+
+  int tenDigit = number ~/ 10;
+  int unitDigit = number % 10;
+
+  String result = "";
+  if (tenDigit > 0) {
+    result += (tenDigit == 1 ? "" : tens[tenDigit]); // Handle 10-19 correctly (십, 이십...)
+    if (tenDigit == 1) result += tens[1]; // Add "십" for 10-19
+  }
+  result += units[unitDigit];
+
+  return result.isNotEmpty ? result : "영"; // Should not happen for 1-100, but safe check
+}
+
+// --- Helper Function: Polish Number to Word (1-100) ---
+String _getNumberWordPolish(int number) {
+  if (number < 1 || number > 100) return "N/A";
+
+  const Map<int, String> baseWords = {
+    1: "jeden", 2: "dwa", 3: "trzy", 4: "cztery", 5: "pięć", 6: "sześć", 7: "siedem", 8: "osiem", 9: "dziewięć",
+    10: "dziesięć", 11: "jedenaście", 12: "dwanaście", 13: "trzynaście", 14: "czternaście", 15: "piętnaście",
+    16: "szesnaście", 17: "siedemnaście", 18: "osiemnaście", 19: "dziewiętnaście",
+    20: "dwadzieścia", 30: "trzydzieści", 40: "czterdzieści", 50: "pięćdziesiąt", 60: "sześćdziesiąt",
+    70: "siedemdziesiąt", 80: "osiemdziesiąt", 90: "dziewięćdziesiąt", 100: "sto"
+  };
+
+  if (baseWords.containsKey(number)) {
+    return baseWords[number]!;
+  }
+
+  int tensDigitVal = number ~/ 10 * 10;
+  int onesDigitVal = number % 10;
+
+  String? tensWord = baseWords[tensDigitVal];
+  String? onesWord = baseWords[onesDigitVal];
+
+  if (tensWord != null && onesWord != null) {
+    return "$tensWord $onesWord";
+  }
+
+  return "N/A"; // Fallback if construction fails
 }

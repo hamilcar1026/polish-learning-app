@@ -485,4 +485,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get copyrightNotice => 'This program was created using the morfeusz2 api.';
+
+  @override
+  String get qualifier_wok => 'clitic (vocalic)';
+
+  @override
+  String get qualifier_nwok => 'clitic (non-vocalic)';
 }

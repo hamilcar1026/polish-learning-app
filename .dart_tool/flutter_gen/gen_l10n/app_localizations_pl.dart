@@ -9,7 +9,7 @@ class AppLocalizationsPl extends AppLocalizations {
   AppLocalizationsPl([String locale = 'pl']) : super(locale);
 
   @override
-  String get appTitle => 'Aplikacja do nauki polskiego';
+  String get appTitle => 'Aplikacja do Nauki Polskiego';
 
   @override
   String get searchHint => 'Wpisz polskie słowo';
@@ -485,4 +485,10 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get copyrightNotice => 'Ten program został stworzony przy użyciu API morfeusz2.';
+
+  @override
+  String get qualifier_wok => 'klityka (wokaliczna)';
+
+  @override
+  String get qualifier_nwok => 'klityka (niewokaliczna)';
 }
