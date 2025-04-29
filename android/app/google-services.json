@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "529152975346",
+    "project_id": "polish-learning-app",
+    "storage_bucket": "polish-learning-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:529152975346:android:f562f45b344fdd85144b6b",
+        "android_client_info": {
+          "package_name": "com.hamilcar1026.PolishApp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBC_b-fKpXoR4TbU_Dab67575Gr-1RqLI8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

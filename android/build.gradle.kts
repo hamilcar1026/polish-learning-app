@@ -1,3 +1,9 @@
+plugins {
+    // Add the dependency for the Google services Gradle plugin
+    // Use the latest version found in Firebase documentation or Maven Central
+    id("com.google.gms.google-services") version "4.4.2" apply false
+}
+
 allprojects {
     repositories {
         google()
