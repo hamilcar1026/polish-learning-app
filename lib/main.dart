@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // Import localization delegates
-import 'package:flutter_gen/gen_l10n/app_localizations.dart'; // Import generated localizations
+import 'package:polish_learning_app/l10n/app_localizations.dart'; // Import generated localizations
 import 'screens/search_screen.dart'; // We will create this screen next
 import 'providers/settings_provider.dart'; // Import the settings provider
 

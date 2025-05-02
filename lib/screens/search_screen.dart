@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart'; // Import flutter_tts
-import 'package:flutter_gen/gen_l10n/app_localizations.dart'; // Import generated localizations
+import 'package:polish_learning_app/l10n/app_localizations.dart'; // Import generated localizations
 import '../providers/api_providers.dart';
 import '../providers/recent_searches_provider.dart'; // Import recent searches provider
 import '../providers/settings_provider.dart'; // Import settings provider
@@ -1337,30 +1337,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
               // M3 style removes default dividers, manage spacing with SizedBox below
               tilePadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // Adjust padding
               // --- Title logic remains the same ---
-              title: isImpersonalCategory ? 
-                Row(
-                  children: [
-                    Expanded( // Wrap title Text with Expanded
-                      child: Text(
-                        title, 
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold, 
-                          fontSize: Theme.of(context).textTheme.titleMedium!.fontSize! * ref.watch(fontSizeFactorProvider)
-                        ),
-                        overflow: TextOverflow.ellipsis, // Add ellipsis for very long titles
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible( // Wrap warning Text with Flexible
-                      child: Text(
-                        "(${l10n.impersonalAccuracyWarning})",
-                        style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12, color: Colors.grey),
-                        // overflow: TextOverflow.ellipsis, // Optional: Add ellipsis if warning can also be long
-                      ),
-                    ),
-                  ],
-                ) : 
-                // --- END MODIFICATION ---
+              title: isImpersonalCategory ?
+                // <<< REVERT: Remove Expanded wrapper >>>
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: Theme.of(context).textTheme.titleMedium!.fontSize! * ref.watch(fontSizeFactorProvider)
+                  ),
+                  overflow: TextOverflow.ellipsis, // Keep ellipsis for long titles
+                )
+                :
                 Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: Theme.of(context).textTheme.titleMedium!.fontSize! * ref.watch(fontSizeFactorProvider))),
               initiallyExpanded: isExpanded,
               onExpansionChanged: (expanding) => setState(() {
@@ -2678,21 +2665,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Text(
-              title,
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              "(${l10n.impersonalAccuracyWarning})",
-              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12, color: Colors.grey),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Column(
+        // <<< REMOVE THE ROW CONTAINING TITLE AND WARNING >>>
+        // Row(
+        //   children: [
+        //     Text(
+        //       title,
+        //       style: TextStyle(fontWeight: FontWeight.bold),
+        //     ),
+        //     const SizedBox(width: 8),
+        //     Text(
+        //       "(${l10n.impersonalAccuracyWarning})",
+        //       style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12, color: Colors.grey),
+        //     ),
+        //   ],
+        // ),
+        // const SizedBox(height: 8), // Also remove the space below the removed row
+        Column( // This Column becomes the direct child
           crossAxisAlignment: CrossAxisAlignment.start,
           children: forms.map((form) {
             // 태그에서 추출한 정보를 기반으로 형태 설명 생성

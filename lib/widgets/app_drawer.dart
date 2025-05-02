@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:polish_learning_app/l10n/app_localizations.dart';
 import '../providers/recent_searches_provider.dart';
 import '../providers/favorites_provider.dart';
 // import '../providers/settings_provider.dart'; // Remove unused import
