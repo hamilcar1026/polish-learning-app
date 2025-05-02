@@ -35,19 +35,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
   TabController? _tabController; // Declare TabController
 
   // --- State variables to control tab visibility reliably ---
-  bool _shouldShowDeclensionTab = false;
-  bool _shouldShowConjugationTab = false;
+  // bool _shouldShowDeclensionTab = false;
+  // bool _shouldShowConjugationTab = false;
 
   // Map to manage the expansion state of conjugation categories
   final Map<String, bool> _expandedCategories = {};
-
-  // Method to toggle the expansion state of a category
-  void _toggleCategoryExpansion(String category) {
-    setState(() {
-      // Default to false (collapsed) if not present, then toggle
-      _expandedCategories[category] = !(_expandedCategories[category] ?? false);
-    });
-  }
 
   // --- Helper functions to check POS based on analysis data ---
   // (REMOVED duplicate functions from below)
@@ -201,7 +193,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
   @override
   Widget build(BuildContext context) {
     final submittedWord = ref.watch(submittedWordProvider);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context); // Remove !
     // Corrected print statement with simpler quoting
     print("[build] Current submittedWord: ${submittedWord == null ? 'null' : '"$submittedWord"'}");
 
@@ -255,7 +247,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
                 // M3 Filled style
                 filled: true,
                 // Use colors from the theme's color scheme
-                fillColor: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5), // Slight transparency
+                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha((0.5 * 255).round()), // Slight transparency
                 // M3 default border style (rounded corners)
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0), // Adjust radius as needed
@@ -653,12 +645,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
       print("[_buildDeclensionResults - Detailed Numeral] Attempting to build detailed table.");
       print("[_buildDeclensionResults - Detailed Numeral] compositeData type: ${compositeData.runtimeType}");
       print("[_buildDeclensionResults - Detailed Numeral] compositeData content: $compositeData");
-      compositeData.forEach((caseKey, genderMap) {
-        print("[_buildDeclensionResults - Detailed Numeral] Case: $caseKey, GenderMap: $genderMap");
-        if (genderMap is! Map<String, String>) {
-            print("[_buildDeclensionResults - Detailed Numeral] WARNING: GenderMap for case '$caseKey' is NOT Map<String, String>, it is: ${genderMap.runtimeType}");
-        }
-      });
       // --- DEBUG PRINTS END ---
       final casesOrder = ['nom', 'gen', 'dat', 'acc', 'inst', 'loc', 'voc'];
       final genderOrder = ['m1', 'm2/m3', 'f', 'n']; 
@@ -675,7 +661,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
         children: [
           Builder(
             builder: (context) {
-              final l10n = AppLocalizations.of(context)!;
+              final l10n = AppLocalizations.of(context);
               return Text(
                 l10n.declensionTableTitle(lemmaData.lemma), // "{lemma}" 곡용
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -901,9 +887,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
           children: [
             Builder(
               builder: (context) {
-                final l10n = AppLocalizations.of(context)!;
+                final l10n = AppLocalizations.of(context);
                 return Text(
-                  l10n.declensionTableTitle(lemmaData.lemma),
+                  l10n.declensionTableTitle(lemmaData.lemma), // "{lemma}" 곡용
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 );
               }
@@ -2566,64 +2552,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
 
   // --- Helper functions for displaying human-readable labels ---
 
-  // Returns the localization KEY for the conjugation category
-  String _getConjugationCategoryKey(Map<String, String> tagMap) {
-    final String base = tagMap['base'] ?? '';
-
-    switch (base) {
-      case 'fin':
-        final String tenseAspect = tagMap['tense_aspect'] ?? '';
-        if (tenseAspect.contains('imperf')) return 'conjugationCategoryPresentIndicative';
-        if (tenseAspect.contains('perf')) return 'conjugationCategoryFuturePerfectiveIndicative';
-        return 'conjugationCategoryFiniteVerb'; // Fallback
-        
-      case 'bedzie': 
-        return 'conjugationCategoryFutureImperfectiveIndicative';
-        
-      case 'praet': 
-        return 'conjugationCategoryPastTense';
-        
-      case 'impt': 
-      case 'impt_periph': 
-        return 'conjugationCategoryImperative';
-        
-      case 'inf': 
-        return 'conjugationCategoryInfinitive';
-        
-      case 'pcon': 
-        return 'conjugationCategoryPresentAdverbialParticiple';
-        
-      case 'pant': 
-        return 'conjugationCategoryAnteriorAdverbialParticiple';
-        
-      case 'pact': 
-        return 'conjugationCategoryPresentActiveParticiple';
-        
-      case 'ppas': 
-        return 'conjugationCategoryPastPassiveParticiple';
-        
-      case 'ger': 
-        return 'conjugationCategoryVerbalNoun';
-        
-      case 'imps': {
-        final String aspect = tagMap['aspect'] ?? '';
-        if (aspect == 'perf' || aspect.contains('perf')) {
-          return 'conjugationCategoryPastImpersonal';
-        } 
-        return 'conjugationCategoryPresentImpersonal';
-      }
-        
-      case 'cond': 
-        return 'conjugationCategoryConditional';
-        
-      case 'conjugationCategoryImperativeImpersonal': 
-        return 'conjugationCategoryImperativeImpersonal';
-        
-      default: 
-        return 'conjugationCategoryOtherForms';
-    }
-  }
-
   String _getPersonLabel(String? personCode, AppLocalizations l10n) {
     switch (personCode) {
       case 'pri': return l10n.personLabelFirst;
@@ -2633,13 +2561,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
     }
   }
 
-  String _getNumberLabel(String? numberCode) {
-    // This function doesn't seem to be used anymore for table headers,
-    // but keep it for potential future use or other contexts.
-    // If it needs localization, add keys similar to person/gender.
-    const map = {'sg': 'Singular', 'pl': 'Plural'};
-    return map[numberCode] ?? numberCode ?? '-';
-  }
+ 
 
   String _getGenderLabel(String? genderCode, AppLocalizations l10n) {
     switch (genderCode) {
@@ -2677,29 +2599,28 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
   }
 
   // Helper to get a short tag description for list items
-  String _getShortTagDescription(String tag, AppLocalizations l10n) {
-    final tagMap = _parseTag(tag);
-    final base = tagMap['base'] ?? '';
-    final aspect = tagMap['aspect'] ?? '';
+  //String _getShortTagDescription(String tag, AppLocalizations l10n) {
+   // final tagMap = _parseTag(tag);
+   // final aspect = tagMap['aspect'] ?? '';
     
     // 먼저 한글 변환된 전체 태그 설명을 시도
-    final formattedDescription = _getFormattedTagDescription(tag, l10n);
-    if (formattedDescription != tag) {
-      return formattedDescription;
-    }
+   // final formattedDescription = _getFormattedTagDescription(tag, l10n);
+   // if (formattedDescription != tag) {
+   //   return formattedDescription;
+   // }
     
     // 기본 설명
-    if (aspect.isNotEmpty) {
-      if (aspect == 'imperf') return l10n.qualifier_imperf;
-      if (aspect == 'perf') return l10n.qualifier_perf;
-    }
+    //if (aspect.isNotEmpty) {
+     // if (aspect == 'imperf') return l10n.qualifier_imperf;
+     // if (aspect == 'perf') return l10n.qualifier_perf;
+    //}
     
     // 다른 일반적인 필드 시도
-    if (tagMap.containsKey('mood')) return _translateGrammarTerm(tagMap['mood']!, l10n);
-    if (tagMap.containsKey('case')) return _getCaseName(tagMap['case'], l10n);
+   // if (tagMap.containsKey('mood')) return _translateGrammarTerm(tagMap['mood']!, l10n);
+    //if (tagMap.containsKey('case')) return _getCaseName(tagMap['case'], l10n);
 
-    return tagMap['full_tag'] ?? tag; // 원래 태그로 폴백
-  }
+   // return tagMap['full_tag'] ?? tag; // 원래 태그로 폴백
+  //}
 
   // Helper function to format the analysis result with translated terms
   String _getTranslatedAnalysisString(AnalysisResult result, AppLocalizations l10n) {
@@ -2894,80 +2815,25 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
   }
 } 
 
-// --- Helper class for SliverPersistentHeaderDelegate to pin the TabBar ---
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  _SliverAppBarDelegate(this._tabBar);
-
-  final TabBar _tabBar;
-
-  @override
-  double get minExtent => _tabBar.preferredSize.height;
-  @override
-  double get maxExtent => _tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      color: Theme.of(context).scaffoldBackgroundColor, // Match background
-      child: _tabBar,
-    );
-  }
-
-  @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return false; // TabBar itself doesn't change
-  }
-}
-
 // --- Helper Function: Korean Number to Word (1-100) ---
-String _getNumberWordKorean(int number) {
-  if (number < 1 || number > 100) return "N/A"; // Handle out of range
+//String _getNumberWordKorean(int number) {
+  //if (number < 1 || number > 100) return "N/A"; // Handle out of range
 
-  const List<String> units = ["", "일", "이", "삼", "사", "오", "육", "칠", "팔", "구"];
-  const List<String> tens = ["", "십", "이십", "삼십", "사십", "오십", "육십", "칠십", "팔십", "구십"];
-  const String hundred = "백";
+ // const List<String> units = ["", "일", "이", "삼", "사", "오", "육", "칠", "팔", "구"];
+ // const List<String> tens = ["", "십", "이십", "삼십", "사십", "오십", "육십", "칠십", "팔십", "구십"];
+ // const String hundred = "백";
 
-  if (number == 100) return hundred;
+ // if (number == 100) return hundred;
 
-  int tenDigit = number ~/ 10;
-  int unitDigit = number % 10;
+ // int tenDigit = number ~/ 10;
+  //int unitDigit = number % 10;
 
-  String result = "";
-  if (tenDigit > 0) {
-    result += (tenDigit == 1 ? "" : tens[tenDigit]); // Handle 10-19 correctly (십, 이십...)
-    if (tenDigit == 1) result += tens[1]; // Add "십" for 10-19
-  }
-  result += units[unitDigit];
+ // String result = "";
+ // if (tenDigit > 0) {
+ //   result += (tenDigit == 1 ? "" : tens[tenDigit]); // Handle 10-19 correctly (십, 이십...)
+  //  if (tenDigit == 1) result += tens[1]; // Add "십" for 10-19
+ // }
+  //result += units[unitDigit];
 
-  return result.isNotEmpty ? result : "영"; // Should not happen for 1-100, but safe check
-}
-
-// --- Helper Function: Polish Number to Word (1-100) ---
-String _getNumberWordPolish(int number) {
-  if (number < 1 || number > 100) return "N/A";
-
-  const Map<int, String> baseWords = {
-    1: "jeden", 2: "dwa", 3: "trzy", 4: "cztery", 5: "pięć", 6: "sześć", 7: "siedem", 8: "osiem", 9: "dziewięć",
-    10: "dziesięć", 11: "jedenaście", 12: "dwanaście", 13: "trzynaście", 14: "czternaście", 15: "piętnaście",
-    16: "szesnaście", 17: "siedemnaście", 18: "osiemnaście", 19: "dziewiętnaście",
-    20: "dwadzieścia", 30: "trzydzieści", 40: "czterdzieści", 50: "pięćdziesiąt", 60: "sześćdziesiąt",
-    70: "siedemdziesiąt", 80: "osiemdziesiąt", 90: "dziewięćdziesiąt", 100: "sto"
-  };
-
-  if (baseWords.containsKey(number)) {
-    return baseWords[number]!;
-  }
-
-  int tensDigitVal = number ~/ 10 * 10;
-  int onesDigitVal = number % 10;
-
-  String? tensWord = baseWords[tensDigitVal];
-  String? onesWord = baseWords[onesDigitVal];
-
-  if (tensWord != null && onesWord != null) {
-    return "$tensWord $onesWord";
-  }
-
-  return "N/A"; // Fallback if construction fails
-}
+  //return result.isNotEmpty ? result : "영"; // Should not happen for 1-100, but safe check
+// }

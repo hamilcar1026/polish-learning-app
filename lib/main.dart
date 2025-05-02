@@ -63,7 +63,7 @@ class MyApp extends ConsumerWidget {
 
     return MaterialApp(
       // title: 'Polish Learning App', // Title will be localized
-      onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle, // Use localized title
+      onGenerateTitle: (context) => AppLocalizations.of(context).appTitle, // Use localized title
       theme: baseTheme.copyWith(
         // Apply the adjusted text theme
         textTheme: _applyFontSizeFactor(baseTheme.textTheme, fontSizeFactor),

@@ -19,7 +19,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final settingsNotifier = ref.read(settingsProvider.notifier);
-    final l10n = AppLocalizations.of(context)!; // Get localizations instance
+    final l10n = AppLocalizations.of(context); // Get localizations instance
 
     return Scaffold(
       appBar: AppBar(
@@ -52,7 +52,7 @@ class SettingsScreen extends ConsumerWidget {
           Divider(
             height: 1,
             thickness: 1,
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.outline.withAlpha((0.5 * 255).round()),
           ),
           const SizedBox(height: 24),
 
@@ -68,9 +68,9 @@ class SettingsScreen extends ConsumerWidget {
               // For example, track height, thumb shape, colors based on ColorScheme
               trackHeight: 4.0, // M3 default track height
               activeTrackColor: Theme.of(context).colorScheme.primary,
-              inactiveTrackColor: Theme.of(context).colorScheme.surfaceVariant,
+              inactiveTrackColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               thumbColor: Theme.of(context).colorScheme.primary,
-              overlayColor: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+              overlayColor: Theme.of(context).colorScheme.primary.withAlpha((0.12 * 255).round()),
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0), // M3 thumb shape
               overlayShape: const RoundSliderOverlayShape(overlayRadius: 20.0), // M3 overlay shape
               valueIndicatorShape: const PaddleSliderValueIndicatorShape(), // M3 value indicator
@@ -109,7 +109,7 @@ class SettingsScreen extends ConsumerWidget {
           Divider(
             height: 1,
             thickness: 1,
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.outline.withAlpha((0.5 * 255).round()),
           ),
           const SizedBox(height: 24),
 
