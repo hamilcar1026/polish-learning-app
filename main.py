@@ -1325,7 +1325,8 @@ def _generate_grouped_forms(lemma_to_generate, check_func, category_func, is_imp
         # (This extensive block should be copied here without changes from the previous working version)
         
         # Retrieve the neutral singular 3rd person past form, e.g., "robiło"
-        neutral_past_sg_3rd_form = past_forms.get("sg:n")
+        # CORRECTED KEY to "ter:sg:n" to fetch the 3rd person neuter singular past form
+        neutral_past_sg_3rd_form = past_forms.get("ter:sg:n")
 
         if past_impersonal_form:
             future_imps_key = 'conjugationCategoryFutureImpersonal'
