@@ -1,0 +1,344 @@
+{
+  "@@locale": "uk",
+  "appTitle": "Польський додаток для навчання",
+  "@appTitle": {
+    "description": "Назва програми"
+  },
+  "searchHint": "Введіть слово для пошуку...",
+  "settingsTitle": "Налаштування",
+  "languageSettingTitle": "Мова",
+  "fontSizeSettingTitle": "Розмір шрифту",
+  "analysisTitle": "Аналіз",
+  "declensionTitle": "Відмінювання",
+  "conjugationTitle": "Дієвідміна",
+  "grammarTitle": "Граматика",
+  "pronounceWordTooltip": "Вимовити слово",
+  "searchButtonTooltip": "Шукати слово",
+  "noAnalysisFound": "Аналіз не знайдено для \"{word}\"",
+  "@noAnalysisFound": {
+    "description": "Повідомлення, що відображається, коли аналіз не вдається або повертає порожній результат.",
+    "placeholders": {
+      "word": {
+        "type": "String",
+        "example": "dom"
+      }
+    }
+  },
+  "noDeclensionData": "Дані про відмінювання не знайдено.",
+  "noConjugationData": "Дані про дієвідміну не знайдено.",
+  "loadingError": "Помилка завантаження: {error}",
+  "@loadingError": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "tag_subst": "іменник",
+  "tag_fin": "дієслово (фінітне)",
+  "tag_adj": "прикметник",
+  "tag_adv": "прислівник",
+  "tag_num": "числівник",
+  "tag_ppron12": "займенник (1/2 ос.)",
+  "tag_ppron3": "займенник (3 ос.)",
+  "tag_siebie": "займенник (зворотний)",
+  "tag_inf": "інфінітив",
+  "tag_praet": "дієслово (мин. час)",
+  "tag_impt": "наказовий спосіб",
+  "tag_pred": "предикатив",
+  "tag_prep": "прийменник",
+  "tag_conj": "сполучник",
+  "tag_comp": "компаративний маркер",
+  "tag_interj": "вигук",
+  "tag_pact": "дієприкметник (активний)",
+  "tag_ppas": "дієприкметник (пасивний)",
+  "tag_pcon": "дієприслівник (тепер. час)",
+  "tag_pant": "дієприслівник (мин. час)",
+  "tag_ger": "герундій",
+  "tag_bedzie": "дієслово (майб. час, доп.)",
+  "tag_aglt": "аглютинант",
+  "tag_qub": "квазілексемна одиниця",
+  "tag_depr": "іменник (зневажливий)",
+  "tag_adja": "прикметник (дієприкм. акт.)",
+  "tag_adjp": "прикметник (дієприкм. пас.)",
+  "tag_cond": "умовний спосіб",
+  "qualifier_sg": "одн.",
+  "qualifier_pl": "мн.",
+  "qualifier_nom": "наз.",
+  "qualifier_gen": "род.",
+  "qualifier_dat": "дав.",
+  "qualifier_acc": "знах.",
+  "qualifier_inst": "оруд.",
+  "qualifier_loc": "місц.",
+  "qualifier_voc": "клич.",
+  "qualifier_m1": "ч1",
+  "qualifier_m2": "ч2",
+  "qualifier_m3": "ч3",
+  "qualifier_f": "ж",
+  "qualifier_n": "с",
+  "qualifier_n1": "с1",
+  "qualifier_n2": "с2",
+  "qualifier_p1": "1ос",
+  "qualifier_p2": "2ос",
+  "qualifier_p3": "3ос",
+  "qualifier_pri": "1-й",
+  "qualifier_sec": "2-й",
+  "qualifier_ter": "3-й",
+  "qualifier_imperf": "недок.",
+  "qualifier_perf": "док.",
+  "qualifier_nazwa_pospolita": "загальна назва",
+  "qualifier_imie": "ім'я",
+  "qualifier_nazwisko": "прізвище",
+  "qualifier_nazwa_geograficzna": "геогр.",
+  "qualifier_skrot": "скор.",
+  "qualifier_pos": "ствердж.",
+  "qualifier_com": "порівн.",
+  "qualifier_sup": "найвищ.",
+  "qualifier_congr": "узгодження",
+  "qualifier_ncol": "незбірний",
+  "@qualifier_ncol": {
+    "description": "Кваліфікатор: незбірний (напр., для числівників, що не потребують родового відмінка множини)"
+  },
+  "qualifier_rec": "керуючий",
+  "@qualifier_rec": {
+    "description": "Кваліфікатор: рективний/керуючий (напр., числівники, що керують відмінком іменника)"
+  },
+  "conjugationCategoryPresentIndicative": "Теперішній час, дійсний спосіб",
+  "conjugationCategoryFuturePerfectiveIndicative": "Майбутній доконаний час, дійсний спосіб",
+  "conjugationCategoryFutureImperfectiveIndicative": "Майбутній недоконаний час, дійсний спосіб",
+  "conjugationCategoryPastTense": "Минулий час",
+  "conjugationCategoryImperative": "Наказовий спосіб",
+  "conjugationCategoryInfinitive": "Інфінітив",
+  "conjugationCategoryPresentAdverbialParticiple": "Дієприслівник теперішнього часу",
+  "conjugationCategoryAnteriorAdverbialParticiple": "Дієприслівник минулого часу (попередній)",
+  "conjugationCategoryPresentActiveParticiple": "Активний дієприкметник теперішнього часу",
+  "conjugationCategoryPastPassiveParticiple": "Пасивний дієприкметник минулого часу",
+  "conjugationCategoryFiniteVerb": "Фінітне дієслово",
+  "conjugationCategoryOtherForms": "Інші форми",
+  "conjugationCategoryImpersonal": "Безособові форми",
+  "conjugationCategoryVerbalNoun": "Віддієслівний іменник",
+  "conjugationCategoryConditional": "Умовний спосіб",
+  "conjugationCategoryPresentImpersonal": "Безособова форма теперішнього часу",
+  "conjugationCategoryPastImpersonal": "Безособова форма минулого часу",
+  "conjugationCategoryFutureImpersonal": "Безособова форма майбутнього часу",
+  "@conjugationCategoryFutureImpersonal": {
+    "description": "Заголовок для категорії безособових форм майбутнього часу дієслова"
+  },
+  "conjugationCategoryConditionalImpersonal": "Безособова форма умовного способу",
+  "@conjugationCategoryConditionalImpersonal": {
+    "description": "Заголовок для категорії безособових форм умовного способу дієслова"
+  },
+  "conjugationCategoryImperativeImpersonal": "Безособовий наказовий спосіб",
+  "drawerRecentSearches": "Останні пошуки",
+  "drawerClearRecentSearchesTooltip": "Очистити останні пошуки",
+  "drawerClearRecentSearchesDialogTitle": "Очистити останні пошуки?",
+  "drawerClearDialogContent": "Цю дію неможливо скасувати.",
+  "drawerCancelButton": "Скасувати",
+  "drawerClearButton": "Очистити все",
+  "drawerNoRecentSearches": "Немає останніх пошуків.",
+  "drawerFavorites": "Обране",
+  "drawerNoFavorites": "Ще не додано до обраного.",
+  "settingsThemeSystem": "Системна тема за замовчуванням",
+  "@settingsThemeSystem": {
+    "description": "Мітка для опції системної теми"
+  },
+  "tableHeaderCase": "Відмінок",
+  "@tableHeaderCase": {
+    "description": "Заголовок для стовпця 'Відмінок' у таблицях відмінювання/дієприкметників"
+  },
+  "tableHeaderSingular": "Однина",
+  "@tableHeaderSingular": {
+    "description": "Заголовок для стовпця 'Однина' в таблицях"
+  },
+  "tableHeaderPlural": "Множина",
+  "tableHeaderM1": "Чол. ос.",
+  "tableHeaderMOther": "Чол. ін.",
+  "tableHeaderF": "Жін. ос.",
+  "tableHeaderN": "Сер. ос.",
+  "tableHeaderPerson": "Особа",
+  "@tableHeaderPerson": {
+    "description": "Заголовок для стовпця 'Особа' в таблицях дієвідміни"
+  },
+  "caseNominative": "Називний",
+  "@caseNominative": {
+    "description": "Називний відмінок"
+  },
+  "caseGenitive": "Родовий",
+  "@caseGenitive": {
+    "description": "Родовий відмінок"
+  },
+  "caseDative": "Давальний",
+  "@caseDative": {
+    "description": "Давальний відмінок"
+  },
+  "caseAccusative": "Знахідний",
+  "@caseAccusative": {
+    "description": "Знахідний відмінок"
+  },
+  "caseInstrumental": "Орудний",
+  "@caseInstrumental": {
+    "description": "Орудний відмінок"
+  },
+  "caseLocative": "Місцевий",
+  "@caseLocative": {
+    "description": "Місцевий відмінок"
+  },
+  "caseVocative": "Кличний",
+  "@caseVocative": {
+    "description": "Кличний відмінок"
+  },
+  "settingsContributors": "Автори",
+  "@settingsContributors": {
+    "description": "Текст пункту меню для 'Автори'"
+  },
+  "personLabelFirst": "1-а ос.\n(я/ми)",
+  "@personLabelFirst": {
+    "description": "Мітка для першої особи в таблицях дієвідміни"
+  },
+  "personLabelSecond": "2-а ос.\n(ти/ви)",
+  "@personLabelSecond": {
+    "description": "Мітка для другої особи в таблицях дієвідміни"
+  },
+  "personLabelThird": "3-я ос.\n(він/вона/воно/вони)",
+  "@personLabelThird": {
+    "description": "Мітка для третьої особи в таблицях дієвідміни"
+  },
+  "genderLabelM1": "Чоловічий особовий",
+  "@genderLabelM1": {
+    "description": "Мітка для чоловічого особового роду (ч1)"
+  },
+  "genderLabelM2": "Чоловічий живий",
+  "@genderLabelM2": {
+    "description": "Мітка для чоловічого живого роду (ч2)"
+  },
+  "genderLabelM3": "Чоловічий неживий",
+  "@genderLabelM3": {
+    "description": "Мітка для чоловічого неживого роду (ч3)"
+  },
+  "genderLabelF": "Жіночий",
+  "@genderLabelF": {
+    "description": "Мітка для жіночого роду (ж)"
+  },
+  "genderLabelN1": "Середній 1",
+  "@genderLabelN1": {
+    "description": "Мітка для середнього роду типу 1 (с1)"
+  },
+  "genderLabelN2": "Середній 2",
+  "@genderLabelN2": {
+    "description": "Мітка для середнього роду типу 2 (с2)"
+  },
+  "declensionTableTitle": "Відмінювання для \"{lemma}\"",
+  "@declensionTableTitle": {
+    "description": "Формат заголовка для таблиці відмінювання, включає заповнювач для леми",
+    "placeholders": {
+      "lemma": {
+        "type": "String",
+        "example": "kot"
+      }
+    }
+  },
+  "conjugationTableTitle": "Дієвідміна для \"{lemma}\"",
+  "@conjugationTableTitle": {
+    "description": "Формат заголовка для таблиці дієвідміни, включає заповнювач для леми",
+    "placeholders": {
+      "lemma": {
+        "type": "String",
+        "example": "robić"
+      }
+    }
+  },
+  "translationLabel": "Переклад",
+  "suggestionDidYouMean": "Можливо, ви мали на увазі \"{suggestedWord}\"?",
+  "@suggestionDidYouMean": {
+    "description": "Повідомлення-пропозиція, що відображається, коли користувач міг неправильно написати слово з діакритикою.",
+    "placeholders": {
+      "suggestedWord": {
+        "type": "String",
+        "example": "książka"
+      }
+    }
+  },
+  "suggestionErrorFallback": "Пропозицію не вдалося завантажити.",
+  "@suggestionErrorFallback": {
+    "description": "Запасне повідомлення, якщо отримано статус пропозиції, але слово є null."
+  },
+  "noRelevantAnalysisForNumeral": "Не знайдено відповідного аналізу для числівника.",
+  "@noRelevantAnalysisForNumeral": {
+    "description": "Повідомлення, що відображається, коли виявлено числівник, але після фільтрації не знайдено аналізу з тегом 'num'."
+  },
+  "removeFromFavorites": "Видалити з обраного",
+  "@removeFromFavorites": {
+    "description": "Підказка для кнопки видалення слова з обраного."
+  },
+  "addToFavorites": "Додати до обраного",
+  "@addToFavorites": {
+    "description": "Підказка для кнопки додавання слова до обраного."
+  },
+  "impersonalAccuracyWarning": "Безособові форми можуть бути менш точними",
+  "@impersonalAccuracyWarning": {
+    "description": "Попереджувальний текст, що відображається поруч із заголовками безособової дієвідміни."
+  },
+  "impersonalPresentForm": "Безособова форма теперішнього часу",
+  "@impersonalPresentForm": {
+    "description": "Мітка для безособових форм теперішнього часу дієслова"
+  },
+  "impersonalPastForm": "Безособова форма минулого часу",
+  "@impersonalPastForm": {
+    "description": "Мітка для безособових форм минулого часу дієслова"
+  },
+  "impersonalFutureForm": "Безособова форма майбутнього часу",
+  "@impersonalFutureForm": {
+    "description": "Мітка для безособових форм майбутнього часу дієслова"
+  },
+  "impersonalConditionalForm": "Безособова умовна форма",
+  "@impersonalConditionalForm": {
+    "description": "Опис для безособової умовної форми"
+  },
+  "impersonalImperativeForm": "Безособова наказова форма",
+  "@impersonalImperativeForm": {
+    "description": "Мітка для безособових наказових форм дієслова"
+  },
+  "settingsLanguage": "Мова",
+  "@settingsLanguage": {
+    "description": "Мітка для вибору мови в налаштуваннях"
+  },
+  "genderLabelM": "чоловічий",
+  "@genderLabelM": {
+    "description": "Мітка для чоловічого роду однини (об'єднує ч1, ч2, ч3)"
+  },
+  "genderLabelN": "середній",
+  "@genderLabelN": {
+    "description": "Мітка для середнього роду однини (об'єднує с, с1, с2)"
+  },
+  "genderLabelM1Pl": "чол. ос. (мн.)",
+  "@genderLabelM1Pl": {
+    "description": "Мітка для чоловічого особового роду множини (ч1)"
+  },
+  "genderLabelNonM1Pl": "не чол. ос. (мн.)",
+  "@genderLabelNonM1Pl": {
+    "description": "Мітка для не чоловічого особового роду множини (об'єднує ж, с, ч2, ч3)"
+  },
+  "copyrightsTitle": "Авторські права",
+  "fontSizeSmall": "Малий",
+  "fontSizeMedium": "Середній",
+  "fontSizeLarge": "Великий",
+  "copyrightNotice": "Ця програма створена з використанням morfeusz2 api.",
+  "qualifier_wok": "клітика (голосна)",
+  "qualifier_nwok": "клітика (приголосна)",
+  "searchErrorFallback": "Не вдалося виконати пошук.",
+  "clearTooltip": "Очистити текст пошуку",
+  "analysisTab": "Аналіз",
+  "conjugationTab": "Дієвідміна",
+  "declensionTab": "Відмінювання",
+  "verbActiveAdjectivalParticiple": "Активний дієприкметник",
+  "verbAnteriorAdverbialParticiple": "Дієприслівник минулого часу",
+  "verbConditionalMood": "Умовний спосіб",
+  "verbContemporaryAdverbialParticiple": "Дієприслівник теперішнього часу",
+  "verbFutureTense": "Майбутній час",
+  "verbImperativeMood": "Наказовий спосіб",
+  "verbInfinitive": "Інфінітив",
+  "verbPassiveAdjectivalParticiple": "Пасивний дієприкметник",
+  "verbPastTense": "Минулий час",
+  "verbPresentTense": "Теперішній час",
+  "verbVerbalNoun": "Віддієслівний іменник"
+}

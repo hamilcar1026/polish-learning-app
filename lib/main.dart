@@ -80,6 +80,7 @@ class MyApp extends ConsumerWidget {
         Locale('pl'), // Polish
         Locale('ko'), // Korean
         Locale('ru'), // Add Russian
+        Locale('uk'), // Add Ukrainian
       ],
       home: const SearchScreen(), // Set SearchScreen as the home screen
       debugShowCheckedModeBanner: false,

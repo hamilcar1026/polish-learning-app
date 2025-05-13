@@ -54,7 +54,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 
   Future<void> setLanguage(String languageCode) async {
     // Validate language code against supported locales
-    if (!['en', 'pl', 'ko', 'ru'].contains(languageCode)) return; // Add 'ru'
+    if (!['en', 'pl', 'ko', 'ru', 'uk'].contains(languageCode)) return; // Add 'uk'
     await _initPrefs();
     await _prefs?.setString(_languagePrefKey, languageCode);
     state = state.copyWith(languageCode: languageCode);
