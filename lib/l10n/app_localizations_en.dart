@@ -445,16 +445,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get impersonalAccuracyWarning => 'Impersonal forms may be less accurate';
 
   @override
-  String get impersonalPresentForm => 'Impersonal present form (imperf)';
+  String get impersonalPresentForm => 'Impersonal present form';
 
   @override
-  String get impersonalPastForm => 'Impersonal past form (perf)';
+  String get impersonalPastForm => 'Impersonal past form';
 
   @override
   String get impersonalFutureForm => 'Impersonal future form';
 
   @override
   String get impersonalConditionalForm => 'Impersonal conditional form';
+
+  @override
+  String get impersonalImperativeForm => 'Impersonal imperative form';
 
   @override
   String get settingsLanguage => 'Language';

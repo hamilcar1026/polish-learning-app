@@ -304,10 +304,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get conjugationCategoryConditionalImpersonal => '조건법 비인칭';
 
   @override
-  String get conjugationCategoryImperativeImpersonal => '명령형 비인칭';
+  String get conjugationCategoryImperativeImpersonal => '비인칭 명령법';
 
   @override
-  String get drawerRecentSearches => '최근 검색어';
+  String get drawerRecentSearches => '최근 검색';
 
   @override
   String get drawerClearRecentSearchesTooltip => '최근 검색어 지우기';
@@ -325,13 +325,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get drawerClearButton => '지우기';
 
   @override
-  String get drawerNoRecentSearches => '최근 검색어가 없습니다.';
+  String get drawerNoRecentSearches => '최근 검색 기록이 없습니다.';
 
   @override
   String get drawerFavorites => '즐겨찾기';
 
   @override
-  String get drawerNoFavorites => '즐겨찾기에 추가된 단어가 없습니다.';
+  String get drawerNoFavorites => '즐겨찾기에 추가된 항목이 없습니다.';
 
   @override
   String get settingsThemeSystem => '시스템 기본값';
@@ -445,16 +445,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String get impersonalAccuracyWarning => '비인칭 형태는 정확하지 않을 수 있습니다';
 
   @override
-  String get impersonalPresentForm => '비인칭 현재형 (미완료)';
+  String get impersonalPresentForm => '현재 비인칭';
 
   @override
-  String get impersonalPastForm => '비인칭 과거형 (완료)';
+  String get impersonalPastForm => '과거 비인칭';
 
   @override
-  String get impersonalFutureForm => '비인칭 미래형';
+  String get impersonalFutureForm => '미래 비인칭';
 
   @override
   String get impersonalConditionalForm => '비인칭 조건법';
+
+  @override
+  String get impersonalImperativeForm => '비인칭 명령법';
 
   @override
   String get settingsLanguage => '언어';

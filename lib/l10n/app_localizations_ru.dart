@@ -304,7 +304,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get conjugationCategoryConditionalImpersonal => 'Условное безличное';
 
   @override
-  String get conjugationCategoryImperativeImpersonal => 'Повелительное безличное наклонение';
+  String get conjugationCategoryImperativeImpersonal => 'Безличная форма повелительного наклонения';
 
   @override
   String get drawerRecentSearches => 'Недавние поиски';
@@ -331,10 +331,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get drawerFavorites => 'Избранное';
 
   @override
-  String get drawerNoFavorites => 'Нет избранных слов.';
+  String get drawerNoFavorites => 'В избранное ничего не добавлено.';
 
   @override
-  String get settingsThemeSystem => 'Системная';
+  String get settingsThemeSystem => 'По умолчанию';
 
   @override
   String get tableHeaderCase => 'Падеж';
@@ -445,16 +445,19 @@ class AppLocalizationsRu extends AppLocalizations {
   String get impersonalAccuracyWarning => 'Безличные формы могут быть менее точными';
 
   @override
-  String get impersonalPresentForm => 'Impersonal present form (imperf)';
+  String get impersonalPresentForm => 'Безличная форма настоящего времени';
 
   @override
-  String get impersonalPastForm => 'Impersonal past form (perf)';
+  String get impersonalPastForm => 'Безличная форма прошедшего времени';
 
   @override
-  String get impersonalFutureForm => 'Impersonal future form';
+  String get impersonalFutureForm => 'Безличная форма будущего времени';
 
   @override
-  String get impersonalConditionalForm => 'Impersonal conditional form';
+  String get impersonalConditionalForm => 'Безличная форма условного наклонения';
+
+  @override
+  String get impersonalImperativeForm => 'Безличная форма повелительного наклонения';
 
   @override
   String get settingsLanguage => 'Язык';

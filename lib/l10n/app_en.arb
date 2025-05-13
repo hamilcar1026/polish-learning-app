@@ -278,21 +278,25 @@
    "@impersonalAccuracyWarning": {
      "description": "Warning text displayed next to impersonal conjugation titles."
    },
-   "impersonalPresentForm": "Impersonal present form (imperf)",
+   "impersonalPresentForm": "Impersonal present form",
    "@impersonalPresentForm": {
-     "description": "Description for the impersonal present form"
+     "description": "Label for impersonal present verb forms"
    },
-   "impersonalPastForm": "Impersonal past form (perf)",
+   "impersonalPastForm": "Impersonal past form",
    "@impersonalPastForm": {
-     "description": "Description for the impersonal past form"
+     "description": "Label for impersonal past verb forms"
    },
    "impersonalFutureForm": "Impersonal future form",
    "@impersonalFutureForm": {
-     "description": "Description for the impersonal future form"
+     "description": "Label for impersonal future verb forms"
    },
    "impersonalConditionalForm": "Impersonal conditional form",
    "@impersonalConditionalForm": {
      "description": "Description for the impersonal conditional form"
+   },
+   "impersonalImperativeForm": "Impersonal imperative form",
+   "@impersonalImperativeForm": {
+     "description": "Label for impersonal imperative verb forms"
    },
    "settingsLanguage": "Language",
    "@settingsLanguage": {

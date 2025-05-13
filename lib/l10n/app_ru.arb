@@ -122,7 +122,7 @@
   "conjugationCategoryPastImpersonal": "Прошедшее безличное",
   "conjugationCategoryFutureImpersonal": "Будущее безличное",
   "conjugationCategoryConditionalImpersonal": "Условное безличное",
-  "conjugationCategoryImperativeImpersonal": "Повелительное безличное наклонение",
+  "conjugationCategoryImperativeImpersonal": "Безличная форма повелительного наклонения",
   "conjugationCategoryOtherForms": "Другие формы",
   "@conjugationCategoryFutureImpersonal": {
     "description": "Заголовок категории для безличной формы будущего времени"
@@ -138,8 +138,8 @@
   "drawerClearButton": "Очистить",
   "drawerNoRecentSearches": "Нет недавних поисков.",
   "drawerFavorites": "Избранное",
-  "drawerNoFavorites": "Нет избранных слов.",
-  "settingsThemeSystem": "Системная",
+  "drawerNoFavorites": "В избранное ничего не добавлено.",
+  "settingsThemeSystem": "По умолчанию",
   "@settingsThemeSystem": {
     "description": "Метка для опции системной темы"
   },
@@ -289,5 +289,25 @@
   "qualifier_wok": "клитика (гласн.)",
   "qualifier_nwok": "клитика (согл.)",
   "searchErrorFallback": "Не удалось выполнить поиск.",
-  "clearTooltip": "Очистить поле поиска"
+  "clearTooltip": "Очистить поле поиска",
+  "impersonalPresentForm": "Безличная форма настоящего времени",
+  "@impersonalPresentForm": {
+    "description": "Метка для безличных форм глагола настоящего времени"
+  },
+  "impersonalPastForm": "Безличная форма прошедшего времени",
+  "@impersonalPastForm": {
+    "description": "Метка для безличных форм глагола прошедшего времени"
+  },
+  "impersonalFutureForm": "Безличная форма будущего времени",
+  "@impersonalFutureForm": {
+    "description": "Метка для безличных форм глагола будущего времени"
+  },
+  "impersonalConditionalForm": "Безличная форма условного наклонения",
+  "@impersonalConditionalForm": {
+    "description": "Описание для безличной формы условного наклонения"
+  },
+  "impersonalImperativeForm": "Безличная форма повелительного наклонения",
+  "@impersonalImperativeForm": {
+    "description": "Метка для безличных форм глагола повелительного наклонения"
+  }
 } 

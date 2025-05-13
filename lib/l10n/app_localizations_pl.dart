@@ -331,7 +331,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get drawerFavorites => 'Ulubione';
 
   @override
-  String get drawerNoFavorites => 'Nie dodano jeszcze ulubionych.';
+  String get drawerNoFavorites => 'Nie dodano jeszcze żadnych ulubionych.';
 
   @override
   String get settingsThemeSystem => 'Domyślny systemowy';
@@ -445,16 +445,19 @@ class AppLocalizationsPl extends AppLocalizations {
   String get impersonalAccuracyWarning => 'Formy bezosobowe mogą być mniej dokładne';
 
   @override
-  String get impersonalPresentForm => 'Impersonal present form (imperf)';
+  String get impersonalPresentForm => 'Forma bezosobowa czasu teraźniejszego';
 
   @override
-  String get impersonalPastForm => 'Impersonal past form (perf)';
+  String get impersonalPastForm => 'Forma bezosobowa czasu przeszłego';
 
   @override
-  String get impersonalFutureForm => 'Impersonal future form';
+  String get impersonalFutureForm => 'Forma bezosobowa czasu przyszłego';
 
   @override
-  String get impersonalConditionalForm => 'Impersonal conditional form';
+  String get impersonalConditionalForm => 'Forma bezosobowa trybu warunkowego';
+
+  @override
+  String get impersonalImperativeForm => 'Forma bezosobowa trybu rozkazującego';
 
   @override
   String get settingsLanguage => 'Język';

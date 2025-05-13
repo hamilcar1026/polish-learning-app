@@ -284,5 +284,27 @@
   "qualifier_wok": "klityka (wokaliczna)",
   "qualifier_nwok": "klityka (niewokaliczna)",
   "searchErrorFallback": "Nie można przeprowadzić wyszukiwania.",
-  "clearTooltip": "Wyczyść tekst wyszukiwania"
+  "clearTooltip": "Wyczyść tekst wyszukiwania",
+  "impersonalPresentForm": "Forma bezosobowa czasu teraźniejszego",
+  "@impersonalPresentForm": {
+    "description": "Etykieta dla form bezosobowych czasownika w czasie teraźniejszym"
+  },
+  "impersonalPastForm": "Forma bezosobowa czasu przeszłego",
+  "@impersonalPastForm": {
+    "description": "Etykieta dla form bezosobowych czasownika w czasie przeszłym"
+  },
+  "impersonalFutureForm": "Forma bezosobowa czasu przyszłego",
+  "@impersonalFutureForm": {
+    "description": "Etykieta dla form bezosobowych czasownika w czasie przyszłym"
+  },
+  "impersonalConditionalForm": "Forma bezosobowa trybu warunkowego",
+  "@impersonalConditionalForm": {
+    "description": "Opis dla formy bezosobowej trybu warunkowego"
+  },
+  "impersonalImperativeForm": "Forma bezosobowa trybu rozkazującego",
+  "@impersonalImperativeForm": {
+    "description": "Etykieta dla form bezosobowych czasownika w trybie rozkazującym"
+  },
+  "drawerNoFavorites": "Nie dodano jeszcze żadnych ulubionych.",
+  "settingsThemeSystem": "Domyślny systemowy"
 } 

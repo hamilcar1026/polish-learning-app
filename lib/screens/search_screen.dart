@@ -2675,74 +2675,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
 
   // --- 비인칭 형태 섹션 빌더 함수 수정 ---
   Widget _buildImpersonalSection(String title, List<ConjugationForm> forms, AppLocalizations l10n) {
+    if (forms.isEmpty) {
+      return const SizedBox.shrink(); 
+    }
+
+    // Simplified to use _buildFormWithDescription for identical rendering
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // <<< REMOVE THE ROW CONTAINING TITLE AND WARNING >>>
-        // Row(
-        //   children: [
-        //     Text(
-        //       title,
-        //       style: TextStyle(fontWeight: FontWeight.bold),
-        //     ),
-        //     const SizedBox(width: 8),
-        //     Text(
-        //       "(${l10n.impersonalAccuracyWarning})",
-        //       style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12, color: Colors.grey),
-        //     ),
-        //   ],
-        // ),
-        // const SizedBox(height: 8), // Also remove the space below the removed row
-        Column( // This Column becomes the direct child
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: forms.map((form) {
-            // 태그에서 추출한 정보를 기반으로 형태 설명 생성
-            final tagMap = _parseTag(form.tag);
-            // Remove the potentially problematic local variable tagAspect
-            // final String tagAspect = tagMap['aspect'] ?? '';
-            
-            // 비인칭 형태에 대한 현지화된 설명 텍스트 생성
-            String description = '';
-            
-            // 태그에 따라 적절한 현지화 키 사용
-            if (form.tag.contains('imps:imperf')) {
-              description = l10n.impersonalPresentForm;
-            } else if (form.tag.contains('imps:perf')) {
-              description = l10n.impersonalPastForm;
-            } else if (form.tag.contains('fut_imps')) {
-              description = l10n.impersonalFutureForm;
-            } else if (form.tag.contains('cond_imps')) {
-              description = l10n.impersonalConditionalForm;
-            } else {
-              // 태그 기반 추가 처리 - 직접 tagMap['aspect'] 사용
-              if ((tagMap['aspect'] ?? '') == 'imperf') {
-                description = l10n.qualifier_imperf;
-              } else if ((tagMap['aspect'] ?? '') == 'perf') {
-                description = l10n.qualifier_perf;
-              } else {
-                // 기본 처리: 전체 태그 형식화 시도
-                description = _getFormattedTagDescription(form.tag, l10n);
-              }
-            }
-            
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(form.form, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-        ),
-      ],
+      crossAxisAlignment: CrossAxisAlignment.start, // Consistent with other simple list sections
+      children: forms.map((form) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8.0), // Consistent padding
+          child: _buildFormWithDescription(form, l10n), // Use the standard helper
+        );
+      }).toList(),
     );
   }
 
@@ -2787,16 +2732,45 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
   }
   
   // 시제 정보를 포함한 형태소 태그 설명
-  String _getFormMorphDescription(ConjugationForm form, AppLocalizations l10n) {
-    // 특수 케이스 먼저 확인
-    if (form.tag.contains('fut_imps')) {
-      return l10n.impersonalFutureForm;
-    } else if (form.tag.contains('cond_imps')) {
-      return l10n.impersonalConditionalForm;
+  String _getFormMorphDescription(ConjugationForm formInfo, AppLocalizations l10n) {
+    final String tag = formInfo.tag;
+    final String formString = formInfo.form; // For past impersonal check
+    List<String> details = [];
+    String baseDescription = '';
+
+    List<String> tagParts = tag.split(':');
+    // Extract aspect first, as it's common
+    if (tagParts.contains('imperf')) {
+      details.add(l10n.qualifier_imperf);
+    } else if (tagParts.contains('perf')) {
+      details.add(l10n.qualifier_perf);
     }
-    
-    // 그 외 일반적인 태그에 대한 설명 생성
-    return _getFormattedTagDescription(form.tag, l10n);
+
+    // Determine baseDescription for specific impersonal types
+    if (tag.startsWith('imps:pres')) { // Present Impersonal (e.g., "imps:pres", "imps:pres:neg")
+      baseDescription = l10n.impersonalPresentForm;
+    } else if (tag.startsWith('imps') && (formString.endsWith('no') || formString.endsWith('to'))) { // Past Impersonal
+      baseDescription = l10n.impersonalPastForm;
+    } else if (tag.startsWith('fut_imps')) { // Future Impersonal (e.g., "fut_imps:imperf")
+      baseDescription = l10n.impersonalFutureForm;
+    } else if (tag.startsWith('cond_imps')) { // Conditional Impersonal (e.g., "cond_imps:imperf")
+      baseDescription = l10n.impersonalConditionalForm;
+    } else if (tag.startsWith('impt_imps')) { // Imperative Impersonal (e.g., "impt_imps")
+      baseDescription = l10n.impersonalImperativeForm;
+    } 
+    // NOTE: Removed the 'else' block here that defaulted to _getFormattedTagDescription.
+    // If baseDescription remains empty after these checks, we will fall through to the default at the end.
+
+    // If baseDescription was set (meaning it's one of the specific impersonal types we handle here)
+    if (baseDescription.isNotEmpty) {
+      if (details.isNotEmpty) {
+        return '$baseDescription (${details.join(', ')})';
+      }
+      return baseDescription;
+    }
+
+    // Fallback for all other forms (non-impersonal, or other types of impersonal NOT explicitly handled above)
+    return _getFormattedTagDescription(tag, l10n);
   }
 
   // 기본 형태소를 표시하는 위젯

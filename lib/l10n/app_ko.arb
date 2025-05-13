@@ -110,16 +110,16 @@
   "@conjugationCategoryConditionalImpersonal": {
     "description": "조건법 비인칭 동사 형태 카테고리 제목"
   },
-  "conjugationCategoryImperativeImpersonal": "명령형 비인칭",
-  "drawerRecentSearches": "최근 검색어",
+  "conjugationCategoryImperativeImpersonal": "비인칭 명령법",
+  "drawerRecentSearches": "최근 검색",
   "drawerClearRecentSearchesTooltip": "최근 검색어 지우기",
   "drawerClearRecentSearchesDialogTitle": "최근 검색어를 지우시겠습니까?",
   "drawerClearDialogContent": "이 작업은 되돌릴 수 없습니다.",
   "drawerCancelButton": "취소",
   "drawerClearButton": "지우기",
-  "drawerNoRecentSearches": "최근 검색어가 없습니다.",
+  "drawerNoRecentSearches": "최근 검색 기록이 없습니다.",
   "drawerFavorites": "즐겨찾기",
-  "drawerNoFavorites": "즐겨찾기에 추가된 단어가 없습니다.",
+  "drawerNoFavorites": "즐겨찾기에 추가된 항목이 없습니다.",
   "settingsThemeSystem": "시스템 기본값",
   "@settingsThemeSystem": {
     "description": "시스템 테마 옵션 레이블"
@@ -275,21 +275,25 @@
   "@impersonalAccuracyWarning": {
     "description": "비인칭 활용 제목 옆에 표시되는 경고 텍스트입니다."
   },
-  "impersonalPresentForm": "비인칭 현재형 (미완료)",
+  "impersonalPresentForm": "현재 비인칭",
   "@impersonalPresentForm": {
-    "description": "비인칭 현재형에 대한 설명"
+    "description": "비인칭 현재 동사 형태 레이블"
   },
-  "impersonalPastForm": "비인칭 과거형 (완료)",
+  "impersonalPastForm": "과거 비인칭",
   "@impersonalPastForm": {
-    "description": "비인칭 과거형에 대한 설명"
+    "description": "비인칭 과거 동사 형태 레이블"
   },
-  "impersonalFutureForm": "비인칭 미래형",
+  "impersonalFutureForm": "미래 비인칭",
   "@impersonalFutureForm": {
-    "description": "비인칭 미래형에 대한 설명"
+    "description": "비인칭 미래 동사 형태 레이블"
   },
   "impersonalConditionalForm": "비인칭 조건법",
   "@impersonalConditionalForm": {
     "description": "비인칭 조건법에 대한 설명"
+  },
+  "impersonalImperativeForm": "비인칭 명령법",
+  "@impersonalImperativeForm": {
+    "description": "비인칭 명령 동사 형태 레이블"
   },
   "settingsLanguage": "언어",
   "@settingsLanguage": {
