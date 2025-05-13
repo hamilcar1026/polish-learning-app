@@ -1247,25 +1247,57 @@ def _generate_grouped_forms(lemma_to_generate, check_func, category_func, is_imp
                 if base_tag == 'praet':
                     parts = form_tag_full.split(':')
                     num = next((p for p in parts if p in ['sg', 'pl']), None)
-                    if num:
-                        for gen_part in parts:
-                            if '.' in gen_part: # Composite tag like m1.m2.m3
-                                for subgen in gen_part.split('.'):
-                                    if subgen in ['m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2']: 
-                                        k = f"{num}:{subgen}"
-                                        if k not in past_forms: past_forms[k] = form
-                            elif gen_part in ['m1','m2','m3','f','n','n1','n2','non-m1']: # Single tag
-                                k = f"{num}:{gen_part}"
-                                past_forms[k] = form # Prefer specific
-                    person = next((p for p in parts if p in ['pri', 'sec', 'ter']), None)
-                    if person is None: # Infer if missing
-                        if form.endswith(('łem', 'łam')): person = 'pri'
-                        elif form.endswith(('łeś', 'łaś')): person = 'sec'
-                        elif form.endswith(('ł', 'ła', 'ło')): person = 'ter'
-                        elif form.endswith(('liśmy', 'łyśmy')): person = 'pri'
-                        elif form.endswith(('liście', 'łyście')): person = 'sec'
-                        elif form.endswith(('li', 'ły')): person = 'ter'
-                    if person and f':{person}:' not in f':{form_tag_full}:': form_tag_full += f':{person}'
+                    person = next((p for p in parts if p in ['pri', 'sec', 'ter']), None) # Explicitly get person
+
+                    if num and person: # Ensure number and person are found
+                        genders_in_tag = [p for p in parts if p in ['m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2', 'non-m1'] or '.' in p]
+                        
+                        # Store in past_forms for each specific gender component
+                        for gen_part_full in genders_in_tag:
+                            for sub_gen in gen_part_full.split('.'):
+                                if sub_gen in ['m1', 'm2', 'm3', 'f', 'n', 'n1', 'n2', 'non-m1']:
+                                    k = f"{person}:{num}:{sub_gen}" # Key: person:number:gender
+                                    if k not in past_forms: # Store first encountered form for this specific key
+                                        past_forms[k] = form
+                                    # Store a general key as well if it's a non-m1 form for pl non-m1 fallback
+                                    if num == 'pl' and sub_gen in ['f','n','m2','m3'] and f"{person}:pl:non-m1" not in past_forms:
+                                        past_forms[f"{person}:pl:non-m1"] = form
+
+
+                    # The form is already a past tense form from Morfeusz, directly add it to the category
+                    category_key_for_past = get_conjugation_category_key(base_tag, form_tag_full)
+                    if category_key_for_past == 'conjugationCategoryPastTense':
+                        # Correction for specific past tense plural non-virile errors
+                        # These errors might stem from Morfeusz with aggl="permissive"
+                        corrected_form = form
+                        
+                        praet_parts_for_correction = form_tag_full.split(':')
+                        praet_num_for_correction = next((p for p in praet_parts_for_correction if p in ['sg', 'pl']), None)
+                        praet_person_for_correction = next((p for p in praet_parts_for_correction if p in ['pri', 'sec', 'ter']), None)
+
+                        if praet_num_for_correction == 'pl':
+                            if praet_person_for_correction == 'pri' and form.endswith('śmyśmy'):
+                                # Correct "Xłyśmyśmy" to "Xłyśmy" or "Xśmyśmy" to "Xśmy"
+                                corrected_form = form[:-3]
+                                print(f"    [PastTenseCorrection] Corrected 1pl non-virile: {form} -> {corrected_form} (Tag: {form_tag_full})")
+                            elif praet_person_for_correction == 'sec' and form.endswith('śmyście'):
+                                # Correct "Xłyśmyście" to "Xłyście" (e.g., robiłyśmyście -> robiłyście)
+                                # This means the original stem was form[:-7] (e.g., "robiły"), and correct ending is "ście"
+                                corrected_form = form[:-7] + "ście"
+                                print(f"    [PastTenseCorrection] Corrected 2pl non-virile: {form} -> {corrected_form} (Tag: {form_tag_full})")
+                        
+                        form_data_for_past = {"form": corrected_form, "tag": form_tag_full, "qualifiers": qualifiers}
+                        
+                        # --- BEGIN DEBUG LOGGING for Past Tense Plural Forms ---
+                        if praet_num_for_correction == 'pl' and praet_person_for_correction in ['pri', 'sec']:
+                            print(f"    [BackendCheck-PastTense] For {praet_person_for_correction}:{praet_num_for_correction} (Tag: {form_tag_full}), attempting to add: {form_data_for_past}")
+                        # --- END DEBUG LOGGING ---
+                        
+                        if category_key_for_past not in grouped_forms: grouped_forms[category_key_for_past] = []
+                        if form_data_for_past not in grouped_forms[category_key_for_past]:
+                             grouped_forms[category_key_for_past].append(form_data_for_past)
+                             print(f"    [_generate_grouped_forms] Directly added to PastTense: {form_data_for_past}")
+
 
                 # ... (Get category_key using category_func, refine for impersonals) ...
                 category_key = None
@@ -1291,13 +1323,29 @@ def _generate_grouped_forms(lemma_to_generate, check_func, category_func, is_imp
 
         # --- Post-processing (Impersonal, Future, Conditional - Copied from previous version) ---
         # (This extensive block should be copied here without changes from the previous working version)
+        
+        # Retrieve the neutral singular 3rd person past form, e.g., "robiło"
+        neutral_past_sg_3rd_form = past_forms.get("sg:n")
+
         if past_impersonal_form:
             future_imps_key = 'conjugationCategoryFutureImpersonal'
             if future_imps_key not in grouped_forms: grouped_forms[future_imps_key] = []
-            f1 = f"będzie {past_impersonal_form}"
-            f2 = f"będzie się {past_impersonal_form}"
-            if not any(d['form'] == f1 for d in grouped_forms[future_imps_key]): grouped_forms[future_imps_key].append({"form": f1, "tag": "fut_imps:imperf", "qualifiers": []})
-            if not any(d['form'] == f2 for d in grouped_forms[future_imps_key]): grouped_forms[future_imps_key].append({"form": f2, "tag": "fut_imps:imperf:refl", "qualifiers": []})
+            
+            # Use the neutral past singular 3rd person form for future impersonal
+            if neutral_past_sg_3rd_form:
+                f1 = f"będzie {neutral_past_sg_3rd_form}"
+                f2 = f"będzie się {neutral_past_sg_3rd_form}"
+                if not any(d['form'] == f1 for d in grouped_forms[future_imps_key]): grouped_forms[future_imps_key].append({"form": f1, "tag": "fut_imps:imperf", "qualifiers": []})
+                if not any(d['form'] == f2 for d in grouped_forms[future_imps_key]): grouped_forms[future_imps_key].append({"form": f2, "tag": "fut_imps:imperf:refl", "qualifiers": []})
+            else:
+                # Fallback to original behavior if neutral_past_sg_3rd_form is not found, though ideally it should exist.
+                # This part might indicate an issue with past_forms population for some verbs if it's reached.
+                print(f"    [_generate_grouped_forms] WARNING: neutral_past_sg_3rd_form not found for {lemma_to_generate} when forming future impersonal. Using past_impersonal_form: {past_impersonal_form}")
+                f1_fallback = f"będzie {past_impersonal_form}"
+                f2_fallback = f"będzie się {past_impersonal_form}"
+                if not any(d['form'] == f1_fallback for d in grouped_forms[future_imps_key]): grouped_forms[future_imps_key].append({"form": f1_fallback, "tag": "fut_imps:imperf:fallback", "qualifiers": []})
+                if not any(d['form'] == f2_fallback for d in grouped_forms[future_imps_key]): grouped_forms[future_imps_key].append({"form": f2_fallback, "tag": "fut_imps:imperf:refl:fallback", "qualifiers": []})
+
             cond_imps_key = 'conjugationCategoryConditionalImpersonal'
             if cond_imps_key not in grouped_forms: grouped_forms[cond_imps_key] = []
             c1 = f"{past_impersonal_form} by"

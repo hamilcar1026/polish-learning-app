@@ -12,6 +12,7 @@ class AnalysisResult {
     required this.qualifiers,
   });
 
+
   factory AnalysisResult.fromJson(Map<String, dynamic> json) {
     // Defensive parsing: Check types before casting
     final String parsedLemma = json['lemma'] is String ? json['lemma'] : '';

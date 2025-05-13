@@ -2429,19 +2429,32 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
         if (parts.length > 1) tagMap['aspect'] = parts[1];
         break;
       case 'praet': // Past tense (CRITICAL FIX: Extract person correctly)
-        if (parts.length > 1) tagMap['number'] = parts[1];
-        // In praet tags, gender is in position 2, person is typically at the end
-        if (parts.length > 2) tagMap['gender'] = parts[2];
-        if (parts.length > 3) tagMap['aspect'] = parts[3];
-        // Look for 'person' in the remaining positions
-        for (int i = 4; i < parts.length; i++) {
-          if (['pri', 'sec', 'ter'].contains(parts[i])) {
-            tagMap['person'] = parts[i];
-            break;
+        if (parts.length > 1) tagMap['number'] = parts[1];     // e.g., pl
+        if (parts.length > 2) tagMap['gender'] = parts[2];     // e.g., m2.m3.f.n
+        // Correctly assign person from parts[3]
+        if (parts.length > 3) {
+          // Check if parts[3] is a valid person marker, otherwise it might be aspect
+          if (['pri', 'sec', 'ter'].contains(parts[3])) {
+            tagMap['person'] = parts[3];
+            // If person is at parts[3], aspect should be at parts[4]
+            if (parts.length > 4) tagMap['aspect'] = parts[4];
+          } else {
+            // If parts[3] is not a person marker, assume it's aspect and person is missing or 'ter'
+            tagMap['aspect'] = parts[3];
+            tagMap['person'] = 'ter'; // Default to 'ter' if person not explicitly in typical slot
           }
+        } else {
+          // If not enough parts for person, default to 'ter'
+          tagMap['person'] = 'ter';
         }
-        // If person wasn't found, default to 'ter' for 3rd person (most common default)
+        
+        // If person was not set (e.g. if parts[3] was aspect and parts.length <=4), ensure it defaults.
         tagMap['person'] ??= 'ter';
+        // Ensure aspect is also handled, could be empty or default if not found
+        // tagMap['aspect'] ??= ''; // Or some other default like 'imperf' if appropriate
+
+        // Debug print to verify parsing
+        // print("[_parseTag PRAET] Input: $tagString -> Parsed: number=${tagMap['number']}, gender=${tagMap['gender']}, person=${tagMap['person']}, aspect=${tagMap['aspect']}");
         break;
       case 'cond': // Conditional (added base tag)
          if (parts.length > 1) tagMap['number'] = parts[1];
