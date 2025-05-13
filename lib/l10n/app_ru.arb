@@ -296,6 +296,20 @@
       }
     }
   },
+  "suggestionDidYouMean": "Возможно, вы имели в виду '{word}'?",
+  "@suggestionDidYouMean": {
+    "description": "Текст, отображаемый при предложении варианта написания.",
+    "placeholders": {
+      "word": {
+        "type": "String",
+        "example": "robić"
+      }
+    }
+  },
+  "suggestionErrorFallback": "Не удалось загрузить подсказку.",
+  "@suggestionErrorFallback": {
+    "description": "Резервное сообщение, если служба подсказок не работает или не возвращает подсказку, но статус был 'suggestion'."
+  },
   "qualifier_wok": "клитика (гласн.)",
   "qualifier_nwok": "клитика (согл.)",
   "searchErrorFallback": "Не удалось выполнить поиск.",

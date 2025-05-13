@@ -882,15 +882,15 @@ def analyze_word(word):
                 if suggestion_found:
                     break
         if suggestion_found and suggested_word:
-             suggestion_message = f"Did you mean '{suggested_word}'?"
+             # suggestion_message = f"Did you mean '{suggested_word}'?" # REMOVE THIS LINE
              response_data = {
                  "status": "suggestion",
-                 "message": suggestion_message,
+                 # "message": suggestion_message, # REMOVE or comment out this line
                  "suggested_word": suggested_word,
                  "original_word": original_word,
-                 "is_numeral_input": False # <<< ADD FLAG HERE (False for suggestions) >>>
+                 "is_numeral_input": False 
              }
-             print(f"[analyze_word] Returning suggestion JSON: {response_data}")
+             print(f"[analyze_word] Returning suggestion JSON (no hardcoded message): {response_data}")
              return jsonify(response_data)
         else:
              print(f"[analyze_word] Attempt 2 FAILED: No valid diacritic suggestion found for '{original_word}'")

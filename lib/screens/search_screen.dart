@@ -295,14 +295,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
                         data: (analysisResponse) {
                           // --- Handle Suggestion Status ---
                           if (analysisResponse.status == 'suggestion') {
-                            if (analysisResponse.suggested_word != null) {
+                            if (analysisResponse.suggested_word != null && analysisResponse.suggested_word!.isNotEmpty) { // Check if suggested_word is not null AND not empty
                               final suggested = analysisResponse.suggested_word!;
-                              // Simplified suggestion display
+                              // Always use the localized string from the frontend
                               return Center(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(analysisResponse.message ?? l10n.suggestionDidYouMean(suggested)),
+                                    Text(l10n.suggestionDidYouMean(suggested)), // Use l10n directly
                                     ElevatedButton(
                                       onPressed: () {
                                         ref.read(searchTermProvider.notifier).state = suggested;
@@ -315,6 +315,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
                                 ),
                               );
                             } else {
+                              // Fallback if suggested_word is null or empty, or if message is also null/empty
+                              // (though suggested_word should always be present if status is 'suggestion')
                               return Center(child: Text(analysisResponse.message ?? l10n.suggestionErrorFallback));
                             }
                           }

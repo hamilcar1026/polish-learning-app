@@ -6,14 +6,12 @@
   "pl": [
     "conjugationCategoryImpersonal",
     "conjugationCategoryVerbalNoun",
-    "conjugationCategoryConditional",
-    "suggestionDidYouMean"
+    "conjugationCategoryConditional"
   ],
 
   "ru": [
     "conjugationCategoryImpersonal",
     "conjugationCategoryVerbalNoun",
-    "conjugationCategoryConditional",
-    "suggestionDidYouMean"
+    "conjugationCategoryConditional"
   ]
 }

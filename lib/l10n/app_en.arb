@@ -248,19 +248,19 @@
      }
    },
    "translationLabel": "Translation",
-   "suggestionDidYouMean": "Did you mean \"{suggestedWord}\"?",
+   "suggestionDidYouMean": "Did you mean '{word}'?",
    "@suggestionDidYouMean": {
-     "description": "Suggestion message shown when the user might have misspelled a diacritic.",
+     "description": "Text to display when offering a spelling suggestion.",
      "placeholders": {
-       "suggestedWord": {
+       "word": {
          "type": "String",
-         "example": "książka"
+         "example": "robić"
        }
      }
    },
-   "suggestionErrorFallback": "Suggestion could not be loaded.",
+   "suggestionErrorFallback": "Could not fetch suggestion.",
    "@suggestionErrorFallback": {
-     "description": "Fallback message if suggestion status received but word is null."
+     "description": "Fallback message if suggestion service fails or returns no suggestion but status was 'suggestion'."
    },
    "noRelevantAnalysisForNumeral": "No relevant analysis for numeral found.",
    "@noRelevantAnalysisForNumeral": {

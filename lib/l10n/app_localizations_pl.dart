@@ -425,12 +425,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get translationLabel => 'Tłumaczenie';
 
   @override
-  String suggestionDidYouMean(String suggestedWord) {
-    return 'Did you mean \"$suggestedWord\"?';
+  String suggestionDidYouMean(String word) {
+    return 'Czy chodziło Ci o \'$word\'?';
   }
 
   @override
-  String get suggestionErrorFallback => 'Nie można załadować sugestii.';
+  String get suggestionErrorFallback => 'Nie udało się pobrać sugestii.';
 
   @override
   String get noRelevantAnalysisForNumeral => 'Nie znaleziono odpowiedniej analizy dla liczebnika.';

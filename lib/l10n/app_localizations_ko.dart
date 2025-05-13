@@ -425,12 +425,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get translationLabel => '번역';
 
   @override
-  String suggestionDidYouMean(String suggestedWord) {
-    return '혹시 \"$suggestedWord\"(을)를 찾으셨나요?';
+  String suggestionDidYouMean(String word) {
+    return '혹시 \'$word\'(을)를 찾으셨나요?';
   }
 
   @override
-  String get suggestionErrorFallback => '추천 단어를 불러올 수 없습니다.';
+  String get suggestionErrorFallback => '추천 검색어를 가져올 수 없습니다.';
 
   @override
   String get noRelevantAnalysisForNumeral => '숫자에 대한 관련 분석을 찾을 수 없습니다.';

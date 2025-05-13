@@ -425,12 +425,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get translationLabel => 'Translation';
 
   @override
-  String suggestionDidYouMean(String suggestedWord) {
-    return 'Did you mean \"$suggestedWord\"?';
+  String suggestionDidYouMean(String word) {
+    return 'Did you mean \'$word\'?';
   }
 
   @override
-  String get suggestionErrorFallback => 'Suggestion could not be loaded.';
+  String get suggestionErrorFallback => 'Could not fetch suggestion.';
 
   @override
   String get noRelevantAnalysisForNumeral => 'No relevant analysis for numeral found.';

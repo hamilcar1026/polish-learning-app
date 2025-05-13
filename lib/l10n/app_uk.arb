@@ -248,19 +248,19 @@
     }
   },
   "translationLabel": "Переклад",
-  "suggestionDidYouMean": "Можливо, ви мали на увазі \"{suggestedWord}\"?",
+  "suggestionDidYouMean": "Можливо, ви мали на увазі '{word}'?",
   "@suggestionDidYouMean": {
-    "description": "Повідомлення-пропозиція, що відображається, коли користувач міг неправильно написати слово з діакритикою.",
+    "description": "Текст, що відображається при пропозиції варіанту написання.",
     "placeholders": {
-      "suggestedWord": {
+      "word": {
         "type": "String",
-        "example": "książka"
+        "example": "robić"
       }
     }
   },
-  "suggestionErrorFallback": "Пропозицію не вдалося завантажити.",
+  "suggestionErrorFallback": "Не вдалося завантажити пропозицію.",
   "@suggestionErrorFallback": {
-    "description": "Запасне повідомлення, якщо отримано статус пропозиції, але слово є null."
+    "description": "Резервне повідомлення, якщо служба пропозицій не працює або не повертає пропозицію, але статус був 'suggestion'."
   },
   "noRelevantAnalysisForNumeral": "Не знайдено відповідного аналізу для числівника.",
   "@noRelevantAnalysisForNumeral": {

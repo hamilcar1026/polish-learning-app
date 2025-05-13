@@ -425,12 +425,12 @@ class AppLocalizationsUk extends AppLocalizations {
   String get translationLabel => 'Переклад';
 
   @override
-  String suggestionDidYouMean(String suggestedWord) {
-    return 'Можливо, ви мали на увазі \"$suggestedWord\"?';
+  String suggestionDidYouMean(String word) {
+    return 'Можливо, ви мали на увазі \'$word\'?';
   }
 
   @override
-  String get suggestionErrorFallback => 'Пропозицію не вдалося завантажити.';
+  String get suggestionErrorFallback => 'Не вдалося завантажити пропозицію.';
 
   @override
   String get noRelevantAnalysisForNumeral => 'Не знайдено відповідного аналізу для числівника.';

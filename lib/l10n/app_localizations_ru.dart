@@ -425,12 +425,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get translationLabel => 'Перевод';
 
   @override
-  String suggestionDidYouMean(String suggestedWord) {
-    return 'Did you mean \"$suggestedWord\"?';
+  String suggestionDidYouMean(String word) {
+    return 'Возможно, вы имели в виду \'$word\'?';
   }
 
   @override
-  String get suggestionErrorFallback => 'Не удалось загрузить предложенное слово.';
+  String get suggestionErrorFallback => 'Не удалось загрузить подсказку.';
 
   @override
   String get noRelevantAnalysisForNumeral => 'Не найдено подходящего анализа для числительного.';

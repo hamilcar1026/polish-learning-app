@@ -291,6 +291,20 @@
       }
     }
   },
+  "suggestionDidYouMean": "Czy chodziło Ci o '{word}'?",
+  "@suggestionDidYouMean": {
+    "description": "Tekst wyświetlany, gdy oferowana jest sugestia pisowni.",
+    "placeholders": {
+      "word": {
+        "type": "String",
+        "example": "robić"
+      }
+    }
+  },
+  "suggestionErrorFallback": "Nie udało się pobrać sugestii.",
+  "@suggestionErrorFallback": {
+    "description": "Komunikat zastępczy, jeśli usługa sugestii zawiedzie lub nie zwróci sugestii, ale status brzmiał 'suggestion'."
+  },
   "qualifier_wok": "klityka (wokaliczna)",
   "qualifier_nwok": "klityka (niewokaliczna)",
   "searchErrorFallback": "Nie można przeprowadzić wyszukiwania.",
