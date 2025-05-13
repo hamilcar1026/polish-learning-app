@@ -323,6 +323,16 @@
    "fontSizeMedium": "Medium",
    "fontSizeLarge": "Large",
    "copyrightNotice": "This program was created using the morfeusz2 api.",
+   "settingsFontSizeCurrentScale": "Current Scale: {scaleValue}x",
+   "@settingsFontSizeCurrentScale": {
+     "description": "Label showing the current font size scale factor",
+     "placeholders": {
+       "scaleValue": {
+         "type": "String",
+         "example": "1.2"
+       }
+     }
+   },
    "qualifier_wok": "clitic (vocalic)",
    "qualifier_nwok": "clitic (non-vocalic)",
    "searchErrorFallback": "Could not perform search.",

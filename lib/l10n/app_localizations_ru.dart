@@ -490,6 +490,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get copyrightNotice => 'Эта программа была создана с использованием API morfeusz2.';
 
   @override
+  String settingsFontSizeCurrentScale(String scaleValue) {
+    return 'Текущий масштаб: ${scaleValue}x';
+  }
+
+  @override
   String get qualifier_wok => 'клитика (гласн.)';
 
   @override

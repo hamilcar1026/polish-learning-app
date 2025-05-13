@@ -286,6 +286,16 @@
     "description": "Подсказка для кнопки добавления слова в избранное."
   },
   "copyrightNotice": "Эта программа была создана с использованием API morfeusz2.",
+  "settingsFontSizeCurrentScale": "Текущий масштаб: {scaleValue}x",
+  "@settingsFontSizeCurrentScale": {
+    "description": "Метка, показывающая текущий коэффициент масштаба шрифта",
+    "placeholders": {
+      "scaleValue": {
+        "type": "String",
+        "example": "1.2"
+      }
+    }
+  },
   "qualifier_wok": "клитика (гласн.)",
   "qualifier_nwok": "клитика (согл.)",
   "searchErrorFallback": "Не удалось выполнить поиск.",

@@ -24,33 +24,33 @@ class AppLocalizationsUk extends AppLocalizations {
   String get fontSizeSettingTitle => 'Розмір шрифту';
 
   @override
-  String get analysisTitle => 'Analysis';
+  String get analysisTitle => 'Аналіз';
 
   @override
-  String get declensionTitle => 'Declension';
+  String get declensionTitle => 'Відмінювання';
 
   @override
-  String get conjugationTitle => 'Conjugation';
+  String get conjugationTitle => 'Дієвідміна';
 
   @override
-  String get grammarTitle => 'Grammar';
+  String get grammarTitle => 'Граматика';
 
   @override
-  String get pronounceWordTooltip => 'Pronounce the word';
+  String get pronounceWordTooltip => 'Вимовити слово';
 
   @override
-  String get searchButtonTooltip => 'Search for the word';
+  String get searchButtonTooltip => 'Шукати слово';
 
   @override
   String noAnalysisFound(String word) {
-    return 'Аналіз не знайдено для \'$word\'';
+    return 'Аналіз не знайдено для \"$word\"';
   }
 
   @override
-  String get noDeclensionData => 'No declension data found.';
+  String get noDeclensionData => 'Дані про відмінювання не знайдено.';
 
   @override
-  String get noConjugationData => 'No conjugation data found.';
+  String get noConjugationData => 'Дані про дієвідміну не знайдено.';
 
   @override
   String loadingError(Object error) {
@@ -58,391 +58,391 @@ class AppLocalizationsUk extends AppLocalizations {
   }
 
   @override
-  String get tag_subst => 'noun';
+  String get tag_subst => 'іменник';
 
   @override
-  String get tag_fin => 'verb (fin)';
+  String get tag_fin => 'дієслово (фінітне)';
 
   @override
-  String get tag_adj => 'adjective';
+  String get tag_adj => 'прикметник';
 
   @override
-  String get tag_adv => 'adverb';
+  String get tag_adv => 'прислівник';
 
   @override
-  String get tag_num => 'numeral';
+  String get tag_num => 'числівник';
 
   @override
-  String get tag_ppron12 => 'pronoun (1st/2nd)';
+  String get tag_ppron12 => 'займенник (1/2 ос.)';
 
   @override
-  String get tag_ppron3 => 'pronoun (3rd)';
+  String get tag_ppron3 => 'займенник (3 ос.)';
 
   @override
-  String get tag_siebie => 'pronoun (refl)';
+  String get tag_siebie => 'займенник (зворотний)';
 
   @override
-  String get tag_inf => 'infinitive';
+  String get tag_inf => 'інфінітив';
 
   @override
-  String get tag_praet => 'verb (past)';
+  String get tag_praet => 'дієслово (мин. час)';
 
   @override
-  String get tag_impt => 'imperative';
+  String get tag_impt => 'наказовий спосіб';
 
   @override
-  String get tag_pred => 'predicative';
+  String get tag_pred => 'предикатив';
 
   @override
-  String get tag_prep => 'preposition';
+  String get tag_prep => 'прийменник';
 
   @override
-  String get tag_conj => 'conjunction';
+  String get tag_conj => 'сполучник';
 
   @override
-  String get tag_comp => 'comparative marker';
+  String get tag_comp => 'компаративний маркер';
 
   @override
-  String get tag_interj => 'interjection';
+  String get tag_interj => 'вигук';
 
   @override
-  String get tag_pact => 'participle (act)';
+  String get tag_pact => 'дієприкметник (активний)';
 
   @override
-  String get tag_ppas => 'participle (pass)';
+  String get tag_ppas => 'дієприкметник (пасивний)';
 
   @override
-  String get tag_pcon => 'participle (pres adv)';
+  String get tag_pcon => 'дієприслівник (тепер. час)';
 
   @override
-  String get tag_pant => 'participle (ant adv)';
+  String get tag_pant => 'дієприслівник (мин. час)';
 
   @override
-  String get tag_ger => 'gerund';
+  String get tag_ger => 'герундій';
 
   @override
-  String get tag_bedzie => 'verb (fut aux)';
+  String get tag_bedzie => 'дієслово (майб. час, доп.)';
 
   @override
-  String get tag_aglt => 'agglutinant';
+  String get tag_aglt => 'аглютинант';
 
   @override
-  String get tag_qub => 'quasilexical unit';
+  String get tag_qub => 'квазілексемна одиниця';
 
   @override
-  String get tag_depr => 'depreciative noun';
+  String get tag_depr => 'іменник (зневажливий)';
 
   @override
-  String get tag_adja => 'adj participle (act)';
+  String get tag_adja => 'прикметник (дієприкм. акт.)';
 
   @override
-  String get tag_adjp => 'adj participle (pass)';
+  String get tag_adjp => 'прикметник (дієприкм. пас.)';
 
   @override
-  String get tag_cond => 'conditional';
+  String get tag_cond => 'умовний спосіб';
 
   @override
-  String get qualifier_sg => 'sg';
+  String get qualifier_sg => 'одн.';
 
   @override
-  String get qualifier_pl => 'pl';
+  String get qualifier_pl => 'мн.';
 
   @override
-  String get qualifier_nom => 'nom';
+  String get qualifier_nom => 'наз.';
 
   @override
-  String get qualifier_gen => 'gen';
+  String get qualifier_gen => 'род.';
 
   @override
-  String get qualifier_dat => 'dat';
+  String get qualifier_dat => 'дав.';
 
   @override
-  String get qualifier_acc => 'acc';
+  String get qualifier_acc => 'знах.';
 
   @override
-  String get qualifier_inst => 'inst';
+  String get qualifier_inst => 'оруд.';
 
   @override
-  String get qualifier_loc => 'loc';
+  String get qualifier_loc => 'місц.';
 
   @override
-  String get qualifier_voc => 'voc';
+  String get qualifier_voc => 'клич.';
 
   @override
-  String get qualifier_m1 => 'm1';
+  String get qualifier_m1 => 'ч1';
 
   @override
-  String get qualifier_m2 => 'm2';
+  String get qualifier_m2 => 'ч2';
 
   @override
-  String get qualifier_m3 => 'm3';
+  String get qualifier_m3 => 'ч3';
 
   @override
-  String get qualifier_f => 'f';
+  String get qualifier_f => 'ж';
 
   @override
-  String get qualifier_n => 'n';
+  String get qualifier_n => 'с';
 
   @override
-  String get qualifier_n1 => 'n1';
+  String get qualifier_n1 => 'с1';
 
   @override
-  String get qualifier_n2 => 'n2';
+  String get qualifier_n2 => 'с2';
 
   @override
-  String get qualifier_p1 => 'p1';
+  String get qualifier_p1 => '1ос';
 
   @override
-  String get qualifier_p2 => 'p2';
+  String get qualifier_p2 => '2ос';
 
   @override
-  String get qualifier_p3 => 'p3';
+  String get qualifier_p3 => '3ос';
 
   @override
-  String get qualifier_pri => '1st';
+  String get qualifier_pri => '1-й';
 
   @override
-  String get qualifier_sec => '2nd';
+  String get qualifier_sec => '2-й';
 
   @override
-  String get qualifier_ter => '3rd';
+  String get qualifier_ter => '3-й';
 
   @override
-  String get qualifier_imperf => 'imperf';
+  String get qualifier_imperf => 'недок.';
 
   @override
-  String get qualifier_perf => 'perf';
+  String get qualifier_perf => 'док.';
 
   @override
-  String get qualifier_nazwa_pospolita => 'common';
+  String get qualifier_nazwa_pospolita => 'загальна назва';
 
   @override
-  String get qualifier_imie => 'name';
+  String get qualifier_imie => 'ім\'я';
 
   @override
-  String get qualifier_nazwisko => 'surname';
+  String get qualifier_nazwisko => 'прізвище';
 
   @override
-  String get qualifier_nazwa_geograficzna => 'geo.';
+  String get qualifier_nazwa_geograficzna => 'геогр.';
 
   @override
-  String get qualifier_skrot => 'abbr.';
+  String get qualifier_skrot => 'скор.';
 
   @override
-  String get qualifier_pos => 'pos';
+  String get qualifier_pos => 'ствердж.';
 
   @override
-  String get qualifier_com => 'com';
+  String get qualifier_com => 'порівн.';
 
   @override
-  String get qualifier_sup => 'superlative';
+  String get qualifier_sup => 'найвищ.';
 
   @override
-  String get qualifier_congr => 'congruence';
+  String get qualifier_congr => 'узгодження';
 
   @override
-  String get qualifier_ncol => 'non-collective';
+  String get qualifier_ncol => 'незбірний';
 
   @override
-  String get qualifier_rec => 'governing';
+  String get qualifier_rec => 'керуючий';
 
   @override
-  String get conjugationCategoryPresentIndicative => 'Present Indicative';
+  String get conjugationCategoryPresentIndicative => 'Теперішній час, дійсний спосіб';
 
   @override
-  String get conjugationCategoryFuturePerfectiveIndicative => 'Future Perfective Indicative';
+  String get conjugationCategoryFuturePerfectiveIndicative => 'Майбутній доконаний час, дійсний спосіб';
 
   @override
-  String get conjugationCategoryFutureImperfectiveIndicative => 'Future Imperfective Indicative';
+  String get conjugationCategoryFutureImperfectiveIndicative => 'Майбутній недоконаний час, дійсний спосіб';
 
   @override
-  String get conjugationCategoryPastTense => 'Past Tense';
+  String get conjugationCategoryPastTense => 'Минулий час';
 
   @override
-  String get conjugationCategoryImperative => 'Imperative';
+  String get conjugationCategoryImperative => 'Наказовий спосіб';
 
   @override
-  String get conjugationCategoryInfinitive => 'Infinitive';
+  String get conjugationCategoryInfinitive => 'Інфінітив';
 
   @override
-  String get conjugationCategoryPresentAdverbialParticiple => 'Present Adverbial Participle';
+  String get conjugationCategoryPresentAdverbialParticiple => 'Дієприслівник теперішнього часу';
 
   @override
-  String get conjugationCategoryAnteriorAdverbialParticiple => 'Anterior Adverbial Participle';
+  String get conjugationCategoryAnteriorAdverbialParticiple => 'Дієприслівник минулого часу (попередній)';
 
   @override
-  String get conjugationCategoryPresentActiveParticiple => 'Present Active Participle';
+  String get conjugationCategoryPresentActiveParticiple => 'Активний дієприкметник теперішнього часу';
 
   @override
-  String get conjugationCategoryPastPassiveParticiple => 'Past Passive Participle';
+  String get conjugationCategoryPastPassiveParticiple => 'Пасивний дієприкметник минулого часу';
 
   @override
-  String get conjugationCategoryFiniteVerb => 'Finite Verb';
+  String get conjugationCategoryFiniteVerb => 'Фінітне дієслово';
 
   @override
-  String get conjugationCategoryOtherForms => 'Other Forms';
+  String get conjugationCategoryOtherForms => 'Інші форми';
 
   @override
-  String get conjugationCategoryImpersonal => 'Impersonal';
+  String get conjugationCategoryImpersonal => 'Безособові форми';
 
   @override
-  String get conjugationCategoryVerbalNoun => 'Verbal Noun';
+  String get conjugationCategoryVerbalNoun => 'Віддієслівний іменник';
 
   @override
-  String get conjugationCategoryConditional => 'Conditional';
+  String get conjugationCategoryConditional => 'Умовний спосіб';
 
   @override
-  String get conjugationCategoryPresentImpersonal => 'Present Impersonal';
+  String get conjugationCategoryPresentImpersonal => 'Безособова форма теперішнього часу';
 
   @override
-  String get conjugationCategoryPastImpersonal => 'Past Impersonal';
+  String get conjugationCategoryPastImpersonal => 'Безособова форма минулого часу';
 
   @override
-  String get conjugationCategoryFutureImpersonal => 'Future Impersonal';
+  String get conjugationCategoryFutureImpersonal => 'Безособова форма майбутнього часу';
 
   @override
-  String get conjugationCategoryConditionalImpersonal => 'Conditional Impersonal';
+  String get conjugationCategoryConditionalImpersonal => 'Безособова форма умовного способу';
 
   @override
-  String get conjugationCategoryImperativeImpersonal => 'Impersonal Imperative';
+  String get conjugationCategoryImperativeImpersonal => 'Безособовий наказовий спосіб';
 
   @override
-  String get drawerRecentSearches => 'Recent Searches';
+  String get drawerRecentSearches => 'Останні пошуки';
 
   @override
-  String get drawerClearRecentSearchesTooltip => 'Clear Recent Searches';
+  String get drawerClearRecentSearchesTooltip => 'Очистити останні пошуки';
 
   @override
-  String get drawerClearRecentSearchesDialogTitle => 'Clear Recent Searches?';
+  String get drawerClearRecentSearchesDialogTitle => 'Очистити останні пошуки?';
 
   @override
-  String get drawerClearDialogContent => 'This action cannot be undone.';
+  String get drawerClearDialogContent => 'Цю дію неможливо скасувати.';
 
   @override
-  String get drawerCancelButton => 'Cancel';
+  String get drawerCancelButton => 'Скасувати';
 
   @override
-  String get drawerClearButton => 'Clear';
+  String get drawerClearButton => 'Очистити все';
 
   @override
-  String get drawerNoRecentSearches => 'No recent searches.';
+  String get drawerNoRecentSearches => 'Немає останніх пошуків.';
 
   @override
-  String get drawerFavorites => 'Favorites';
+  String get drawerFavorites => 'Обране';
 
   @override
-  String get drawerNoFavorites => 'No favorites added yet.';
+  String get drawerNoFavorites => 'Ще не додано до обраного.';
 
   @override
-  String get settingsThemeSystem => 'System Default';
+  String get settingsThemeSystem => 'Системна тема за замовчуванням';
 
   @override
-  String get tableHeaderCase => 'Case';
+  String get tableHeaderCase => 'Відмінок';
 
   @override
-  String get tableHeaderSingular => 'Singular';
+  String get tableHeaderSingular => 'Однина';
 
   @override
-  String get tableHeaderPlural => 'Plural';
+  String get tableHeaderPlural => 'Множина';
 
   @override
-  String get tableHeaderM1 => 'Masc. Pers.';
+  String get tableHeaderM1 => 'Чол. ос.';
 
   @override
-  String get tableHeaderMOther => 'Masc. Other';
+  String get tableHeaderMOther => 'Чол. ін.';
 
   @override
-  String get tableHeaderF => 'Feminine';
+  String get tableHeaderF => 'Жін. ос.';
 
   @override
-  String get tableHeaderN => 'Neuter';
+  String get tableHeaderN => 'Сер. ос.';
 
   @override
-  String get tableHeaderPerson => 'Person';
+  String get tableHeaderPerson => 'Особа';
 
   @override
-  String get caseNominative => 'Nominative';
+  String get caseNominative => 'Називний';
 
   @override
-  String get caseGenitive => 'Genitive';
+  String get caseGenitive => 'Родовий';
 
   @override
-  String get caseDative => 'Dative';
+  String get caseDative => 'Давальний';
 
   @override
-  String get caseAccusative => 'Accusative';
+  String get caseAccusative => 'Знахідний';
 
   @override
-  String get caseInstrumental => 'Instrumental';
+  String get caseInstrumental => 'Орудний';
 
   @override
-  String get caseLocative => 'Locative';
+  String get caseLocative => 'Місцевий';
 
   @override
-  String get caseVocative => 'Vocative';
+  String get caseVocative => 'Кличний';
 
   @override
-  String get settingsContributors => 'Contributors';
+  String get settingsContributors => 'Автори';
 
   @override
-  String get personLabelFirst => '1st\n(I/we)';
+  String get personLabelFirst => '1-а ос.\n(я/ми)';
 
   @override
-  String get personLabelSecond => '2nd\n(you/you)';
+  String get personLabelSecond => '2-а ос.\n(ти/ви)';
 
   @override
-  String get personLabelThird => '3rd\n(he/she/it/they)';
+  String get personLabelThird => '3-я ос.\n(він/вона/воно/вони)';
 
   @override
-  String get genderLabelM1 => 'Masc. Personal';
+  String get genderLabelM1 => 'Чоловічий особовий';
 
   @override
-  String get genderLabelM2 => 'Masc. Animate';
+  String get genderLabelM2 => 'Чоловічий живий';
 
   @override
-  String get genderLabelM3 => 'Masc. Inanimate';
+  String get genderLabelM3 => 'Чоловічий неживий';
 
   @override
-  String get genderLabelF => 'Feminine';
+  String get genderLabelF => 'Жіночий';
 
   @override
-  String get genderLabelN1 => 'Neuter 1';
+  String get genderLabelN1 => 'Середній 1';
 
   @override
-  String get genderLabelN2 => 'Neuter 2';
+  String get genderLabelN2 => 'Середній 2';
 
   @override
   String declensionTableTitle(String lemma) {
-    return 'Declension for \"$lemma\"';
+    return 'Відмінювання для \"$lemma\"';
   }
 
   @override
   String conjugationTableTitle(String lemma) {
-    return 'Conjugation for \"$lemma\"';
+    return 'Дієвідміна для \"$lemma\"';
   }
 
   @override
-  String get translationLabel => 'Translation';
+  String get translationLabel => 'Переклад';
 
   @override
   String suggestionDidYouMean(String suggestedWord) {
-    return 'Did you mean \"$suggestedWord\"?';
+    return 'Можливо, ви мали на увазі \"$suggestedWord\"?';
   }
 
   @override
-  String get suggestionErrorFallback => 'Suggestion could not be loaded.';
+  String get suggestionErrorFallback => 'Пропозицію не вдалося завантажити.';
 
   @override
-  String get noRelevantAnalysisForNumeral => 'No relevant analysis for numeral found.';
+  String get noRelevantAnalysisForNumeral => 'Не знайдено відповідного аналізу для числівника.';
 
   @override
-  String get removeFromFavorites => 'Remove from favorites';
+  String get removeFromFavorites => 'Видалити з обраного';
 
   @override
-  String get addToFavorites => 'Add to favorites';
+  String get addToFavorites => 'Додати до обраного';
 
   @override
-  String get impersonalAccuracyWarning => 'Impersonal forms may be less accurate';
+  String get impersonalAccuracyWarning => 'Безособові форми можуть бути менш точними';
 
   @override
   String get impersonalPresentForm => 'Безособова форма теперішнього часу';
@@ -460,44 +460,49 @@ class AppLocalizationsUk extends AppLocalizations {
   String get impersonalImperativeForm => 'Безособова наказова форма';
 
   @override
-  String get settingsLanguage => 'Language';
+  String get settingsLanguage => 'Мова';
 
   @override
-  String get genderLabelM => 'masculine';
+  String get genderLabelM => 'чоловічий';
 
   @override
-  String get genderLabelN => 'neuter';
+  String get genderLabelN => 'середній';
 
   @override
-  String get genderLabelM1Pl => 'masc. pers.';
+  String get genderLabelM1Pl => 'чол. ос. (мн.)';
 
   @override
-  String get genderLabelNonM1Pl => 'non-masc. pers.';
+  String get genderLabelNonM1Pl => 'не чол. ос. (мн.)';
 
   @override
-  String get copyrightsTitle => 'Copyrights';
+  String get copyrightsTitle => 'Авторські права';
 
   @override
-  String get fontSizeSmall => 'Small';
+  String get fontSizeSmall => 'Малий';
 
   @override
-  String get fontSizeMedium => 'Medium';
+  String get fontSizeMedium => 'Середній';
 
   @override
-  String get fontSizeLarge => 'Large';
+  String get fontSizeLarge => 'Великий';
 
   @override
-  String get copyrightNotice => 'This program was created using the morfeusz2 api.';
+  String get copyrightNotice => 'Ця програма створена з використанням morfeusz2 api.';
 
   @override
-  String get qualifier_wok => 'clitic (vocalic)';
+  String settingsFontSizeCurrentScale(String scaleValue) {
+    return 'Поточний масштаб: ${scaleValue}x';
+  }
 
   @override
-  String get qualifier_nwok => 'clitic (non-vocalic)';
+  String get qualifier_wok => 'клітика (голосна)';
 
   @override
-  String get searchErrorFallback => 'Could not perform search.';
+  String get qualifier_nwok => 'клітика (приголосна)';
 
   @override
-  String get clearTooltip => 'Clear search text';
+  String get searchErrorFallback => 'Не вдалося виконати пошук.';
+
+  @override
+  String get clearTooltip => 'Очистити текст пошуку';
 }

@@ -100,7 +100,7 @@ class SettingsScreen extends ConsumerWidget {
            // Display current factor value
           Center(
             child: Text(
-              'Current Scale: ${settings.fontSizeFactor.toStringAsFixed(1)}x', // Replace with localized string later
+              l10n.settingsFontSizeCurrentScale(settings.fontSizeFactor.toStringAsFixed(1)),
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),

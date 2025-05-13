@@ -320,6 +320,16 @@
   "fontSizeMedium": "중간",
   "fontSizeLarge": "크게",
   "copyrightNotice": "이 프로그램은 morfeusz2 api를 이용하여 제작되었습니다.",
+  "settingsFontSizeCurrentScale": "현재 배율: {scaleValue}x",
+  "@settingsFontSizeCurrentScale": {
+    "description": "현재 글꼴 크기 배율을 표시하는 레이블",
+    "placeholders": {
+      "scaleValue": {
+        "type": "String",
+        "example": "1.2"
+      }
+    }
+  },
   "qualifier_wok": "활음조",
   "qualifier_nwok": "비활음조"
 } 

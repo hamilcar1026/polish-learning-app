@@ -490,6 +490,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get copyrightNotice => '이 프로그램은 morfeusz2 api를 이용하여 제작되었습니다.';
 
   @override
+  String settingsFontSizeCurrentScale(String scaleValue) {
+    return '현재 배율: ${scaleValue}x';
+  }
+
+  @override
   String get qualifier_wok => '활음조';
 
   @override

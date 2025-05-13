@@ -323,6 +323,16 @@
   "fontSizeMedium": "Середній",
   "fontSizeLarge": "Великий",
   "copyrightNotice": "Ця програма створена з використанням morfeusz2 api.",
+  "settingsFontSizeCurrentScale": "Поточний масштаб: {scaleValue}x",
+  "@settingsFontSizeCurrentScale": {
+    "description": "Мітка, що показує поточний коефіцієнт масштабу шрифту",
+    "placeholders": {
+      "scaleValue": {
+        "type": "String",
+        "example": "1.2"
+      }
+    }
+  },
   "qualifier_wok": "клітика (голосна)",
   "qualifier_nwok": "клітика (приголосна)",
   "searchErrorFallback": "Не вдалося виконати пошук.",

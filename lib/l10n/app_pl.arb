@@ -281,6 +281,16 @@
   "fontSizeMedium": "Średni",
   "fontSizeLarge": "Duży",
   "copyrightNotice": "Ten program został stworzony przy użyciu API morfeusz2.",
+  "settingsFontSizeCurrentScale": "Aktualna skala: {scaleValue}x",
+  "@settingsFontSizeCurrentScale": {
+    "description": "Etykieta pokazująca aktualny współczynnik skali czcionki",
+    "placeholders": {
+      "scaleValue": {
+        "type": "String",
+        "example": "1.2"
+      }
+    }
+  },
   "qualifier_wok": "klityka (wokaliczna)",
   "qualifier_nwok": "klityka (niewokaliczna)",
   "searchErrorFallback": "Nie można przeprowadzić wyszukiwania.",

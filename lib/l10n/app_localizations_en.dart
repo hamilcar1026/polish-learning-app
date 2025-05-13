@@ -490,6 +490,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get copyrightNotice => 'This program was created using the morfeusz2 api.';
 
   @override
+  String settingsFontSizeCurrentScale(String scaleValue) {
+    return 'Current Scale: ${scaleValue}x';
+  }
+
+  @override
   String get qualifier_wok => 'clitic (vocalic)';
 
   @override

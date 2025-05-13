@@ -490,6 +490,11 @@ class AppLocalizationsPl extends AppLocalizations {
   String get copyrightNotice => 'Ten program został stworzony przy użyciu API morfeusz2.';
 
   @override
+  String settingsFontSizeCurrentScale(String scaleValue) {
+    return 'Aktualna skala: ${scaleValue}x';
+  }
+
+  @override
   String get qualifier_wok => 'klityka (wokaliczna)';
 
   @override
