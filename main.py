@@ -1355,18 +1355,94 @@ def _generate_grouped_forms(lemma_to_generate, check_func, category_func, is_imp
             if not any(d['form'] == c1 for d in grouped_forms[cond_imps_key]): grouped_forms[cond_imps_key].append({"form": c1, "tag": "cond_imps", "qualifiers": []})
             if not any(d['form'] == c2 for d in grouped_forms[cond_imps_key]): grouped_forms[cond_imps_key].append({"form": c2, "tag": "cond_imps:alt", "qualifiers": []})
             if not has_reflexive_sie and not any(d['form'] == c3 for d in grouped_forms[cond_imps_key]): grouped_forms[cond_imps_key].append({"form": c3, "tag": "cond_imps:refl", "qualifiers": []})
+        
+        # --- DEBUG LOGGING for Populating Present Impersonal Category ---
+        print(f"    [BackendDebug-PresImpsPopulate] Before populating 'conjugationCategoryPresentImpersonal', present_impersonal_forms list: {present_impersonal_forms}")
+        # --- END DEBUG LOGGING ---
+        
+        # --- BEGIN: Construct Present Impersonal if not directly provided by Morfeusz ---
+        if not present_impersonal_forms: 
+            print(f"    [PresImpsConstruct-Info] 'present_impersonal_forms' is empty. Attempting to construct from 3rd person singular present.")
+            fin_sg_ter_forms = []
+            if "conjugationCategoryPresentIndicative" in grouped_forms:
+                for f_data in grouped_forms["conjugationCategoryPresentIndicative"]:
+                    if isinstance(f_data, dict) and "tag" in f_data and "form" in f_data: # Basic check for valid structure
+                        if "sg" in f_data["tag"] and "ter" in f_data["tag"] and "fin" in f_data["tag"] and not f_data["form"].startswith("nie "):
+                            fin_sg_ter_forms.append(f_data["form"])
+            
+            print(f"    [PresImpsConstruct-Debug] Found affirmative fin_sg_ter_forms for construction: {fin_sg_ter_forms}")
+
+            temp_constructed_list = []
+            for fin_form in fin_sg_ter_forms:
+                # Affirmative: "robi się"
+                form_aff = f"{fin_form} się"
+                if form_aff not in temp_constructed_list:
+                    temp_constructed_list.append(form_aff)
+                    print(f"    [PresImpsConstruct-Confirm] Constructed and added to temp list (AFF): '{form_aff}'")
+                
+                # Negative: "nie robi się"
+                form_neg = f"nie {fin_form} się"
+                if form_neg not in temp_constructed_list:
+                    temp_constructed_list.append(form_neg)
+                    print(f"    [PresImpsConstruct-Confirm] Constructed and added to temp list (NEG): '{form_neg}'")
+            
+            # If successfully constructed, assign to present_impersonal_forms
+            if temp_constructed_list:
+                present_impersonal_forms = temp_constructed_list
+                print(f"    [PresImpsConstruct-Success] 'present_impersonal_forms' updated to: {present_impersonal_forms}")
+            else:
+                print(f"    [PresImpsConstruct-Fail] Could not construct any present impersonal forms.")
+        # --- END: Construct Present Impersonal --- 
+       
         if present_impersonal_forms:
             impt_imps_key = 'conjugationCategoryImperativeImpersonal'
             if impt_imps_key not in grouped_forms: grouped_forms[impt_imps_key] = []
-            for pf in present_impersonal_forms:
-                iif = f"{IMPERSONAL_IMPERATIVE_PREFIX} {pf}"
-                if not any(d['form'] == iif for d in grouped_forms[impt_imps_key]): grouped_forms[impt_imps_key].append({"form": iif, "tag": "impt_imps", "qualifiers": []})
+            for pf_candidate_for_impt in present_impersonal_forms:
+                # Only create imperative for affirmative base forms
+                if not pf_candidate_for_impt.startswith("nie "):
+                    iif = f"{IMPERSONAL_IMPERATIVE_PREFIX} {pf_candidate_for_impt}"
+                    if not any(d['form'] == iif for d in grouped_forms[impt_imps_key]): 
+                        grouped_forms[impt_imps_key].append({"form": iif, "tag": "impt_imps", "qualifiers": []})
+            
             present_imps_key = 'conjugationCategoryPresentImpersonal'
-            if present_imps_key not in grouped_forms: grouped_forms[present_imps_key] = [] 
-            for pf in present_impersonal_forms:
-                if not pf.startswith("nie "):
-                    nf = f"nie {pf}"
-                    if not any(d['form'] == nf for d in grouped_forms[present_imps_key]): grouped_forms[present_imps_key].append({"form": nf, "tag": "imps:neg", "qualifiers": []})
+            if present_imps_key not in grouped_forms: grouped_forms[present_imps_key] = []
+
+            # Use a set to track form strings already added to this specific category to prevent duplicates
+            processed_forms_in_category = set()
+
+            for pf_candidate in present_impersonal_forms:
+                if pf_candidate.startswith("nie "):
+                    # This is an already-negated form from the list
+                    form_to_add = pf_candidate
+                    tag_to_add = "imps:pres:neg" # Correct tag for negated form
+                    form_data = {"form": form_to_add, "tag": tag_to_add, "qualifiers": []}
+                    
+                    # Check if this exact form string is already added
+                    if form_to_add not in processed_forms_in_category:
+                        grouped_forms[present_imps_key].append(form_data)
+                        processed_forms_in_category.add(form_to_add)
+                        print(f"    [BackendDebug-PresImpsPopulate] Added (pre-negated) form: {form_data} to {present_imps_key}")
+                else:
+                    # This is an affirmative form from the list
+                    affirmative_form_to_add = pf_candidate
+                    affirmative_tag = "imps:pres"
+                    affirmative_form_data = {"form": affirmative_form_to_add, "tag": affirmative_tag, "qualifiers": []}
+                    if affirmative_form_to_add not in processed_forms_in_category:
+                        grouped_forms[present_imps_key].append(affirmative_form_data)
+                        processed_forms_in_category.add(affirmative_form_to_add)
+                        print(f"    [BackendDebug-PresImpsPopulate] Added AFFIRMATIVE form: {affirmative_form_data} to {present_imps_key}")
+
+                    # Construct and add the corresponding negative form
+                    negative_counterpart_form = f"nie {pf_candidate}"
+                    negative_counterpart_tag = "imps:pres:neg"
+                    negative_counterpart_data = {"form": negative_counterpart_form, "tag": negative_counterpart_tag, "qualifiers": []}
+                    if negative_counterpart_form not in processed_forms_in_category:
+                        grouped_forms[present_imps_key].append(negative_counterpart_data)
+                        processed_forms_in_category.add(negative_counterpart_form)
+                        print(f"    [BackendDebug-PresImpsPopulate] Added corresponding NEGATIVE form: {negative_counterpart_data} to {present_imps_key}")
+                        
+            print(f"    [BackendDebug-PresImpsPopulate] Populated 'conjugationCategoryPresentImpersonal': {grouped_forms.get(present_imps_key)}")
+
         if is_imperfective:
             if infinitive_form:
                 future_key = 'conjugationCategoryFutureImperfectiveIndicative'
