@@ -32,33 +32,29 @@ class ApiService {
   
   // --- Updated Base URL Logic ---
   static String getBaseUrl() {
-    // 1. --dart-define으로 전달된 BACKEND_URL 값을 먼저 확인
-    const backendUrlFromEnv = String.fromEnvironment('BACKEND_URL');
-
-    // 2. 전달된 값이 있다면 그 값을 사용
-    if (backendUrlFromEnv.isNotEmpty) {
-      // Ensure the URL doesn't end with a slash
-      return backendUrlFromEnv.endsWith('/') 
-             ? backendUrlFromEnv.substring(0, backendUrlFromEnv.length - 1) 
-             : backendUrlFromEnv;
+    // Check for environment variable first
+    const backendUrl = String.fromEnvironment('BACKEND_URL', defaultValue: '');
+    if (backendUrl.isNotEmpty) {
+      return backendUrl;
     }
 
-    // 3. 전달된 값이 없다면 (예: 로컬 개발 환경) 기존 로직 사용
-    print("Warning: BACKEND_URL environment variable not set. Falling back to default URLs."); // 로그 추가
+    // Fallback to hardcoded URLs depending on the platform or a global default
     if (kIsWeb) {
-      return 'http://localhost:8080';
+      // For web, it might be a relative path or a specific URL for web deployment
+      // return 'http://localhost:8080'; // Example for local web development
+      return 'https://polish-learning-app.onrender.com';
     } else if (Platform.isAndroid) {
-      // Use 10.0.2.2 for Android emulators
-      return 'http://10.0.2.2:8080';
-    } else if (Platform.isIOS) {
-      // Use localhost for iOS simulators
-      return 'http://localhost:8080';
-    } else {
-      // Default for other platforms (like desktop) or physical devices 
-      // Might need adjustment based on actual network setup for physical devices
-      // Consider making this 'http://localhost:8080' as a more universal fallback?
-      return 'http://192.168.0.8:8080'; // Or try localhost as a fallback 
+      // For Android emulator, 10.0.2.2 typically refers to the host machine
+      // return 'http://10.0.2.2:8080';
+      return 'https://polish-learning-app.onrender.com';
+    } else if (Platform.isIOS || Platform.isMacOS) {
+      // For iOS simulator and macOS, localhost or 127.0.0.1 should work for local server
+      // return 'http://localhost:8080';
+      return 'https://polish-learning-app.onrender.com';
     }
+    // Default fallback if no other condition met (should ideally not be reached if covered above)
+    // return 'http://192.168.0.8:8080'; // Or try localhost as a fallback
+    return 'https://polish-learning-app.onrender.com';
   }
 
   static final String _baseUrl = getBaseUrl();
