@@ -1,4 +1,8 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
 
 /// The translations for Polish (`pl`).
 class AppLocalizationsPl extends AppLocalizations {
@@ -246,10 +250,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get conjugationCategoryPresentIndicative => 'Czas teraźniejszy';
 
   @override
-  String get conjugationCategoryFuturePerfectiveIndicative => 'Czas przyszły dokonany';
+  String get conjugationCategoryFuturePerfectiveIndicative =>
+      'Czas przyszły dokonany';
 
   @override
-  String get conjugationCategoryFutureImperfectiveIndicative => 'Czas przyszły niedokonany';
+  String get conjugationCategoryFutureImperfectiveIndicative =>
+      'Czas przyszły niedokonany';
 
   @override
   String get conjugationCategoryPastTense => 'Czas przeszły';
@@ -261,16 +267,20 @@ class AppLocalizationsPl extends AppLocalizations {
   String get conjugationCategoryInfinitive => 'Bezokolicznik';
 
   @override
-  String get conjugationCategoryPresentAdverbialParticiple => 'Imiesłów przysłówkowy współczesny';
+  String get conjugationCategoryPresentAdverbialParticiple =>
+      'Imiesłów przysłówkowy współczesny';
 
   @override
-  String get conjugationCategoryAnteriorAdverbialParticiple => 'Imiesłów przysłówkowy uprzedni';
+  String get conjugationCategoryAnteriorAdverbialParticiple =>
+      'Imiesłów przysłówkowy uprzedni';
 
   @override
-  String get conjugationCategoryPresentActiveParticiple => 'Imiesłów przymiotnikowy czynny';
+  String get conjugationCategoryPresentActiveParticiple =>
+      'Imiesłów przymiotnikowy czynny';
 
   @override
-  String get conjugationCategoryPastPassiveParticiple => 'Imiesłów przymiotnikowy bierny';
+  String get conjugationCategoryPastPassiveParticiple =>
+      'Imiesłów przymiotnikowy bierny';
 
   @override
   String get conjugationCategoryFiniteVerb => 'Forma osobowa';
@@ -297,19 +307,23 @@ class AppLocalizationsPl extends AppLocalizations {
   String get conjugationCategoryFutureImpersonal => 'Bezosobowa przyszła';
 
   @override
-  String get conjugationCategoryConditionalImpersonal => 'Bezosobowa trybu warunkowego';
+  String get conjugationCategoryConditionalImpersonal =>
+      'Bezosobowa trybu warunkowego';
 
   @override
-  String get conjugationCategoryImperativeImpersonal => 'Tryb rozkazujący nieosobowy';
+  String get conjugationCategoryImperativeImpersonal =>
+      'Tryb rozkazujący nieosobowy';
 
   @override
   String get drawerRecentSearches => 'Ostatnie wyszukiwania';
 
   @override
-  String get drawerClearRecentSearchesTooltip => 'Wyczyść ostatnie wyszukiwania';
+  String get drawerClearRecentSearchesTooltip =>
+      'Wyczyść ostatnie wyszukiwania';
 
   @override
-  String get drawerClearRecentSearchesDialogTitle => 'Wyczyścić ostatnie wyszukiwania?';
+  String get drawerClearRecentSearchesDialogTitle =>
+      'Wyczyścić ostatnie wyszukiwania?';
 
   @override
   String get drawerClearDialogContent => 'Tej operacji nie można cofnąć.';
@@ -429,7 +443,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get suggestionErrorFallback => 'Nie udało się pobrać sugestii.';
 
   @override
-  String get noRelevantAnalysisForNumeral => 'Nie znaleziono odpowiedniej analizy dla liczebnika.';
+  String get noRelevantAnalysisForNumeral =>
+      'Nie znaleziono odpowiedniej analizy dla liczebnika.';
 
   @override
   String get removeFromFavorites => 'Usuń z ulubionych';
@@ -438,7 +453,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get addToFavorites => 'Dodaj do ulubionych';
 
   @override
-  String get impersonalAccuracyWarning => 'Formy bezosobowe mogą być mniej dokładne';
+  String get impersonalAccuracyWarning =>
+      'Formy bezosobowe mogą być mniej dokładne';
 
   @override
   String get impersonalPresentForm => 'Forma bezosobowa czasu teraźniejszego';
@@ -483,7 +499,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get fontSizeLarge => 'Duży';
 
   @override
-  String get copyrightNotice => 'Ten program został stworzony przy użyciu API morfeusz2.';
+  String get copyrightNotice =>
+      'Ten program został stworzony przy użyciu API morfeusz2.';
 
   @override
   String settingsFontSizeCurrentScale(String scaleValue) {

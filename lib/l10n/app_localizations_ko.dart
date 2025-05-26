@@ -1,4 +1,8 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
 
 /// The translations for Korean (`ko`).
 class AppLocalizationsKo extends AppLocalizations {
@@ -249,7 +253,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get conjugationCategoryFuturePerfectiveIndicative => '미래 완료 시제 (직설법)';
 
   @override
-  String get conjugationCategoryFutureImperfectiveIndicative => '미래 미완료 시제 (직설법)';
+  String get conjugationCategoryFutureImperfectiveIndicative =>
+      '미래 미완료 시제 (직설법)';
 
   @override
   String get conjugationCategoryPastTense => '과거 시제';

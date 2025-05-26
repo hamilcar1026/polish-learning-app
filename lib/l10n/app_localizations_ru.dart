@@ -1,4 +1,8 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
 
 /// The translations for Russian (`ru`).
 class AppLocalizationsRu extends AppLocalizations {
@@ -246,10 +250,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get conjugationCategoryPresentIndicative => 'Настоящее время (изъяв.)';
 
   @override
-  String get conjugationCategoryFuturePerfectiveIndicative => 'Будущее время (соверш., изъяв.)';
+  String get conjugationCategoryFuturePerfectiveIndicative =>
+      'Будущее время (соверш., изъяв.)';
 
   @override
-  String get conjugationCategoryFutureImperfectiveIndicative => 'Будущее время (несоверш., изъяв.)';
+  String get conjugationCategoryFutureImperfectiveIndicative =>
+      'Будущее время (несоверш., изъяв.)';
 
   @override
   String get conjugationCategoryPastTense => 'Прошедшее время';
@@ -261,16 +267,20 @@ class AppLocalizationsRu extends AppLocalizations {
   String get conjugationCategoryInfinitive => 'Инфинитив';
 
   @override
-  String get conjugationCategoryPresentAdverbialParticiple => 'Деепричастие настоящего времени';
+  String get conjugationCategoryPresentAdverbialParticiple =>
+      'Деепричастие настоящего времени';
 
   @override
-  String get conjugationCategoryAnteriorAdverbialParticiple => 'Деепричастие прошедшего времени';
+  String get conjugationCategoryAnteriorAdverbialParticiple =>
+      'Деепричастие прошедшего времени';
 
   @override
-  String get conjugationCategoryPresentActiveParticiple => 'Действительное причастие настоящего времени';
+  String get conjugationCategoryPresentActiveParticiple =>
+      'Действительное причастие настоящего времени';
 
   @override
-  String get conjugationCategoryPastPassiveParticiple => 'Страдательное причастие прошедшего времени';
+  String get conjugationCategoryPastPassiveParticiple =>
+      'Страдательное причастие прошедшего времени';
 
   @override
   String get conjugationCategoryFiniteVerb => 'Личный глагол';
@@ -300,7 +310,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get conjugationCategoryConditionalImpersonal => 'Условное безличное';
 
   @override
-  String get conjugationCategoryImperativeImpersonal => 'Безличная форма повелительного наклонения';
+  String get conjugationCategoryImperativeImpersonal =>
+      'Безличная форма повелительного наклонения';
 
   @override
   String get drawerRecentSearches => 'Недавние поиски';
@@ -309,7 +320,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get drawerClearRecentSearchesTooltip => 'Очистить недавние поиски';
 
   @override
-  String get drawerClearRecentSearchesDialogTitle => 'Очистить недавние поиски?';
+  String get drawerClearRecentSearchesDialogTitle =>
+      'Очистить недавние поиски?';
 
   @override
   String get drawerClearDialogContent => 'Это действие нельзя отменить.';
@@ -429,7 +441,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get suggestionErrorFallback => 'Не удалось загрузить подсказку.';
 
   @override
-  String get noRelevantAnalysisForNumeral => 'Не найдено подходящего анализа для числительного.';
+  String get noRelevantAnalysisForNumeral =>
+      'Не найдено подходящего анализа для числительного.';
 
   @override
   String get removeFromFavorites => 'Удалить из избранного';
@@ -438,7 +451,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get addToFavorites => 'Добавить в избранное';
 
   @override
-  String get impersonalAccuracyWarning => 'Безличные формы могут быть менее точными';
+  String get impersonalAccuracyWarning =>
+      'Безличные формы могут быть менее точными';
 
   @override
   String get impersonalPresentForm => 'Безличная форма настоящего времени';
@@ -450,10 +464,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get impersonalFutureForm => 'Безличная форма будущего времени';
 
   @override
-  String get impersonalConditionalForm => 'Безличная форма условного наклонения';
+  String get impersonalConditionalForm =>
+      'Безличная форма условного наклонения';
 
   @override
-  String get impersonalImperativeForm => 'Безличная форма повелительного наклонения';
+  String get impersonalImperativeForm =>
+      'Безличная форма повелительного наклонения';
 
   @override
   String get settingsLanguage => 'Язык';
@@ -483,7 +499,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get fontSizeLarge => 'Большой';
 
   @override
-  String get copyrightNotice => 'Эта программа была создана с использованием API morfeusz2.';
+  String get copyrightNotice =>
+      'Эта программа была создана с использованием API morfeusz2.';
 
   @override
   String settingsFontSizeCurrentScale(String scaleValue) {

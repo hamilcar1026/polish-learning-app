@@ -1,4 +1,8 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
 
 /// The translations for English (`en`).
 class AppLocalizationsEn extends AppLocalizations {
@@ -246,10 +250,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get conjugationCategoryPresentIndicative => 'Present Indicative';
 
   @override
-  String get conjugationCategoryFuturePerfectiveIndicative => 'Future Perfective Indicative';
+  String get conjugationCategoryFuturePerfectiveIndicative =>
+      'Future Perfective Indicative';
 
   @override
-  String get conjugationCategoryFutureImperfectiveIndicative => 'Future Imperfective Indicative';
+  String get conjugationCategoryFutureImperfectiveIndicative =>
+      'Future Imperfective Indicative';
 
   @override
   String get conjugationCategoryPastTense => 'Past Tense';
@@ -261,16 +267,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get conjugationCategoryInfinitive => 'Infinitive';
 
   @override
-  String get conjugationCategoryPresentAdverbialParticiple => 'Present Adverbial Participle';
+  String get conjugationCategoryPresentAdverbialParticiple =>
+      'Present Adverbial Participle';
 
   @override
-  String get conjugationCategoryAnteriorAdverbialParticiple => 'Anterior Adverbial Participle';
+  String get conjugationCategoryAnteriorAdverbialParticiple =>
+      'Anterior Adverbial Participle';
 
   @override
-  String get conjugationCategoryPresentActiveParticiple => 'Present Active Participle';
+  String get conjugationCategoryPresentActiveParticiple =>
+      'Present Active Participle';
 
   @override
-  String get conjugationCategoryPastPassiveParticiple => 'Past Passive Participle';
+  String get conjugationCategoryPastPassiveParticiple =>
+      'Past Passive Participle';
 
   @override
   String get conjugationCategoryFiniteVerb => 'Finite Verb';
@@ -297,7 +307,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get conjugationCategoryFutureImpersonal => 'Future Impersonal';
 
   @override
-  String get conjugationCategoryConditionalImpersonal => 'Conditional Impersonal';
+  String get conjugationCategoryConditionalImpersonal =>
+      'Conditional Impersonal';
 
   @override
   String get conjugationCategoryImperativeImpersonal => 'Impersonal Imperative';
@@ -429,7 +440,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get suggestionErrorFallback => 'Could not fetch suggestion.';
 
   @override
-  String get noRelevantAnalysisForNumeral => 'No relevant analysis for numeral found.';
+  String get noRelevantAnalysisForNumeral =>
+      'No relevant analysis for numeral found.';
 
   @override
   String get removeFromFavorites => 'Remove from favorites';
@@ -438,7 +450,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addToFavorites => 'Add to favorites';
 
   @override
-  String get impersonalAccuracyWarning => 'Impersonal forms may be less accurate';
+  String get impersonalAccuracyWarning =>
+      'Impersonal forms may be less accurate';
 
   @override
   String get impersonalPresentForm => 'Impersonal present form';
@@ -483,7 +496,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fontSizeLarge => 'Large';
 
   @override
-  String get copyrightNotice => 'This program was created using the morfeusz2 api.';
+  String get copyrightNotice =>
+      'This program was created using the morfeusz2 api.';
 
   @override
   String settingsFontSizeCurrentScale(String scaleValue) {

@@ -1,4 +1,8 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
 
 /// The translations for Ukrainian (`uk`).
 class AppLocalizationsUk extends AppLocalizations {
@@ -243,13 +247,16 @@ class AppLocalizationsUk extends AppLocalizations {
   String get qualifier_rec => 'керуючий';
 
   @override
-  String get conjugationCategoryPresentIndicative => 'Теперішній час, дійсний спосіб';
+  String get conjugationCategoryPresentIndicative =>
+      'Теперішній час, дійсний спосіб';
 
   @override
-  String get conjugationCategoryFuturePerfectiveIndicative => 'Майбутній доконаний час, дійсний спосіб';
+  String get conjugationCategoryFuturePerfectiveIndicative =>
+      'Майбутній доконаний час, дійсний спосіб';
 
   @override
-  String get conjugationCategoryFutureImperfectiveIndicative => 'Майбутній недоконаний час, дійсний спосіб';
+  String get conjugationCategoryFutureImperfectiveIndicative =>
+      'Майбутній недоконаний час, дійсний спосіб';
 
   @override
   String get conjugationCategoryPastTense => 'Минулий час';
@@ -261,16 +268,20 @@ class AppLocalizationsUk extends AppLocalizations {
   String get conjugationCategoryInfinitive => 'Інфінітив';
 
   @override
-  String get conjugationCategoryPresentAdverbialParticiple => 'Дієприслівник теперішнього часу';
+  String get conjugationCategoryPresentAdverbialParticiple =>
+      'Дієприслівник теперішнього часу';
 
   @override
-  String get conjugationCategoryAnteriorAdverbialParticiple => 'Дієприслівник минулого часу (попередній)';
+  String get conjugationCategoryAnteriorAdverbialParticiple =>
+      'Дієприслівник минулого часу (попередній)';
 
   @override
-  String get conjugationCategoryPresentActiveParticiple => 'Активний дієприкметник теперішнього часу';
+  String get conjugationCategoryPresentActiveParticiple =>
+      'Активний дієприкметник теперішнього часу';
 
   @override
-  String get conjugationCategoryPastPassiveParticiple => 'Пасивний дієприкметник минулого часу';
+  String get conjugationCategoryPastPassiveParticiple =>
+      'Пасивний дієприкметник минулого часу';
 
   @override
   String get conjugationCategoryFiniteVerb => 'Фінітне дієслово';
@@ -288,19 +299,24 @@ class AppLocalizationsUk extends AppLocalizations {
   String get conjugationCategoryConditional => 'Умовний спосіб';
 
   @override
-  String get conjugationCategoryPresentImpersonal => 'Безособова форма теперішнього часу';
+  String get conjugationCategoryPresentImpersonal =>
+      'Безособова форма теперішнього часу';
 
   @override
-  String get conjugationCategoryPastImpersonal => 'Безособова форма минулого часу';
+  String get conjugationCategoryPastImpersonal =>
+      'Безособова форма минулого часу';
 
   @override
-  String get conjugationCategoryFutureImpersonal => 'Безособова форма майбутнього часу';
+  String get conjugationCategoryFutureImpersonal =>
+      'Безособова форма майбутнього часу';
 
   @override
-  String get conjugationCategoryConditionalImpersonal => 'Безособова форма умовного способу';
+  String get conjugationCategoryConditionalImpersonal =>
+      'Безособова форма умовного способу';
 
   @override
-  String get conjugationCategoryImperativeImpersonal => 'Безособовий наказовий спосіб';
+  String get conjugationCategoryImperativeImpersonal =>
+      'Безособовий наказовий спосіб';
 
   @override
   String get drawerRecentSearches => 'Останні пошуки';
@@ -429,7 +445,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get suggestionErrorFallback => 'Не вдалося завантажити пропозицію.';
 
   @override
-  String get noRelevantAnalysisForNumeral => 'Не знайдено відповідного аналізу для числівника.';
+  String get noRelevantAnalysisForNumeral =>
+      'Не знайдено відповідного аналізу для числівника.';
 
   @override
   String get removeFromFavorites => 'Видалити з обраного';
@@ -438,7 +455,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get addToFavorites => 'Додати до обраного';
 
   @override
-  String get impersonalAccuracyWarning => 'Безособові форми можуть бути менш точними';
+  String get impersonalAccuracyWarning =>
+      'Безособові форми можуть бути менш точними';
 
   @override
   String get impersonalPresentForm => 'Безособова форма теперішнього часу';
@@ -483,7 +501,8 @@ class AppLocalizationsUk extends AppLocalizations {
   String get fontSizeLarge => 'Великий';
 
   @override
-  String get copyrightNotice => 'Ця програма створена з використанням morfeusz2 api.';
+  String get copyrightNotice =>
+      'Ця програма створена з використанням morfeusz2 api.';
 
   @override
   String settingsFontSizeCurrentScale(String scaleValue) {
