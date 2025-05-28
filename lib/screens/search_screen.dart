@@ -338,50 +338,47 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
 
                             // <<< REVERT: Use Column > Card > TabBar > Expanded > TabBarView >>>
                             // Remove the outer SingleChildScrollView
-                            return SingleChildScrollView(
-                              child: Column(
-                                children: [
-                                  // --- Analysis Info Card (directly in the Column) ---
-                                  _buildAnalysisInfoCard(
-                                    context, ref, l10n,
-                                    submittedWord, // Pass submittedWord directly
-                                    analysisResponse, analysisResponse.data!, lemma
+                            return Column(
+                              children: [
+                                // --- Analysis Info Card (directly in the Column) ---
+                                _buildAnalysisInfoCard(
+                                  context, ref, l10n,
+                                  submittedWord, // Pass submittedWord directly
+                                  analysisResponse, analysisResponse.data!, lemma
+                                ),
+                                // --- TabBar (directly in the Column) ---
+                                if (_tabController != null && _tabController!.length > 0)
+                                  TabBar(
+                                    controller: _tabController,
+                                    tabs: [
+                                      if (isDeclinable) Tab(text: l10n.declensionTitle),
+                                      if (isVerb) Tab(text: l10n.conjugationTitle),
+                                    ],
+                                    // M3 Style Adjustments
+                                    labelColor: Theme.of(context).colorScheme.primary, // Use primary color for selected label
+                                    unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant, // Use a less prominent color for unselected
+                                    indicatorColor: Theme.of(context).colorScheme.primary, // Use primary for indicator
+                                    // M3 default indicator style (can customize further if needed)
+                                    indicatorSize: TabBarIndicatorSize.tab,
+                                    indicatorWeight: 3.0, // M3 default indicator weight
+                                    indicatorPadding: EdgeInsets.zero,
+                                    // Add M3 style splash/highlight colors if desired
+                                    // splashBorderRadius: BorderRadius.circular(8.0),
                                   ),
-                                  // --- TabBar (directly in the Column) ---
-                                  if (_tabController != null && _tabController!.length > 0)
-                                    TabBar(
+                                // --- TabBarView (flexible height container) ---
+                                if (_tabController != null && _tabController!.length > 0)
+                                  Expanded(
+                                    child: TabBarView(
                                       controller: _tabController,
-                                      tabs: [
-                                        if (isDeclinable) Tab(text: l10n.declensionTitle),
-                                        if (isVerb) Tab(text: l10n.conjugationTitle),
+                                      physics: const NeverScrollableScrollPhysics(), // Keep swipe disabled
+                                      children: [
+                                        if (isDeclinable) _buildDeclensionTab(submittedWord, l10n),
+                                        if (isVerb) _buildConjugationTab(submittedWord, l10n),
                                       ],
-                                      // M3 Style Adjustments
-                                      labelColor: Theme.of(context).colorScheme.primary, // Use primary color for selected label
-                                      unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant, // Use a less prominent color for unselected
-                                      indicatorColor: Theme.of(context).colorScheme.primary, // Use primary for indicator
-                                      // M3 default indicator style (can customize further if needed)
-                                      indicatorSize: TabBarIndicatorSize.tab,
-                                      indicatorWeight: 3.0, // M3 default indicator weight
-                                      indicatorPadding: EdgeInsets.zero,
-                                      // Add M3 style splash/highlight colors if desired
-                                      // splashBorderRadius: BorderRadius.circular(8.0),
                                     ),
-                                  // --- TabBarView (fixed height container) ---
-                                  if (_tabController != null && _tabController!.length > 0)
-                                    SizedBox(
-                                      height: MediaQuery.of(context).size.height * 0.6, // 화면 높이의 60%로 고정
-                                      child: TabBarView(
-                                        controller: _tabController,
-                                        physics: const NeverScrollableScrollPhysics(), // Keep swipe disabled
-                                        children: [
-                                          if (isDeclinable) _buildDeclensionTab(submittedWord, l10n),
-                                          if (isVerb) _buildConjugationTab(submittedWord, l10n),
-                                        ],
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ); // <<< End SingleChildScrollView >>>
+                                  ),
+                              ],
+                            ); // <<< End Column >>>
                           }
                           // --- Handle Error/No Data Status ---
                           else {
