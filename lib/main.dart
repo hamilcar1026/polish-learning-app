@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // MethodChannel을 위해 추가
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // Import localization delegates
 import 'package:polish_learning_app/l10n/app_localizations.dart'; // Import generated localizations
 import 'screens/search_screen.dart'; // We will create this screen next
+import 'screens/settings_screen.dart'; // 설정 화면 import 추가
 import 'providers/settings_provider.dart'; // Import the settings provider
+
+// 전역 네비게이터 키 추가
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   // Ensure Flutter bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
+
+  // MethodChannel 설정
+  const platform = MethodChannel('com.hamilcar1026.polishlearningapp/settings');
+  platform.setMethodCallHandler(_handleMethodCall);
 
   // Initialize Hive for Flutter
   await Hive.initFlutter();
@@ -22,6 +31,23 @@ Future<void> main() async {
       child: MyApp(),
     ),
   );
+}
+
+// MethodChannel 핸들러 함수
+Future<void> _handleMethodCall(MethodCall call) async {
+  switch (call.method) {
+    case 'showSettingsPage':
+      print('Flutter: Received showSettingsPage call from macOS');
+      // 설정 화면으로 네비게이션
+      if (navigatorKey.currentState != null) {
+        navigatorKey.currentState!.push(
+          MaterialPageRoute(builder: (context) => const SettingsScreen()),
+        );
+      }
+      break;
+    default:
+      print('Flutter: Unknown method ${call.method}');
+  }
 }
 
 // Change MyApp to ConsumerWidget to access providers
@@ -62,6 +88,7 @@ class MyApp extends ConsumerWidget {
     );
 
     return MaterialApp(
+      navigatorKey: navigatorKey, // 전역 네비게이터 키 추가
       // title: 'Polish Learning App', // Title will be localized
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle, // Use localized title
       theme: baseTheme.copyWith(
