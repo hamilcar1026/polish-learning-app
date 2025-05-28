@@ -234,7 +234,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
       drawer: const AppDrawer(),
       // --- REVERT to Expanded > Consumer > Column(max) layout ---
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0), // 하단 여백을 0으로 수정
         child: Column( // Keep the outer Column
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -367,7 +367,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
                                   ),
                                 // --- TabBarView (flexible height container) ---
                                 if (_tabController != null && _tabController!.length > 0)
-                                  Expanded(
+                                  Flexible( // Expanded를 Flexible로 변경
+                                    fit: FlexFit.loose, // fit 속성 추가
                                     child: TabBarView(
                                       controller: _tabController,
                                       physics: const NeverScrollableScrollPhysics(), // Keep swipe disabled
@@ -404,7 +405,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
     );
   }
 
-  // --- _SliverAppBarDelegate for pinning TabBar --- 
+  // --- _SliverAppBarDelegate for pinning TabBar ---
   // (Needs to be added to the class)
 
   // --- Builder for Analysis Info Card ---
@@ -442,7 +443,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
         );
      }
 
-    // --- ADDED: Check if the input word is a numeral --- 
+    // --- ADDED: Check if the input word is a numeral ---
     final bool isInputNumeral = int.tryParse(word) != null;
     print("[_buildAnalysisInfoCard] Input word: '$word', isInputNumeral: $isInputNumeral");
     // --- END ADDED ---
@@ -547,7 +548,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
             if (d.status == 'success' && d.data != null && d.data!.isNotEmpty) {
               // <<< ADD SingleChildScrollView back INSIDE the tab content >>>
               return SingleChildScrollView(
-                 padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                 padding: EdgeInsets.zero, // 모든 padding 제거
                  child: _buildDeclensionResults(d.data!.first, l10n),
               );
             } else {
@@ -581,8 +582,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
 
               // <<< ADD SingleChildScrollView back INSIDE the tab content >>>
               return SingleChildScrollView(
-                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                 // Use standard Card and apply M3 styles manually (Re-apply)
+                 padding: EdgeInsets.zero, // 모든 padding 제거
                  child: Card(
                     elevation: 1.0, // M3 uses lower elevation
                     margin: EdgeInsets.zero,
@@ -671,7 +671,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              padding: EdgeInsets.zero, // 수직 여백 제거
               child: Table(
                   border: TableBorder.all(color: Colors.grey.shade300),
                   // 열 너비 자동 조절 -> 모든 열 내용에 맞게 되돌림
@@ -897,7 +897,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> with TickerProvider
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                padding: EdgeInsets.zero, // 수직 여백 제거
                 child: Table(
                     border: TableBorder.all(color: Colors.grey.shade300),
                     // Make Singular and Plural columns equal width
